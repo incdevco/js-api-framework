@@ -1,10 +1,6 @@
 var AWS = require('aws-sdk');
 var q = require('q');
-AWS.config.update({
-	"accessKeyId": "AKIAJICR3F2FUKJOSELQ",
-	"secretAccessKey": "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",
-	"region": "us-west-1"
-});
+
 
 module.exports = function DynamoDB(awsddb) {
 	"use strict";
