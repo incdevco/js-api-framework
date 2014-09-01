@@ -1,17 +1,6 @@
-var Controller = require('../controller');
-
-function PutController(config) {
+module.exports = function (request,response,scope) {
 	
-	Controller.call(this,config);
-	
-}
-
-PutController.prototype = Object.create(Controller.prototype);
-PutController.prototype.constructor = PutController;
-
-PutController.prototype.handle = function (request,response,scope) {
-	
-	return this.service().fetchOne(request.params,scope).then(function (model) {
+	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
 		
 		return model.save(request.body,scope).then(function (model) {
 			
@@ -29,5 +18,3 @@ PutController.prototype.handle = function (request,response,scope) {
 	});
 	
 };
-
-module.exports = PutController;

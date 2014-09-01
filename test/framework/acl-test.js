@@ -160,7 +160,7 @@ describe('Framework.Acl',function () {
 			
 			try {
 			
-				expect(exception).to.be.equal('Resource could not be converted to a string.');
+				Framework.Expect(exception).to.be.equal('Resource could not be converted to a string.');
 			
 				done();
 				

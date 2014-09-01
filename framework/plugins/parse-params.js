@@ -1,16 +1,8 @@
-var Plugin = require('../plugin');
 var Promise = require('../promise');
 
-function ParseParams(config) {
+module.exports.afterRoute = function (request,response,scope) {
 	
-	Plugin.call(this,config);
-	
-}
-
-ParseParams.prototype = Object.create(Plugin.prototype);
-ParseParams.prototype.constructor = ParseParams;
-
-ParseParams.prototype.afterRoute = function (request,response,scope) {
+	console.log('ParseParams.afterRoute');
 	
 	if ('params' in request) {
 			
@@ -35,5 +27,3 @@ ParseParams.prototype.afterRoute = function (request,response,scope) {
 	return Promise.resolve(true);
 	
 };
-
-module.exports = ParseParams;

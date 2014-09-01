@@ -1,21 +1,8 @@
-var Controller = require('../controller');
-
-function GetController(config) {
-	
-	this.cache = config.cache || 60;
-	
-	Controller.call(this,config);
-	
-}
-
-GetController.prototype = Object.create(Controller.prototype);
-GetController.prototype.constructor = GetController;
-
-GetController.prototype.handle = function (request,response,scope) {
+module.exports = function (request,response,scope) {
 	
 	var controller = this;
 	
-	return this.service().fetchOne(request.params,scope).then(function (model) {
+	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
 		
 		return model.toJson(scope).then(function (string) {
 			
@@ -36,5 +23,3 @@ GetController.prototype.handle = function (request,response,scope) {
 	});
 	
 };
-
-module.exports = GetController;

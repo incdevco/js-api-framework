@@ -1,18 +1,10 @@
 var rawbody = require('raw-body');
 
-var Plugin = require('../plugin');
 var Promise = require('../promise');
 
-function ParseBody(config) {
+module.exports.beforeRoute = function (request,response,scope) {
 	
-	Plugin.call(this,config);
-	
-}
-
-ParseBody.prototype = Object.create(Plugin.prototype);
-ParseBody.prototype.constructor = ParseBody;
-
-ParseBody.prototype.before = function (request,response,scope) {
+	console.log('ParseBody.beforeRoute');
 	
 	return new Promise(function (resolve,reject) {
 		
@@ -59,5 +51,3 @@ ParseBody.prototype.before = function (request,response,scope) {
 	});
 	
 };
-
-module.exports = ParseBody;

@@ -34,8 +34,10 @@ function Route(path,controller) {
 Route.prototype.match = function (url) {
 	
 	var self = this,
-		path = url.pathname,
+		path = url.pathname || '/',
 		match = self.regex.exec(path);
+	
+	//console.log('Route.match',path,self.regex);
 	
 	if (null != match && match[0] == path) {
 		

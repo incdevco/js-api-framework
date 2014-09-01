@@ -1,17 +1,6 @@
-var Controller = require('../controller');
-
-function DeleteController(config) {
+module.exports = function (request,response,scope) {
 	
-	Controller.call(this,config);
-	
-}
-
-DeleteController.prototype = Object.create(Controller.prototype);
-DeleteController.prototype.constructor = DeleteController;
-
-DeleteController.prototype.handle = function (request,response,scope) {
-	
-	return this.service().fetchOne(request.params,scope).then(function (model) {
+	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
 		
 		return model.delete(scope).then(function (model) {
 			
@@ -29,5 +18,3 @@ DeleteController.prototype.handle = function (request,response,scope) {
 	});
 	
 };
-
-module.exports = DeleteController;

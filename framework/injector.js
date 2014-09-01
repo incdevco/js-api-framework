@@ -2,6 +2,7 @@ function Injector(parent) {
 	
 	this.items = {};
 	this.parent = parent;
+	this.services = {};
 	
 }
 
@@ -60,6 +61,30 @@ Injector.prototype.invoke = function (original,locals) {
 	}
 	
 	return fn.apply(null,args);
+	
+};
+
+Injector.prototype.service = function (name,service) {
+	
+	if (service) {
+		
+		this.services[name] = service;
+		
+		return this;
+		
+	} else {
+	
+		var result = this.services[name];
+		
+		if (undefined === result && this.parent) {
+				
+			return this.parent.service(name);
+			
+		}
+		
+		return result;
+		
+	}
 	
 };
 

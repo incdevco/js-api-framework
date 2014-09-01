@@ -1,26 +1,18 @@
 var qs = require('qs');
 var url = require('url');
 
-var Plugin = require('../plugin');
 var Promise = require('../promise');
 
-function ParseUrl(config) {
+module.exports.beforeRoute = function (request,response,scope) {
 	
-	Plugin.call(this,config);
-	
-}
-
-ParseUrl.prototype = Object.create(Plugin.prototype);
-ParseUrl.prototype.constructor = ParseUrl;
-
-ParseUrl.prototype.before = function (request,response,scope) {
+	console.log('ParseUrl.beforeRoute');
 	
 	request.url = url.parse(request.url);
 	
 	request.query = qs.parse(request.url.query);
 	
 	for (var i in request.query) {
-	
+		
 		if ('null' === request.query[i]) {
 		
 			request.query[i] = null;
@@ -40,5 +32,3 @@ ParseUrl.prototype.before = function (request,response,scope) {
 	return Promise.resolve(true);
 	
 };
-
-module.exports = ParseUrl;

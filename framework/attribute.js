@@ -9,6 +9,12 @@ function Attribute(config) {
 	this.required = false;
 	this.validators = config.validators || [];
 	
+	if (undefined !== config.exists) {
+		
+		this.validators.push(new Validators.Exists(config.exists));
+		
+	}
+	
 	if (undefined !== config.required) {
 		
 		this.required = config.required;
@@ -23,7 +29,7 @@ function Attribute(config) {
 	
 }
 
-Attribute.prototype.validate = function(value) {
+Attribute.prototype.validate = function(value,context,scope) {
 	
 	var promises = [];
 	
@@ -43,7 +49,7 @@ Attribute.prototype.validate = function(value) {
 		
 		for (var i = 0, length = this.validators.length; i < length; i++) {
 			
-			promises.push(this.validators[i].validate(value));
+			promises.push(this.validators[i].validate(value,context,scope));
 			
 		}
 		

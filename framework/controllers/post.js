@@ -1,17 +1,6 @@
-var Controller = require('../controller');
-
-function PostController(config) {
+module.exports = function (request,response,scope) {
 	
-	Controller.call(this,config);
-	
-}
-
-PostController.prototype = Object.create(Controller.prototype);
-PostController.prototype.constructor = PostController;
-
-PostController.prototype.handle = function (request,response,scope) {
-	
-	return this.service().fetchNew().then(function (model) {
+	return scope.service(this.service).fetchNew().then(function (model) {
 		
 		return model.save(request.body,scope).then(function (model) {
 			
@@ -29,5 +18,3 @@ PostController.prototype.handle = function (request,response,scope) {
 	});
 	
 };
-
-module.exports = PostController;

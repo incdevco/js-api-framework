@@ -1,33 +1,35 @@
 var base = process.env.PWD;
 
 var bunyan = require('bunyan');
-var moment = require('moment');
 var objectMerge = require('object-merge');
 
 var Cache = require('./cache');
+var Injector = require('./injector');
+var Moment = require('./moment');
 var NotFound = require('./exceptions/not-found');
-var ParseUrl = require('./plugins/parse-url');
+var Plugins = require('./plugins');
 var Promise = require('./promise');
 var Route = require('./route');
 var Scope = require('./scope');
 
 function Application (config) {
 	
-	this.controllers = {};
-	this.items = {};
+	this.injector = config.injector || new Injector();
 	this.log = config.log || bunyan.createLogger({
 		name: 'app',
 		level: 'trace'
 	});
-	this.plugins = [ParseUrl];
+	this.plugins = [
+		Plugins.ParseUrl,
+		Plugins.ParseBody
+	];
 	this.routes = [];
-	this.services = {};
 	
 }
 
-Application.prototype.after = function (request,response,scope) {
+Application.prototype.afterController = function (request,response,scope) {
 	
-	return this.runPlugins('after',request,response,scope);
+	return this.runPlugins('afterController',request,response,scope);
 	
 };
 
@@ -37,63 +39,57 @@ Application.prototype.afterRoute = function (request,response,scope) {
 	
 };
 
-Application.prototype.before = function (request,response,scope) {
+Application.prototype.beforeController = function (request,response,scope) {
 	
-	return this.runPlugins('before',request,response,scope);
+	return this.runPlugins('beforeController',request,response,scope);
 	
 };
 
-Application.prototype.controller = function (name,controller) {
+Application.prototype.beforeRoute = function (request,response,scope) {
 	
-	if (controller) {
-		
-		controller.application = this;
-		
-		this.controllers[name] = controller;
-		
-		return this;
-		
-	} else {
-		
-		return this.controllers[name];
-		
-	}
+	return this.runPlugins('beforeRoute',request,response,scope);
 	
 };
 
 Application.prototype.handle = function (request,response) {
 	
-	var app, log, scope;
+	var app, scope;
 	
 	console.log('New Request',request.method,request.url);
 	
 	app = this;
 	
-	scope = new Scope();
-	scope.time = moment();
-	scope.cache = new Cache();
+	scope = new Scope({
+		cache: new Cache(),
+		injector: new Injector(this.injector),
+		time: Moment()
+	});
 	
-	var result = app.before(request,response,scope);
-	
-	result.then(function () {
+	app.beforeRoute(request,response,scope).then(function () {
 		
-		var route = app.match(request);
+		console.log('beforeRoute',request.method,request.url);
 		
-		if (route) {
+		scope.route = app.match(request);
+		
+		if (scope.route) {
 			
-			scope.route = route;
-			
-			request.params = objectMerge(request.query,route.params);
+			request.params = objectMerge(request.query,scope.route.params);
 			
 			return app.afterRoute(request,response,scope).then(function () {
 				
-				var controller = app.controller(route.controller);
+				console.log('afterRoute',request.method,request.url);
 				
-				if (undefined !== controller) {
+				return app.beforeController(request,response,scope).then(function () {
 					
-					return controller.handle(request,response,scope).then(function () {
+					console.log('beforeController',request.method,request.url);
+					
+					return scope.route.controller(request,response,scope).then(function () {
 						
-						return app.after(request,response,scope).then(function () {
+						console.log('controller',request.method,request.url);
+						
+						return app.afterController(request,response,scope).then(function () {
+							
+							console.log('afterController',request.method,request.url);
 							
 							response.statusCode = response.statusCode || 200;
 							
@@ -105,13 +101,7 @@ Application.prototype.handle = function (request,response) {
 						
 					});
 					
-				} else {
-					
-					console.error('No Controller Found',route.controller,app.controllers);
-					
-					throw new NotFound();
-					
-				}
+				});
 				
 			});
 			
@@ -125,10 +115,10 @@ Application.prototype.handle = function (request,response) {
 		
 	}).catch(function (exception) {
 		
-		console.error('exception',exception,exception.stack);
+		console.error('Exception Occurred',exception,exception.stack);
 		
 		response.statusCode = exception.statusCode || 500;
-		response.write(exception.content || JSON.stringify(exception) || 'Exception Occurred');
+		response.write(exception.content || JSON.stringify(exception));
 		response.end();
 		
 	});
@@ -141,7 +131,11 @@ Application.prototype.match = function (request) {
 	
 	if (request.method in this.routes) {
 		
+		//console.log('Application.match',request.method,request.url);
+		
 		for (var i = 0, length = this.routes[request.method].length; i < length; i++) {
+			
+			//console.log('Application.match trying route',this.routes[request.method][i]);
 			
 			var result = this.routes[request.method][i].match(request.url);
 			
@@ -157,7 +151,7 @@ Application.prototype.match = function (request) {
 		
 	} else {
 		
-		//this.log.info('Method Not Implemented: '+request.method);
+		console.log('Method Not Implemented: '+request.method);
 		
 		return false;
 		
@@ -166,21 +160,9 @@ Application.prototype.match = function (request) {
 
 Application.prototype.plugin = function (plugin) {
 	
-	if ('function' === typeof(plugin.bootstrap)) {
-		
-		plugin.bootstrap(this);
-		
-	}
-	
 	this.plugins.push(plugin);
 	
 	return this;
-
-};
-
-Application.prototype.resource = function (resource) {
-	
-	resource.bootstrap(this);
 
 };
 
@@ -214,17 +196,15 @@ Application.prototype.runPlugins = function (fn,request,response,scope) {
 
 Application.prototype.service = function (name,service) {
 	
+	var result = this.injector.service(name,service);
+	
 	if (service) {
-		
-		this.services[name] = service;
-		
-		service.application = this;
 		
 		return this;
 		
 	} else {
 		
-		return this.services[name];
+		return result;
 		
 	}
 	

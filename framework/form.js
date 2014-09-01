@@ -7,7 +7,7 @@ function Form(config) {
 	
 }
 
-Form.prototype.validate = function (data) {
+Form.prototype.validate = function (data,scope) {
 	
 	var attributes = this.attributes, 
 		clean = {},
@@ -19,7 +19,7 @@ Form.prototype.validate = function (data) {
 		
 		(function (i) {
 			
-			var promise = attributes[i].validate(data[i]);
+			var promise = attributes[i].validate(data[i],data,scope);
 			
 			if (undefined !== data[i]) {
 				

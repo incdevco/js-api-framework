@@ -1,28 +1,11 @@
-var base = process.env.PWD;
-
-var Plugin = require('../plugin');
 var Promise = require('../promise');
 
-function Json(config) {
+module.exports.beforeRoute = function (request,response,scope) {
 	
-	config = config || {};
+	console.log('Json.beforeRoute');
 	
-	this.charset = config.charset || 'UTF-8';
-	this.contentType = config.contentType || 'application/json';
-	
-	Plugin.call(this,config);
-	
-}
-
-Json.prototype = Object.create(Plugin.prototype);
-Json.prototype.constructor = Json;
-
-Json.prototype.before = function (request,response,scope) {
-	
-	response.setHeader('Content-Type',this.contentType+';'+this.charset);
+	response.setHeader('Content-Type','application/json;charset=UTF-8');
 	
 	return Promise.resolve(true);
 	
 };
-
-module.exports = Json;

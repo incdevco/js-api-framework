@@ -6,13 +6,13 @@ function ExistsValidator(config) {
 	
 }
 
-ExistsValidator.prototype.validate = function (value) {
+ExistsValidator.prototype.validate = function (value,context,scope) {
 	
-	var data = {},message = this.message;
+	var data = {}, message = this.message;
 	
 	data[this.key] = value;
 	
-	return this.service.fetchOne(data).then(function () {
+	return scope.service(this.service).fetchOne(data,scope,true).then(function () {
 		
 		return true;
 		

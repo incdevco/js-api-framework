@@ -1,4 +1,3 @@
-var Plugin = require('../plugin');
 var Promise = require('../promise');
 
 function Cors(config) {
@@ -7,14 +6,11 @@ function Cors(config) {
 	this.exposeHeaders = config.exposeHeaders || [];
 	this.origin = config.origin;
 	
-	Plugin.call(this,config);
-	
 }
 
-Cors.prototype = Object.create(Plugin.prototype);
-Cors.prototype.constructor = Cors;
-
-Cors.prototype.before = function (request,response,scope) {
+Cors.prototype.beforeRoute = function (request,response,scope) {
+	
+	console.log('Cors.beforeRoute');
 	
 	response.setHeader('Access-Control-Allow-Origin',this.origin);
 	response.setHeader('Access-Control-Allow-Headers',this.allowHeaders.join(','));

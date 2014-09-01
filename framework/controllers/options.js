@@ -1,25 +1,6 @@
-var Controller = require('../controller');
 var Promise = require('../promise');
 
-function OptionsController(config) {
-	
-	config = config || {};
-	
-	this.cache = config.cache || 60;
-	this.methods = config.methods || [
-		'DELETE',
-		'POST',
-		'PUT'
-	];
-	
-	Controller.call(this,config);
-	
-}
-
-OptionsController.prototype = Object.create(Controller.prototype);
-OptionsController.prototype.constructor = OptionsController;
-
-OptionsController.prototype.handle = function (request,response,scope) {
+module.exports = function (request,response,scope) {
 	
 	response.statusCode = 200;
 	
@@ -34,5 +15,3 @@ OptionsController.prototype.handle = function (request,response,scope) {
 	return Promise.resolve(true);
 	
 };
-
-module.exports = OptionsController;

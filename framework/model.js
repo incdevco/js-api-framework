@@ -152,7 +152,7 @@ Model.prototype.save = function (data,scope,bypass) {
 		
 	if (model.isDiff()) {
 		
-		return model.validate().then(function (model) {
+		return model.validate(scope).then(function (model) {
 			
 			return model.service.save(model,scope,bypass).then(function (model) {
 				
@@ -164,7 +164,7 @@ Model.prototype.save = function (data,scope,bypass) {
 		
 	} else {
 		
-		return model;
+		return Promise.resolve(model);
 		
 	}
 	
@@ -217,7 +217,7 @@ Model.prototype.set = function (attribute,value,bypass) {
 	
 };
 
-Model.prototype.toData = function (scope) {
+Model.prototype.toData = function (scope,bypass) {
 	
 	var acl = this.service.acl, data = {}, model = this;
 	
@@ -225,15 +225,23 @@ Model.prototype.toData = function (scope) {
 		
 		(function (i) {
 			
-			data[i] = acl.isAllowed(model,i+'::get',scope).then(function () {
+			if (bypass) {
 				
-				return model.get(i);
+				data[i] = model.get(i);
 				
-			}).catch(function () {
+			} else {
 				
-				return undefined;
+				data[i] = acl.isAllowed(model,i+'::get',scope).then(function () {
+					
+					return model.get(i);
+					
+				}).catch(function () {
+					
+					return undefined;
+					
+				});
 				
-			});
+			}
 			
 		})(i);
 		
@@ -253,35 +261,44 @@ Model.prototype.toJson = function (scope) {
 	
 };
 
-Model.prototype.validate = function () {
+Model.prototype.validate = function (scope) {
 	
 	var messages = {}, model = this, promises = [];
 	
-	for (var i in model.attributes) {
+	return this.toData(scope,true).then(function (data) {
 		
-		(function (i) {
+		for (var i in model.attributes) {
 			
-			promises.push(model.attributes[i].validate(model.get(i)).catch(function (exception) {
+			(function (i) {
 				
-				messages[i] = exception;
+				promises.push(model.attributes[i].validate(data[i],data,scope)
+				.catch(function (exception) {
+					
+					console.log('Model.validate',i,exception);
+					
+					messages[i] = exception;
+					
+					throw exception;
+					
+				}));
 				
-				throw exception;
-				
-			}));
+			})(i);
 			
-		})(i);
+		}
 		
-	}
-	
-	return Promise.all(promises).then(function () {
-		
-		return model;
-		
-	}).catch(function (exception) {
-		
-		throw new Exceptions.NotValid({
-			resource: model.getResourceId(),
-			errors: messages
+		return Promise.all(promises).then(function () {
+			
+			return model;
+			
+		}).catch(function (exception) {
+			
+			throw new Exceptions.NotValid({
+				content: JSON.stringify({
+					resource: model.getResourceId(),
+					errors: messages
+				})
+			});
+			
 		});
 		
 	});

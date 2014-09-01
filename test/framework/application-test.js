@@ -6,17 +6,6 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Application',function () {
 	
-	it('application.controller',function () {
-		
-		var application = new Framework.Application({}),
-			controller = function (request,response,scope) {};
-		
-		application.controller('test',controller);
-		
-		expect(application.controller('test')).to.be.equal(controller);
-		
-	});
-	
 	it('application.handle',function (done) {
 		
 		var application = new Framework.Application({}),
@@ -52,11 +41,8 @@ describe('Framework.Application',function () {
 			'return': deferred4.promise
 		});
 		
-		application.controller('TestController',controller);
+		application.when('GET','/test/:id',controller.handle);
 		
-		application.when('GET','/test/:id','TestController');
-		
-		application.plugin(new Framework.Plugins.ParseUrl());
 		application.plugin(plugin);
 		
 		deferred1.resolve(true);
@@ -71,37 +57,8 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				expect(this.statusCode).to.be.equal(200);
-				expect(this.content).to.be.equal('');
-				
-				done();
-				
-			} catch (exception) {
-				
-				done(exception);
-				
-			}
-			
-		};
-		
-		application.handle(request,response);
-		
-	});
-	
-	it('application.handle without controller',function (done) {
-		
-		var application = new Framework.Application({}),
-			request = new Framework.Mocks.Request(),
-			response = new Framework.Mocks.Response();
-		
-		application.when('GET','/','TestController');
-		
-		response.end = function () {
-			
-			try {
-				
-				expect(this.statusCode).to.be.equal(404);
-				expect(this.content).to.be.equal('Not Found');
+				Framework.Expect(this.statusCode).to.be.equal(200);
+				Framework.Expect(this.content).to.be.equal('');
 				
 				done();
 				
@@ -127,8 +84,8 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				expect(this.statusCode).to.be.equal(404);
-				expect(this.content).to.be.equal('Not Found');
+				Framework.Expect(this.statusCode).to.be.equal(404);
+				Framework.Expect(this.content).to.be.equal('Not Found');
 				
 				done();
 				
@@ -156,8 +113,8 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				expect(this.statusCode).to.be.equal(404);
-				expect(this.content).to.be.equal('Not Found');
+				Framework.Expect(this.statusCode).to.be.equal(404);
+				Framework.Expect(this.content).to.be.equal('Not Found');
 				
 				done();
 				
@@ -170,17 +127,6 @@ describe('Framework.Application',function () {
 		};
 		
 		application.handle(request,response);
-		
-	});
-	
-	it('application.resource',function () {
-		
-		var app = new Framework.Application({}), 
-			resource = new Framework.Resource({
-				path: '/'
-			});
-		
-		app.resource(resource);
 		
 	});
 	
