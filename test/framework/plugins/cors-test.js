@@ -8,7 +8,7 @@ var Cors = require(base+'/framework/plugins/cors');
 
 describe('Framework.Plugins.Cors',function () {
 	
-	it('plugin.before',function (done) {
+	it('plugin.beforeRoute',function (done) {
 		
 		var request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response(),
@@ -19,7 +19,7 @@ describe('Framework.Plugins.Cors',function () {
 				origin: 'test'
 			});
 		
-		plugin.before(request,response,scope).then(function () {
+		plugin.beforeRoute(request,response,scope).then(function () {
 			
 			try {
 				

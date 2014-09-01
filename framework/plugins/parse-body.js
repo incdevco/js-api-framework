@@ -8,45 +8,57 @@ module.exports.beforeRoute = function (request,response,scope) {
 	
 	return new Promise(function (resolve,reject) {
 		
-		var exception = {
-			statusCode: 400,
-			content: 'Not Valid JSON'
-		};
-		
-		rawbody(request,{
-			length: request.headers['content-length'],
-			encoding: 'utf8'
-		},function (error,body) {
+		if (undefined === request.on) {
 			
-			if (error) {
+			return resolve(true);
+			
+		} else {
+			
+			var exception = {
+				statusCode: 400,
+				content: 'Not Valid JSON'
+			};
+			
+			rawbody(request,{
+				length: request.headers['content-length'],
+				encoding: 'utf8'
+			},function (error,body) {
 				
-				return reject(exception);
-				
-			} else {
-				
-				if (body && body.length) {
+				if (error) {
 					
-					try {
-						
-						request.body = JSON.parse(body);
-						
-					} catch (error) {
-						
-						return reject(exception);
-						
-					}
+					console.error(error);
+					
+					return reject(exception);
 					
 				} else {
 					
-					request.body = {};
+					if (body && body.length) {
+						
+						try {
+							
+							request.body = JSON.parse(body);
+							
+						} catch (error) {
+							
+							console.error(error);
+							
+							return reject(exception);
+							
+						}
+						
+					} else {
+						
+						request.body = {};
+						
+					}
+					
+					return resolve(true);
 					
 				}
 				
-				return resolve(true);
-				
-			}
+			});
 			
-		});
+		}
 			
 	});
 	
