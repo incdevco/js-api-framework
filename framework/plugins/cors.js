@@ -10,7 +10,7 @@ function Cors(config) {
 
 Cors.prototype.beforeRoute = function (request,response,scope) {
 	
-	console.log('Cors.beforeRoute');
+	//console.log('Cors.beforeRoute');
 	
 	response.setHeader('Access-Control-Allow-Origin',this.origin);
 	response.setHeader('Access-Control-Allow-Headers',this.allowHeaders.join(','));

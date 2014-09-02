@@ -313,7 +313,7 @@ AclRule.prototype.isAllowed = function (resource,privilege,scope) {
 			
 			for (var i = 0, length = this.assertions.length; i < length; i++) {
 				
-				promises.push(this.assertions[i].assert(resource,privilege,scope));
+				promises.push(this.assertions[i](resource,privilege,scope));
 				
 			}
 			

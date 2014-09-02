@@ -1,6 +1,5 @@
 module.exports.Acl = require('./acl');
 module.exports.Application = require('./application');
-module.exports.Assertion = require('./assertion');
 module.exports.Attribute = require('./attribute');
 module.exports.Attributes = require('./attributes');
 module.exports.Cache = require('./cache');

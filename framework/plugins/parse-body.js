@@ -4,7 +4,7 @@ var Promise = require('../promise');
 
 module.exports.beforeRoute = function (request,response,scope) {
 	
-	console.log('ParseBody.beforeRoute');
+	//console.log('ParseBody.beforeRoute');
 	
 	return new Promise(function (resolve,reject) {
 		

@@ -5,7 +5,7 @@ var Promise = require('../promise');
 
 module.exports.beforeRoute = function (request,response,scope) {
 	
-	console.log('ParseUrl.beforeRoute');
+	//console.log('ParseUrl.beforeRoute');
 	
 	request.url = url.parse(request.url);
 	

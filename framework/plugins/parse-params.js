@@ -2,7 +2,7 @@ var Promise = require('../promise');
 
 module.exports.afterRoute = function (request,response,scope) {
 	
-	console.log('ParseParams.afterRoute');
+	//console.log('ParseParams.afterRoute');
 	
 	if ('params' in request) {
 			

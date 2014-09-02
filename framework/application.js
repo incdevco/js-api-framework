@@ -67,7 +67,7 @@ Application.prototype.handle = function (request,response) {
 	
 	app.beforeRoute(request,response,scope).then(function () {
 		
-		console.log('beforeRoute',request.method,request.url);
+		//console.log('beforeRoute',request.method,request.url);
 		
 		scope.route = app.match(request);
 		
@@ -77,19 +77,19 @@ Application.prototype.handle = function (request,response) {
 			
 			return app.afterRoute(request,response,scope).then(function () {
 				
-				console.log('afterRoute',request.method,request.url);
+				//console.log('afterRoute',request.method,request.url);
 				
 				return app.beforeController(request,response,scope).then(function () {
 					
-					console.log('beforeController',request.method,request.url);
+					//console.log('beforeController',request.method,request.url);
 					
 					return scope.route.controller(request,response,scope).then(function () {
 						
-						console.log('controller',request.method,request.url);
+						//console.log('controller',request.method,request.url);
 						
 						return app.afterController(request,response,scope).then(function () {
 							
-							console.log('afterController',request.method,request.url);
+							//console.log('afterController',request.method,request.url);
 							
 							response.statusCode = response.statusCode || 200;
 							

@@ -1,4 +1,5 @@
 var Attribute = require('../attribute');
+var Validators = require('../validators')
 
 function TimestampAttribute(config) {
 	
@@ -9,7 +10,7 @@ function TimestampAttribute(config) {
 	if (undefined === config.validators) {
 	
 		config.validators = [
-			new Framework.Validators.Float()
+			new Validators.Float()
 		];
 		
 	}
