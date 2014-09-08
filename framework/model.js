@@ -154,7 +154,7 @@ Model.prototype.save = function (data,scope,bypass) {
 		
 		return model.validate(scope).then(function (model) {
 			
-			return model.service.save(model,scope,bypass).then(function (model) {
+			return model.service.save(model,scope,bypass).then(function () {
 				
 				return model.saved();
 				
