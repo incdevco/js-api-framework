@@ -1,5 +1,5 @@
 var Attribute = require('../attribute');
-var Validators = require('../validators')
+var Validators = require('../validators');
 
 function TimestampAttribute(config) {
 	

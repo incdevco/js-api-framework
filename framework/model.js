@@ -221,6 +221,8 @@ Model.prototype.toData = function (scope,bypass) {
 	
 	var acl = this.service.acl, data = {}, model = this;
 	
+	console.log('Model.toData',bypass);
+	
 	for (var i in model.attributes) {
 		
 		(function (i) {
@@ -253,6 +255,8 @@ Model.prototype.toData = function (scope,bypass) {
 
 Model.prototype.toJson = function (scope) {
 	
+	console.log('Model.toJson');
+	
 	return this.toData(scope).then(function (data) {
 		
 		return JSON.stringify(data);
@@ -265,7 +269,11 @@ Model.prototype.validate = function (scope) {
 	
 	var messages = {}, model = this, promises = [];
 	
+	console.log('Model.validate');
+	
 	return this.toData(scope,true).then(function (data) {
+		
+		console.log('Model.validate toData', data);
 		
 		for (var i in model.attributes) {
 			
@@ -274,7 +282,7 @@ Model.prototype.validate = function (scope) {
 				promises.push(model.attributes[i].validate(data[i],data,scope)
 				.catch(function (exception) {
 					
-					console.log('Model.validate',i,exception);
+					console.log('Model.validate',i,exception,data[i]);
 					
 					messages[i] = exception;
 					

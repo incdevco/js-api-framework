@@ -93,12 +93,10 @@ describe('Framework.Acl',function () {
 	it('assertion',function (done) {
 		
 		var acl = new Framework.Acl(),
-			assertion = {
-				assert: function (resource,privilege,scope) {
-					
-					return Framework.Promise.resolve(true);
-					
-				}
+			assertion = function (resource,privilege,scope) {
+				
+				return Framework.Promise.resolve(true);
+				
 			},
 			scope = new Framework.Scope();
 		
@@ -123,12 +121,10 @@ describe('Framework.Acl',function () {
 	it('assertion failed',function (done) {
 		
 		var acl = new Framework.Acl(),
-			assertion = {
-				assert: function (resource,privilege,scope) {
-					
-					return Framework.Promise.reject(true);
-					
-				}
+			assertion = function (resource,privilege,scope) {
+				
+				return Framework.Promise.reject(false);
+				
 			},
 			scope = new Framework.Scope();
 		

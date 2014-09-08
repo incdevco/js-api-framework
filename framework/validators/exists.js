@@ -12,6 +12,8 @@ ExistsValidator.prototype.validate = function (value,context,scope) {
 	
 	data[this.key] = value;
 	
+	console.log('exists',this.service);
+	
 	return scope.service(this.service).fetchOne(data,scope,true).then(function () {
 		
 		return true;

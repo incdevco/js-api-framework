@@ -78,13 +78,9 @@ Acl.prototype.isAllowed = function (resource,privileges,scope) {
 	var id = resource,
 		promises = [];
 	
-	if (typeof resource == 'object') {
+	if (typeof resource == 'object' && 'getResourceId' in resource) {
 		
-		if ('getResourceId' in resource) {
-		
-			id = resource.getResourceId();
-		
-		}
+		id = resource.getResourceId();
 		
 	}
 	

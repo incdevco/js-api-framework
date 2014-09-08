@@ -178,7 +178,7 @@ Select.prototype.where = function (key,value,comparator) {
 		if (null === this._where) {
 			this._where = [];
 		}
-		if (/(><=)?\s/.test(value)) {
+		if (/=/.test(value)) {
 			var parts = value.split(' ',2);
 			comparator = parts[0];
 			value = parts[1];

@@ -103,4 +103,10 @@ describe('Framework.Sql',function () {
 		]);
 		expect(mysql.format(query.sql,query.inserts)).to.be.equal("UPDATE `table` SET `field1` = 'field1', `field2` = 2 WHERE `field1` = 'field1' AND `field2` = 2 LIMIT 1 OFFSET 5");
 	});
+	it('select with where object with value with space',function () {
+		var query = sql.select().from('test_table').where({type: 'Domain Name'});
+		query = query.build();
+		expect(query.sql).to.be.equal('SELECT * FROM ?? WHERE ?? = ?');
+		expect(query.inserts).to.be.eql(['test_table','type','Domain Name']);
+	});
 });

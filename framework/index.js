@@ -16,7 +16,6 @@ module.exports.Model = require('./model');
 module.exports.Moment = require('./moment');
 module.exports.Mysql = require('./mysql');
 module.exports.MysqlAdapter = require('./mysql-adapter');
-module.exports.Plugin = require('./plugin');
 module.exports.Plugins = require('./plugins');
 module.exports.Promise = require('./promise');
 module.exports.Route = require('./route');
