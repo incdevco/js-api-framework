@@ -62,8 +62,19 @@ Application.prototype.handle = function (request,response) {
 	scope = new Scope({
 		cache: new Cache(),
 		injector: new Injector(this.injector),
+		response: response,
 		time: Moment()
 	});
+	
+	scope.timeout = setTimeout(function () {
+		
+		response.statusCode = 500;
+		response.write('Request Timed Out');
+		response.end();
+		
+		scope.close();
+		
+	}, 30000);
 	
 	app.beforeRoute(request,response,scope).then(function () {
 		
@@ -95,6 +106,8 @@ Application.prototype.handle = function (request,response) {
 							
 							response.end();
 							
+							scope.close();
+							
 							return true;
 							
 						})
@@ -115,11 +128,13 @@ Application.prototype.handle = function (request,response) {
 		
 	}).catch(function (exception) {
 		
-		console.error('Exception Occurred',exception,exception.stack);
+		console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
 		
 		response.statusCode = exception.statusCode || 500;
 		response.write(exception.content || JSON.stringify(exception));
 		response.end();
+		
+		scope.close();
 		
 	});
 	

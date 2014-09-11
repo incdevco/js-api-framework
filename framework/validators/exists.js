@@ -1,3 +1,5 @@
+var Promise = require('../promise');
+
 function ExistsValidator(config) {
 	
 	this.key = config.key;
@@ -8,21 +10,29 @@ function ExistsValidator(config) {
 
 ExistsValidator.prototype.validate = function (value,context,scope) {
 	
-	var data = {}, message = this.message;
+	var data = {}, 
+		message = this.message, 
+		service = scope.service(this.service);
 	
 	data[this.key] = value;
 	
-	console.log('exists',this.service);
+	if (service) {
+		
+		return service.fetchOne(data,scope,true).then(function () {
+			
+			return true;
+			
+		}).catch(function () {
+			
+			throw message;
+			
+		});
+		
+	}
 	
-	return scope.service(this.service).fetchOne(data,scope,true).then(function () {
-		
-		return true;
-		
-	}).catch(function () {
-		
-		throw message;
-		
-	});
+	console.error('Exists Validator','Service Not Found',this.service,service);
+	
+	return Promise.reject(message);
 	
 };
 

@@ -9,7 +9,7 @@ function Attribute(config) {
 	this.required = false;
 	this.validators = config.validators || [];
 	
-	if (undefined !== config.exists) {
+	if (typeof(config.exists) === 'object') {
 		
 		this.validators.push(new Validators.Exists(config.exists));
 		

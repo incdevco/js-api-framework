@@ -15,8 +15,8 @@
     "api",
     "framework"
   ],
-  "author": "Shawn Ostler",
-  "license": "ISC",
+  "author": "Inclusive Development Company",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/incdevco/js-api-framework/issues"
   },
