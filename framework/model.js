@@ -221,7 +221,7 @@ Model.prototype.toData = function (scope,bypass) {
 	
 	var acl = this.service.acl, data = {}, model = this;
 	
-	console.log('Model.toData',bypass);
+	//console.log('Model.toData',bypass);
 	
 	for (var i in model.attributes) {
 		

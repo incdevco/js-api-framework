@@ -11,47 +11,39 @@ function MysqlAdapter(config) {
 	
 }
 
-MysqlAdapter.prototype.connection = function (scope) {
+MysqlAdapter.prototype.connection = function () {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		if (scope.db) {
+		adapter.mysql.pool.getConnection(function (error,connection) {
 			
-			resolve(scope.db);
-			
-		} else {
-			
-			adapter.mysql.pool.getConnection(function (error,connection) {
+			if (error) {
 				
-				if (error) {
-					
-					//console.error(error);
-					
-					reject(error);
-					
-				} else {
-					
-					resolve(connection);
-					
-				}
+				//console.error(error);
 				
-			});
+				reject(error);
+				
+			} else {
+				
+				resolve(connection);
+				
+			}
 			
-		}
+		});
 		
 	});
 	
 };
 
-MysqlAdapter.prototype.delete = function (where,limit,offset,scope) {
+MysqlAdapter.prototype.delete = function (where) {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		adapter.connection(scope).then(function (connection) {
+		adapter.connection().then(function (connection) {
 			
 			var query = Sql.delete().from(adapter.table);
 			
@@ -61,31 +53,15 @@ MysqlAdapter.prototype.delete = function (where,limit,offset,scope) {
 				
 			}
 			
-			if (limit) {
-			
-				query.limit(limit);
-				
-			}
-			
-			if (offset) {
-			
-				query.offset(offset);
-				
-			}
-			
 			query = query.build();
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			console.log('mysql-adapter delete',query);
+			//console.log('mysql-adapter delete',query);
 			
 			connection.query(query,function (error,result) {
 				
-				if (!scope.db) {
-					
-					connection.release();
-					
-				}
+				connection.release();
 				
 				if (error) {
 					
@@ -106,13 +82,13 @@ MysqlAdapter.prototype.delete = function (where,limit,offset,scope) {
 	
 };
 
-MysqlAdapter.prototype.fetchAll = function (where,limit,offset,scope) {
+MysqlAdapter.prototype.fetchAll = function (where,limit,offset) {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		adapter.connection(scope).then(function (connection) {
+		adapter.connection().then(function (connection) {
 			
 			var query = Sql.select().from(adapter.table);
 			
@@ -138,15 +114,11 @@ MysqlAdapter.prototype.fetchAll = function (where,limit,offset,scope) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			console.log('mysql-adapter.fetchAll',query);
+			//console.log('mysql-adapter.fetchAll',query);
 			
 			connection.query(query,function (error,results) {
 				
-				if (!scope.db) {
-					
-					connection.release();
-					
-				}
+				connection.release();
 				
 				if (error) {
 					
@@ -166,13 +138,13 @@ MysqlAdapter.prototype.fetchAll = function (where,limit,offset,scope) {
 	
 };
 
-MysqlAdapter.prototype.fetchRow = function (where,offset,scope) {
+MysqlAdapter.prototype.fetchRow = function (where,offset) {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		adapter.connection(scope).then(function (connection) {
+		adapter.connection().then(function (connection) {
 			
 			var query = Sql.select().from(adapter.table);
 			
@@ -194,15 +166,11 @@ MysqlAdapter.prototype.fetchRow = function (where,offset,scope) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			console.log('mysql-adapter.fetchRow',query);
+			//console.log('mysql-adapter.fetchRow',query);
 			
 			connection.query(query,function (error,results) {
 				
-				if (!scope.db) {
-					
-					connection.release();
-					
-				}
+				connection.release();
 				
 				if (error) {
 					
@@ -222,13 +190,13 @@ MysqlAdapter.prototype.fetchRow = function (where,offset,scope) {
 	
 };
 
-MysqlAdapter.prototype.insert = function (data,scope) {
+MysqlAdapter.prototype.insert = function (data) {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		adapter.connection(scope).then(function (connection) {
+		adapter.connection().then(function (connection) {
 			
 			var query = Sql.insert().into(adapter.table).set(data);
 			
@@ -236,15 +204,11 @@ MysqlAdapter.prototype.insert = function (data,scope) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			console.log('mysql-adapter.insert',query);
+			//console.log('mysql-adapter.insert',query);
 			
 			connection.query(query,function (error,result) {
 				
-				if (!scope.db) {
-					
-					connection.release();
-					
-				}
+				connection.release();
 				
 				if (error) {
 					
@@ -264,13 +228,13 @@ MysqlAdapter.prototype.insert = function (data,scope) {
 	
 };
 
-MysqlAdapter.prototype.update = function (data,where,scope) {
+MysqlAdapter.prototype.update = function (data,where) {
 	
 	var adapter = this;
 	
 	return new Promise(function (resolve,reject) {
 		
-		adapter.connection(scope).then(function (connection) {
+		adapter.connection().then(function (connection) {
 			
 			console.log('mysql-adapter.update',data,where);
 			
@@ -280,15 +244,11 @@ MysqlAdapter.prototype.update = function (data,where,scope) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			console.log('mysql-adapter.update',query);
+			//console.log('mysql-adapter.update',query);
 			
 			connection.query(query,function (error,result) {
 				
-				if (!scope.db) {
-					
-					connection.release();
-					
-				}
+				connection.release();
 				
 				if (error) {
 					

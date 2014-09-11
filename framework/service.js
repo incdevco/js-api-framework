@@ -15,9 +15,9 @@ function Service(config) {
 	
 }
 
-Service.prototype.add = function (data,scope) {
+Service.prototype.add = function (data) {
 	
-	return this.adapter.insert(data,scope).then(function (result) {
+	return this.adapter.insert(data).then(function (result) {
 		
 		if (result.affectedRows) {
 			
@@ -79,7 +79,7 @@ Service.prototype.delete = function (model,scope,bypass) {
 	
 	return promise.then(function () {
 		
-		return service.adapter.delete(model.primary(),1,0,scope).then(function (result) {
+		return service.adapter.delete(model.primary()).then(function (result) {
 			
 			if (result.affectedRows) {
 				
@@ -97,9 +97,9 @@ Service.prototype.delete = function (model,scope,bypass) {
 	
 };
 
-Service.prototype.edit = function (data,where,scope) {
+Service.prototype.edit = function (data,where) {
 	
-	return this.adapter.update(data,where,scope).then(function (result) {
+	return this.adapter.update(data,where).then(function (result) {
 		
 		if (result.affectedRows) {
 			
@@ -131,7 +131,7 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 	
 	return promise.then(function (where) {
 		
-		return service.adapter.fetchAll(where,limit,offset,scope).then(function (results) {
+		return service.adapter.fetchAll(where,limit,offset).then(function (results) {
 			
 			var promises = [], set = new Set();
 			
@@ -216,7 +216,7 @@ Service.prototype.fetchOne = function (where,scope,bypass,cache) {
 		
 		return promise.catch(function () {
 			
-			return service.adapter.fetchRow(where,0,scope).then(function (result) {
+			return service.adapter.fetchRow(where,0).then(function (result) {
 				
 				var model;
 				
@@ -289,11 +289,11 @@ Service.prototype.save = function (model,scope,bypass) {
 		
 		if (model.new) {
 			
-			promise = service.add(diff,scope);
+			promise = service.add(diff);
 			
 		} else {
 			
-			promise = service.edit(diff,model.primary(),scope);
+			promise = service.edit(diff,model.primary());
 			
 		}
 		

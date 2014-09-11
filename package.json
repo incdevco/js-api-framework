@@ -1,6 +1,6 @@
 {
   "name": "incdev-api-fw",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "promise based node.js framework",
   "main": "framework/index.js",
   "scripts": {
@@ -15,8 +15,8 @@
     "api",
     "framework"
   ],
-  "author": "Shawn Ostler",
-  "license": "ISC",
+  "author": "Inclusive Development Company",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/incdevco/js-api-framework/issues"
   },
