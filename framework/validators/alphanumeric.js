@@ -2,6 +2,8 @@ var RegexValidator = require('./regex');
 
 function AlphaNumericValidator(config) {
 	
+	config = config || {};
+	
 	config.message = config.message || 'Only Alphanumeric Characters Allowed';
 	config.regex = /^[a-zA-Z0-9]+$/;
 	

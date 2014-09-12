@@ -178,11 +178,11 @@ Select.prototype.where = function (key,value,comparator) {
 		if (null === this._where) {
 			this._where = [];
 		}
-		if (/=/.test(value)) {
+		if (/[><]/.test(value)) {
 			var parts = value.split(' ',2);
 			comparator = parts[0];
 			value = parts[1];
-			console.log('select.where',parts,comparator,value);
+			//console.log('select.where',parts,comparator,value);
 		}
 		this._where.push(new Where({
 			key: key,
