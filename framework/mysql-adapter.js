@@ -114,7 +114,7 @@ MysqlAdapter.prototype.fetchAll = function (where,limit,offset) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			//console.log('mysql-adapter.fetchAll',query);
+			console.log('mysql-adapter.fetchAll',query);
 			
 			connection.query(query,function (error,results) {
 				

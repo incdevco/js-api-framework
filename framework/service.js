@@ -15,7 +15,7 @@ function Service(config) {
 	
 }
 
-Service.prototype.add = function (data) {
+Service.prototype.add = function (data,scope) {
 	
 	return this.adapter.insert(data).then(function (result) {
 		
@@ -97,7 +97,7 @@ Service.prototype.delete = function (model,scope,bypass) {
 	
 };
 
-Service.prototype.edit = function (data,where) {
+Service.prototype.edit = function (data,where,scope) {
 	
 	return this.adapter.update(data,where).then(function (result) {
 		
@@ -289,11 +289,11 @@ Service.prototype.save = function (model,scope,bypass) {
 		
 		if (model.new) {
 			
-			promise = service.add(diff);
+			promise = service.add(diff,scope);
 			
 		} else {
 			
-			promise = service.edit(diff,model.primary());
+			promise = service.edit(diff,model.primary(),scope);
 			
 		}
 		
