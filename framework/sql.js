@@ -1,4 +1,3 @@
-
 function Delete() {
 	this._limit = null;
 	this._offset = null;
@@ -93,8 +92,47 @@ Insert.prototype.set = function (object) {
 	return this;
 };
 
+function Join(config) {
+	this._type = config.type;
+	this._table = config.table;
+	this._on = config.on;
+	this._fields = config.fields;
+}
+
+Join.prototype.build = function () {
+	
+	var inserts = [], str = '';
+	
+	if (this._type === 'left') {
+		
+		str += 'LEFT '
+		
+	}
+	
+	str += 'JOIN ';
+	
+	str += '?? ';
+	
+	inserts.push(this._table);
+	
+	str += 'ON ?? = ??';
+	
+	this._on.split(' = ').forEach(function (part) {
+		
+		inserts.push(part);
+		
+	});
+	
+	return {
+		sql: str,
+		inserts: inserts
+	};
+	
+};
+
 function Select() {
 	this._fields = null;
+	this._joins = [];
 	this._limit = null;
 	this._offset = null;
 	this._order = null;
@@ -114,6 +152,16 @@ Select.prototype.build = function () {
 	}
 	str += ' FROM ??';
 	inserts.push(this._table);
+	if (this._joins.length) {
+		console.log(this._joins);
+		this._joins.forEach(function (join) {
+			var built = join.build();
+			str += ' '+built.sql;
+			built.inserts.forEach(function (insert) {
+				inserts.push(insert);
+			});
+		});
+	}
 	if (this._where) {
 		//console.log(this._where);
 		str += ' WHERE ';
@@ -157,6 +205,15 @@ Select.prototype.from = function (table) {
 	this._table = table;
 	return this;
 };
+Select.prototype.joinLeft = function (table,on,fields) {
+	this._joins.push(new Join({
+		type: 'left',
+		table: table,
+		on: on,
+		fields: fields
+	}));
+	return this;
+};
 Select.prototype.limit = function (limit) {
 	this._limit = parseInt(limit);
 	return this;
@@ -178,11 +235,15 @@ Select.prototype.where = function (key,value,comparator) {
 		if (null === this._where) {
 			this._where = [];
 		}
-		if (/[><]/.test(value)) {
-			var parts = value.split(' ',2);
-			comparator = parts[0];
-			value = parts[1];
-			//console.log('select.where',parts,comparator,value);
+		console.log('select.where',key);
+		if (key.match('<') || key.match('>')) {
+			var parts = key.split(' ',2);
+			key = parts[0];
+			comparator = parts[1];
+			console.log('select.where',parts,comparator,value);
+		} else if (value === 'IS NOT NULL') {
+			comparator = 'IS';
+			value = 'NOT NULL';
 		}
 		this._where.push(new Where({
 			key: key,
@@ -279,18 +340,27 @@ function Where(config) {
 }
 
 Where.prototype.build = function () {
-	var str = '?? '+this._comparator,
+	var str = '?? '+this._comparator+' ',
 		inserts = [this._key];
-		if (this._value instanceof Select) {
-			var select = this._value.build();
-			str += ' ('+select.sql+')';
-			for (var i in select.inserts) {
-				inserts.push(select.inserts[i]);
-			}
-		} else {
-			str += ' ?';
-			inserts.push(this._value);
+	if (this._value instanceof Select) {
+		var select = this._value.build();
+		str += ' ('+select.sql+')';
+		for (var i in select.inserts) {
+			inserts.push(select.inserts[i]);
 		}
+	} else {
+		if (this._comparator === 'IS') {
+			
+			str += this._value;
+			
+		} else {
+			
+			str += '?';
+			
+			inserts.push(this._value);
+		
+		}
+	}
 	return {
 		sql: str,
 		inserts: inserts

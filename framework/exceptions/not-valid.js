@@ -1,7 +1,13 @@
 function NotValidException(config) {
 	
 	this.statusCode = config.statusCode || 400;
-	this.content = config.content || 'Not Valid';
+	this.content = 'Not Valid';
+	
+	if (config.content) {
+		
+		this.content = JSON.stringify(config.content);
+		
+	}
 	
 }
 

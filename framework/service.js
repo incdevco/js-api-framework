@@ -121,7 +121,7 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 	
 	if ('fetchAll' in this.forms) {
 	
-		promise = this.forms.fetchAll.validate(where);
+		promise = this.forms.fetchAll.validate(where,scope);
 	
 	} else {
 		
@@ -192,7 +192,7 @@ Service.prototype.fetchOne = function (where,scope,bypass,cache) {
 	
 	if ('fetchOne' in service.forms) {
 		
-		promise = service.forms.fetchOne.validate(where);
+		promise = service.forms.fetchOne.validate(where,scope);
 		
 	} else {
 		

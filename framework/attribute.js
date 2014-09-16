@@ -3,6 +3,8 @@ var Validators = require('./validators');
 
 function Attribute(config) {
 	
+	config = config || {};
+	
 	this.default = config.default;
 	this.max = config.max;
 	this.min = config.min;
