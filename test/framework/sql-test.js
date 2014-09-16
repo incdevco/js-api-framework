@@ -110,9 +110,24 @@ describe('Framework.Sql',function () {
 		expect(query.inserts).to.be.eql(['test_table','type','Domain Name']);
 	});
 	it('select with where with > 0 value',function () {
-		var query = sql.select().from('test_table').where({available: '> 0'});
+		var query = sql.select().from('test_table').where({'available >': '0'});
 		query = query.build();
 		expect(query.sql).to.be.equal('SELECT * FROM ?? WHERE ?? > ?');
 		expect(query.inserts).to.be.eql(['test_table','available','0']);
+	});
+	it('select with join',function () {
+		var query = sql.select()
+			.from('test')
+			.leftJoin('join','test.id = join.id','*')
+			.where('join.test','test');		
+		query = query.build();
+		expect(query.sql).to.be.equal('SELECT * FROM ?? JOIN LEFT ?? ON ?? WHERE ?? = ?');
+		expect(query.inserts).to.be.eql([
+			'test',
+			'join',
+			'test.id = join.id',
+			'join.test',
+			'test'
+		]);
 	});
 });

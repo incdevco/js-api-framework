@@ -204,7 +204,7 @@ MysqlAdapter.prototype.insert = function (data) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			//console.log('mysql-adapter.insert',query);
+			console.log('mysql-adapter.insert',query);
 			
 			connection.query(query,function (error,result) {
 				
