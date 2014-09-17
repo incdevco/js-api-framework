@@ -1,4 +1,5 @@
 var rawbody = require('raw-body');
+var qs = require('qs');
 
 var Promise = require('../promise');
 
@@ -14,11 +15,6 @@ module.exports.beforeRoute = function (request,response,scope) {
 			
 		} else {
 			
-			var exception = {
-				statusCode: 400,
-				content: 'Not Valid JSON'
-			};
-			
 			rawbody(request,{
 				length: request.headers['content-length'],
 				encoding: 'utf8'
@@ -28,21 +24,48 @@ module.exports.beforeRoute = function (request,response,scope) {
 					
 					console.error(error);
 					
-					return reject(exception);
+					return reject({
+						statusCode: 400,
+						content: 'Invalid Body'
+					});
 					
 				} else {
 					
 					if (body && body.length) {
 						
-						try {
+						if (request.headers['content-type'].match('json')) {
 							
-							request.body = JSON.parse(body);
+							try {
+								
+								request.body = JSON.parse(body);
+								
+							} catch (error) {
+								
+								console.error(error);
+								
+								return reject({
+									statusCode: 400,
+									content: 'Not Valid JSON'
+								});
+								
+							}
 							
-						} catch (error) {
+						} else {
 							
-							console.error(error);
-							
-							return reject(exception);
+							try {
+								
+								request.body = qs.parse(body);
+								
+							} catch (error) {
+								
+								console.error(error);
+								
+								return reject({
+									statusCode: 400,
+									content: 'Invalid Body'
+								});
+								
+							}
 							
 						}
 						
