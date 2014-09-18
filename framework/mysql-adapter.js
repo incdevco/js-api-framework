@@ -166,7 +166,7 @@ MysqlAdapter.prototype.fetchRow = function (where,offset) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			//console.log('mysql-adapter.fetchRow',query);
+			console.log('mysql-adapter.fetchRow',query);
 			
 			connection.query(query,function (error,results) {
 				
