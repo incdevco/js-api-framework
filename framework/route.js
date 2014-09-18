@@ -21,7 +21,7 @@ function Route(path,controller) {
 	    	
 	    	this.params[capture.replace(':','')] = null;
 	    	
-	    	this.regex = this.regex.replace(capture,'([._a-zA-Z0-9-]+)');
+	    	this.regex = this.regex.replace(capture,'([a-zA-Z0-9]+)');
 	    	
 	  	}
 	  	
@@ -41,6 +41,8 @@ Route.prototype.match = function (url) {
 	
 	if (null != match && match[0] == path) {
 		
+		console.log('Route.match',match[0],path);
+			
 		var index = 1;
 		
 		for (var i in self.params) {

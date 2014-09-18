@@ -8,4 +8,5 @@ module.exports.Integer = require('./integer');
 module.exports.Length = require('./length');
 module.exports.NotExists = require('./not-exists');
 module.exports.Numeric = require('./numeric');
+module.exports.PhoneNumber = require('./phone-number');
 module.exports.Regex = require('./regex');
