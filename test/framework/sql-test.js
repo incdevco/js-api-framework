@@ -118,14 +118,15 @@ describe('Framework.Sql',function () {
 	it('select with join',function () {
 		var query = sql.select()
 			.from('test')
-			.leftJoin('join','test.id = join.id','*')
+			.joinLeft('join','test.id = join.id','*')
 			.where('join.test','test');		
 		query = query.build();
-		expect(query.sql).to.be.equal('SELECT * FROM ?? JOIN LEFT ?? ON ?? WHERE ?? = ?');
+		expect(query.sql).to.be.equal('SELECT * FROM ?? LEFT JOIN ?? ON ?? = ?? WHERE ?? = ?');
 		expect(query.inserts).to.be.eql([
 			'test',
 			'join',
-			'test.id = join.id',
+			'test.id',
+			'join.id',
 			'join.test',
 			'test'
 		]);

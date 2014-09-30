@@ -216,6 +216,8 @@ Service.prototype.fetchOne = function (where,scope,bypass,cache) {
 		
 		return promise.catch(function () {
 			
+			console.log('fetchOne',where);
+			
 			return service.adapter.fetchRow(where,0).then(function (result) {
 				
 				var model;
