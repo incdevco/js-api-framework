@@ -180,6 +180,14 @@ Select.prototype.build = function () {
 			count++;
 		}
 	}
+	if (this._order) {
+		var orderParts = this._order.split(' ');
+		str += ' ORDER BY ??';
+		if (orderParts.length > 1) {
+			str += ' '+orderParts[1];
+		}
+		inserts.push(orderParts[0]);
+	}
 	if (this._limit) {
 		str += ' LIMIT ?';
 		inserts.push(this._limit);
@@ -187,10 +195,6 @@ Select.prototype.build = function () {
 	if (this._offset) {
 		str += ' OFFSET ?';
 		inserts.push(this._offset);
-	}
-	if (this._order) {
-		str += ' ORDER BY ?';
-		inserts.push(this._order);
 	}
 	return {
 		sql: str,
@@ -244,6 +248,9 @@ Select.prototype.where = function (key,value,comparator) {
 		} else if (value === 'IS NOT NULL') {
 			comparator = 'IS';
 			value = 'NOT NULL';
+		} else if (value === 'IS NULL') {
+			comparator = 'IS';
+			value = 'NULL';
 		}
 		this._where.push(new Where({
 			key: key,

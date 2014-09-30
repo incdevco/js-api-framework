@@ -244,7 +244,7 @@ MysqlAdapter.prototype.update = function (data,where) {
 			
 			query = mysql.format(query.sql,query.inserts);
 			
-			//console.log('mysql-adapter.update',query);
+			console.log('mysql-adapter.update',query);
 			
 			connection.query(query,function (error,result) {
 				
