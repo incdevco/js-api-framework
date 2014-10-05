@@ -141,19 +141,19 @@ function Select() {
 }
 
 Select.prototype.build = function () {
-	var str = '',
+	var select = this,
+		str = '',
 		inserts = [];
 	str += 'SELECT ';
 	if (this._fields) {
-		str += '??';
-		inserts.push(this._fields);
+		str += this._fields;
 	} else {
 		str += '*';
 	}
 	str += ' FROM ??';
 	inserts.push(this._table);
 	if (this._joins.length) {
-		console.log(this._joins);
+		//console.log(this._joins);
 		this._joins.forEach(function (join) {
 			var built = join.build();
 			str += ' '+built.sql;
@@ -181,12 +181,39 @@ Select.prototype.build = function () {
 		}
 	}
 	if (this._order) {
-		var orderParts = this._order.split(' ');
-		str += ' ORDER BY ??';
-		if (orderParts.length > 1) {
-			str += ' '+orderParts[1];
+		str += ' ORDER BY';
+		if (Array.isArray(this._order)) {
+			this._order.forEach(function (order,index) {
+				if (index > 0 ) {
+					str += ',';
+				}
+				if (order.indexOf(' ') > 0) {
+					var first = order.substr(0,order.indexOf(' ')),
+						second = order.substr(order.indexOf(' ')+1);
+					str += ' ??';
+					if (second) {
+						str += ' '+second;
+					}
+					inserts.push(first);
+				} else {
+					str += ' ??';
+					inserts.push(order);
+				}
+			});
+		} else {
+			if (this._order.indexOf(' ')) {
+				var first = this._order.substr(0,this._order.indexOf(' ')),
+					second = this._order.substr(this._order.indexOf(' ')+1);
+				str += ' ??';
+				if (second) {
+					str += ' '+second;
+				}
+				inserts.push(first);
+			} else {
+				str += ' ??';
+				inserts.push(this._order);
+			}
 		}
-		inserts.push(orderParts[0]);
 	}
 	if (this._limit) {
 		str += ' LIMIT ?';
@@ -200,6 +227,10 @@ Select.prototype.build = function () {
 		sql: str,
 		inserts: inserts
 	};
+};
+Select.prototype.buildOrder = function (order) {
+	console.log('Select.buildOrder',order);
+	
 };
 Select.prototype.fields = function (fields) {
 	this._fields = fields;
@@ -239,12 +270,12 @@ Select.prototype.where = function (key,value,comparator) {
 		if (null === this._where) {
 			this._where = [];
 		}
-		console.log('select.where',key);
+		//console.log('select.where',key);
 		if (key.match('<') || key.match('>')) {
 			var parts = key.split(' ',2);
 			key = parts[0];
 			comparator = parts[1];
-			console.log('select.where',parts,comparator,value);
+			//console.log('select.where',parts,comparator,value);
 		} else if (value === 'IS NOT NULL') {
 			comparator = 'IS';
 			value = 'NOT NULL';
