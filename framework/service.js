@@ -33,28 +33,6 @@ Service.prototype.add = function (data,scope) {
 	
 };
 
-Service.prototype.cache = function (scope,id,result) {
-	
-	if (undefined === scope.cache) {
-		
-		return Promise.reject(false);
-		
-	} else {
-		
-		if (result) {
-			
-			return scope.cache.save(id,result);
-			
-		} else {
-			
-			return scope.cache.get(id);
-			
-		}
-		
-	}
-	
-};
-
 Service.prototype.createId = function (length) {
 	
 	length = length || this.idLength;
@@ -131,7 +109,7 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 	
 	return promise.then(function (where) {
 		
-		return service.adapter.fetchAll(where,limit,offset).then(function (results) {
+		return service.adapter.fetchAll(where,undefined,offset).then(function (results) {
 			
 			var promises = [], set = new Set();
 			
@@ -139,27 +117,31 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 			
 			for (var i = 0, length = results.length; i < length; i++) {
 				
-				var model = new service.model({
-						data: results[i],
-						service: service
-					}),
-					promise;
-				
-				if (bypass) {
+				if ((i + 1) < limit) {
 					
-					promise = Promise.resolve(model);
+					var model = new service.model({
+							data: results[i],
+							service: service
+						}),
+						promise;
 					
-				} else {
+					if (bypass) {
+						
+						promise = Promise.resolve(model);
+						
+					} else {
+						
+						promise = service.acl.isAllowed(model,'view',scope);
+						
+					}
 					
-					promise = service.acl.isAllowed(model,'view',scope);
+					promises.push(promise.then(function (model) {
+						
+						set.push(model);
+						
+					}));
 					
 				}
-				
-				promises.push(promise.then(function (model) {
-					
-					set.push(model);
-					
-				}));
 				
 			}
 			
@@ -186,7 +168,7 @@ Service.prototype.fetchNew = function () {
 	
 };
 
-Service.prototype.fetchOne = function (where,scope,bypass,cache) {
+Service.prototype.fetchOne = function (where,scope,bypass) {
 	
 	var promise, service = this;
 	
@@ -202,56 +184,32 @@ Service.prototype.fetchOne = function (where,scope,bypass,cache) {
 	
 	return promise.then(function (where) {
 		
-		if (cache) {
+		return service.adapter.fetchRow(where,0).then(function (result) {
 			
-			var id = service.adapter.table+':'+JSON.stringify(where);
+			var model;
 			
-			promise = service.cache(scope,id);
-			
-		} else {
-			
-			promise = Promise.reject(false);
-			
-		}
-		
-		return promise.catch(function () {
-			
-			console.log('fetchOne',where);
-			
-			return service.adapter.fetchRow(where,0).then(function (result) {
+			if (result) {
 				
-				var model;
+				model = new service.model({
+					data: result,
+					service: service
+				});
 				
-				if (result) {
+				if (bypass) {
 					
-					if (cache) {
-						
-						service.cache(scope,id,result);
-						
-					}
-					
-					model = new service.model({
-						data: result,
-						service: service
-					});
-					
-					if (bypass) {
-						
-						return model;
-						
-					} else {
-						
-						return service.acl.isAllowed(model,'view',scope);
-						
-					}
+					return model;
 					
 				} else {
 					
-					throw new Exceptions.NotFound();
+					return service.acl.isAllowed(model,'view',scope);
 					
 				}
 				
-			});
+			} else {
+				
+				throw new Exceptions.NotFound();
+				
+			}
 			
 		});
 		
