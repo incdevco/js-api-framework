@@ -63,9 +63,8 @@ describe('Framework.Sql',function () {
 			offset = 5,
 			query = sql.select().fields(fields).from('table').where(where).limit(limit).offset(offset);
 		query = query.build();
-		expect(query.sql).to.be.equal('SELECT ?? FROM ?? WHERE ?? = ? AND ?? = ? LIMIT ? OFFSET ?');
+		expect(query.sql).to.be.equal('SELECT field1,field2 FROM ?? WHERE ?? = ? AND ?? = ? LIMIT ? OFFSET ?');
 		expect(query.inserts).to.be.eql([
-			fields,
 			'table',
 			'field1',
 			'field1',
@@ -74,7 +73,7 @@ describe('Framework.Sql',function () {
 			limit,
 			offset
 		]);
-		expect(mysql.format(query.sql,query.inserts)).to.be.equal("SELECT `field1`, `field2` FROM `table` WHERE `field1` = 'field1' AND `field2` = 'field2' LIMIT 1 OFFSET 5");
+		expect(mysql.format(query.sql,query.inserts)).to.be.equal("SELECT field1,field2 FROM `table` WHERE `field1` = 'field1' AND `field2` = 'field2' LIMIT 1 OFFSET 5");
 	});
 	it('update',function () {
 		var table = 'table',
