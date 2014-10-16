@@ -115,6 +115,8 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 			
 			set.actualLength = results.length;
 			
+			limit = limit || results.length;
+			
 			for (var i = 0, length = results.length; i < length; i++) {
 				
 				if ((i + 1) < limit) {
