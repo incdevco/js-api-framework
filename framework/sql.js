@@ -218,6 +218,8 @@ Select.prototype.build = function () {
 	if (this._limit) {
 		str += ' LIMIT ?';
 		inserts.push(this._limit);
+	} else if (this._offset) {
+		str += ' LIMIT 18446744073709551615';
 	}
 	if (this._offset) {
 		str += ' OFFSET ?';
@@ -255,6 +257,9 @@ Select.prototype.limit = function (limit) {
 };
 Select.prototype.offset = function (offset) {
 	this._offset = parseInt(offset);
+	if (this._offset < 0) {
+		this._offset = 0;
+	}
 	return this;
 };
 Select.prototype.order = function (order) {

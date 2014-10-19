@@ -83,15 +83,17 @@ Set.prototype.toData = function (scope) {
 
 Set.prototype.toJson = function (scope) {
 	
-	var set = [], promises = [];
+	var set = [], str = '', promises = [];
 	
 	for (var i = 0, length = this.models.length; i < length; i++) {
 		
-		promises.push(this.models[i].toData(scope).then(function (model) {
+		promises.push(this.models[i].toJson(scope).then(function (string) {
 			
-			set.push(model);
+			str += string;
 			
-			return model;
+			str += ',';
+			
+			return true;
 			
 		}));
 		
@@ -99,7 +101,9 @@ Set.prototype.toJson = function (scope) {
 	
 	return Promise.all(promises).then(function () {
 		
-		return JSON.stringify(set);
+		str = str.replace(/,$/,'');
+		
+		return '['+str+']';
 		
 	});
 

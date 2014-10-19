@@ -117,33 +117,35 @@ Service.prototype.fetchAll = function (where,limit,offset,scope,bypass) {
 			
 			limit = limit || results.length;
 			
-			for (var i = 0, length = results.length; i < length; i++) {
+			if (results.length < limit) {
 				
-				if ((i + 1) < limit) {
+				limit = results.length;
+				
+			}
+			
+			for (var i = 0; i < limit; i++) {
+				
+				var model = new service.model({
+						data: results[i],
+						service: service
+					}),
+					promise;
+				
+				if (bypass) {
 					
-					var model = new service.model({
-							data: results[i],
-							service: service
-						}),
-						promise;
+					promise = Promise.resolve(model);
 					
-					if (bypass) {
-						
-						promise = Promise.resolve(model);
-						
-					} else {
-						
-						promise = service.acl.isAllowed(model,'view',scope);
-						
-					}
+				} else {
 					
-					promises.push(promise.then(function (model) {
-						
-						set.push(model);
-						
-					}));
+					promise = service.acl.isAllowed(model,'view',scope);
 					
 				}
+				
+				promises.push(promise.then(function (model) {
+					
+					set.push(model);
+					
+				}));
 				
 			}
 			
@@ -203,7 +205,11 @@ Service.prototype.fetchOne = function (where,scope,bypass) {
 					
 				} else {
 					
-					return service.acl.isAllowed(model,'view',scope);
+					return service.acl.isAllowed(model,'view',scope).then(function (model) {
+						
+						return model;
+						
+					});
 					
 				}
 				
