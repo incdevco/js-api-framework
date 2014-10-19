@@ -255,7 +255,7 @@ Model.prototype.toData = function (scope,bypass) {
 
 Model.prototype.toJson = function (scope) {
 	
-	console.log('Model.toJson');
+	//console.log('Model.toJson');
 	
 	return this.toData(scope).then(function (data) {
 		
@@ -269,11 +269,11 @@ Model.prototype.validate = function (scope) {
 	
 	var messages = {}, model = this, promises = [];
 	
-	console.log('Model.validate');
+	//console.log('Model.validate');
 	
 	return this.toData(scope,true).then(function (data) {
 		
-		console.log('Model.validate toData', data);
+		//console.log('Model.validate toData', data);
 		
 		for (var i in model.attributes) {
 			

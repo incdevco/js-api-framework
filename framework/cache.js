@@ -1,30 +1,34 @@
-var Promise = require('./promise');
-
 function Cache(config) {
 	
 	this.items = {};
 	
 }
 
-Cache.prototype.get = function (id) {
+Cache.prototype.delete = function (id) {
 	
-	if (undefined === this.items[id]) {
-		
-		return Promise.reject(false);
-		
-	} else {
-		
-		return Promise.resolve(this.items[id]);
-		
-	}
+	delete this.items[id];
+	
+	return this;
 	
 };
 
-Cache.prototype.save = function (id,result) {
+Cache.prototype.get = function (id) {
+	
+	if (this.items.hasOwnProperty(id)) {
+		
+		return this.items[id];
+		
+	}
+	
+	return undefined;
+	
+};
+
+Cache.prototype.put = function (id,result) {
 	
 	this.items[id] = result;
 	
-	return Promise.resolve(this);
+	return this;
 	
 };
 
