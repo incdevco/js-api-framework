@@ -1,6 +1,6 @@
 var Promise = require('../promise');
 
-module.exports.afterRoute = function (request,response,scope) {
+module.exports.afterRoute = function (scope,request,response) {
 	
 	//console.log('ParseParams.afterRoute');
 	

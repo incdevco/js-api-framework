@@ -1,6 +1,6 @@
 var Promise = require('../promise');
 
-module.exports = function (request,response,scope) {
+module.exports = function (scope,request,response) {
 	
 	response.statusCode = 200;
 	

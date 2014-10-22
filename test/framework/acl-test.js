@@ -1,168 +1,100 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
-
 var Framework = require(base+'/framework');
 
 describe('Framework.Acl',function () {
 	
-	it('isAllowed returns a promise and rejects if not allowed',function (done) {
+	it('acl.allow',function (done) {
 		
-		var acl = new Framework.Acl();
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
 		
-		var result = acl.isAllowed('Test','Test',{});
+		scope.roles.push('test');
 		
-		result.catch(function () {
+		acl.allow('test','test','test');
+		
+		acl.allow(['test'],['test'],['save']);
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
 			
-			done();
+			try {
 			
-		});
-		
-	});
-	
-	it('allowed',function (done) {
-		
-		var acl = new Framework.Acl();
-		
-		acl.allow('Role','Resource','Privilege');
-		
-		acl.isAllowed('Resource','Privilege',{
-			roles: ['Role']
-		}).then(function () {
-			
-			done();
-			
-		}).catch(function (exception) {
-			
-			done(exception);
-			
-		});
-		
-	});
-	
-	it('denied',function (done) {
-		
-		var acl = new Framework.Acl();
-		
-		acl.allow('Role','Resource','Test');
-		acl.allow('Developer','Resource','Privilege');
-		acl.allow('Administrator');
-		
-		acl.isAllowed('Resource','Privilege',{
-			roles: 'Role'
-		}).then(function () {
-			
-			done(new Error('acl.isAllowed resolved'));
-			
-		}).catch(function (exception) {
-			
-			done();
-			
-		});
-		
-	});
-	
-	it('* rule',function (done) {
-		
-		var acl = new Framework.Acl(),scope = new Framework.Scope();
-		
-		scope.roles = ['Administrator'];
-		
-		acl.allow('Administrator');
-		
-		acl.isAllowed({
-			getResourceId: function () {
+				Framework.Expect(result).to.be.eql(context);
 				
-				return 'Resource';
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
 				
 			}
-		},'Privilege',scope).then(function () {
 			
-			done();
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('acl.isAllowed rejected'));
-			
-		});
+		}).catch(done);
 		
 	});
 	
-	it('assertion',function (done) {
+	it('acl.allow without resource or privilege',function (done) {
 		
 		var acl = new Framework.Acl(),
-			assertion = function (resource,privilege,scope) {
-				
-				return Framework.Promise.resolve(true);
-				
-			},
+			context = {id: 'test'},
 			scope = new Framework.Scope();
 		
-		scope.roles = ['test'];
+		scope.roles.push('test');
 		
-		acl.allow('test','test','test',assertion);
+		acl.addResource('test');
 		
-		acl.isAllowed('test','test',scope).then(function () {
+		acl.allow('test');
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
 			
-			done();
+			try {
+			
+				Framework.Expect(result).to.be.eql(context);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
 			
 		}).catch(function (exception) {
 			
-			console.error(exception);
+			console.error(exception,exception.stack);
 			
-			done(new Error('acl.isAllowed rejected'));
+			return done(exception);
 			
 		});
 		
 	});
 	
-	it('assertion failed',function (done) {
+	it('acl.isAllowed rejects without resource',function (done) {
 		
 		var acl = new Framework.Acl(),
-			assertion = function (resource,privilege,scope) {
-				
-				return Framework.Promise.reject(false);
-				
-			},
+			context = {id: 'test'},
 			scope = new Framework.Scope();
 		
-		scope.roles = ['test'];
+		scope.roles.push('test');
 		
-		acl.allow('test','test','test',assertion);
+		acl.allow('test');
 		
-		acl.isAllowed('test','test',scope).then(function () {
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
 			
-			done(new Error('acl.isAllowed resolved'));
-			
-		}).catch(function (exception) {
-			
-			done();
-			
-		});
-		
-	});
-	
-	it('isAllowed with array',function (done) {
-		
-		var acl = new Framework.Acl();
-		
-		acl.isAllowed([],'test',{}).then(function () {
-			
-			done(new Error('acl.isAllowed resolved'));
+			return done(new Error('resolved'));
 			
 		}).catch(function (exception) {
 			
 			try {
 			
-				Framework.Expect(exception).to.be.equal('Resource could not be converted to a string.');
-			
-				done();
+				Framework.Expect(exception).to.be.equal(false);
 				
-			} catch (exception) {
+				return done();
 				
-				done(exception);
+			} catch (error) {
+				
+				return done(error);
 				
 			}
 			
@@ -170,21 +102,135 @@ describe('Framework.Acl',function () {
 		
 	});
 	
-	it('rule with no roles',function (done) {
+	it('acl.isAllowed rejects',function (done) {
 		
-		var acl = new Framework.Acl();
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
 		
-		acl.allow(undefined,'Resource','Privilege');
+		acl.allow('test','test');
 		
-		acl.isAllowed('Resource','Privilege',{
-			roles: ['Role']
-		}).then(function () {
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
 			
-			done();
+			return done(new Error('resolved'));
 			
 		}).catch(function (exception) {
 			
-			done(exception);
+			try {
+			
+				Framework.Expect(exception).to.be.equal(false);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('acl.isAllowed rejects',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		acl.allow('test','test');
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			try {
+			
+				Framework.Expect(exception).to.be.equal(false);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('acl.isAllowed resolves with assertion',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles = ['test'];
+		
+		acl.allow('test','test','test',function (scope,resource,privilege,context) {
+			
+			return Framework.Promise.resolve(true);
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			return done();
+			
+		}).catch(done);
+		
+	});
+	
+	it('acl.isAllowed rejects with assertion',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles = ['test'];
+		
+		acl.allow('test','test','test',function (scope,resource,privilege,context) {
+			
+			return Framework.Promise.reject(false);
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			return done();
+			
+		});
+		
+	});
+	
+	it('acl.isAllowed resolves without roles',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles = ['test'];
+		
+		acl.allow([],'test','test',function (scope,resource,privilege,context) {
+			
+			return Framework.Promise.reject(false);
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			return done();
 			
 		});
 		

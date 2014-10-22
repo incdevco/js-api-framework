@@ -1,6 +1,6 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
+var expect = require('chai').expect;
 
 var Framework = require(base+'/framework');
 
@@ -20,7 +20,7 @@ describe('Plugins.ParseParams',function () {
 			offset: 50
 		};
 		
-		Framework.Plugins.ParseParams.afterRoute(request,response,scope).then(function () {
+		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				
@@ -50,7 +50,7 @@ describe('Plugins.ParseParams',function () {
 			scope = new Framework.Scope(),
 			mock = new Framework.Mock();
 		
-		Framework.Plugins.ParseParams.afterRoute(request,response,scope).then(function () {
+		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				
@@ -78,7 +78,7 @@ describe('Plugins.ParseParams',function () {
 		
 		request.params = {};
 		
-		Framework.Plugins.ParseParams.afterRoute(request,response,scope).then(function () {
+		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				

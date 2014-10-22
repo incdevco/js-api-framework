@@ -1,6 +1,6 @@
 var Promise = require('../promise');
 
-module.exports.beforeRoute = function (request,response,scope) {
+module.exports.beforeRoute = function (scope,request,response) {
 	
 	//console.log('Json.beforeRoute');
 	

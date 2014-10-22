@@ -5,19 +5,27 @@ function Acl(config) {
 	
 	config = config || {};
 	
-	this.injector = config.injector;
-	this.logger = config.logger;
 	this.rules = {};
 	
 }
+
+Acl.prototype.addResource = function (resource) {
+	
+	if (undefined === this.rules[resource]) {
+		
+		this.rules[resource] = [];
+		
+	}
+	
+	return this;
+	
+};
 
 Acl.prototype.allow = function (roles,resources,privileges,assertions) {
 	
 	var rule;
 	
-	roles = roles || [];
-	
-	resources = resources || '*';
+	resources = resources || ['*'];
 	
 	privileges = privileges || [];
 	
@@ -45,11 +53,7 @@ Acl.prototype.allow = function (roles,resources,privileges,assertions) {
 	
 	}
 	
-	for (var i = 0, length = privileges.length; i < length; i++) {
-		
-		privileges[i] = this.normalizePrivilege(privileges[i]);
-		
-	}
+	privileges = this.normalizePrivilege(privileges);
 	
 	rule = new AclRule({
 		roles: roles,
@@ -59,7 +63,7 @@ Acl.prototype.allow = function (roles,resources,privileges,assertions) {
 	
 	for (var i = 0,length = resources.length; i < length; i++) {
 		
-		if (!(resources[i] in this.rules)) {
+		if (undefined === this.rules[resources[i]]) {
 		
 			this.rules[resources[i]] = [];
 		
@@ -73,68 +77,17 @@ Acl.prototype.allow = function (roles,resources,privileges,assertions) {
 	
 };
 
-Acl.prototype.isAllowed = function (resource,privileges,scope) {
+Acl.prototype.isAllowed = function (scope,resource,privilege,context) {
 	
-	var id = resource,
-		promises = [];
+	var acl = this, promise;
 	
-	if (typeof resource == 'object' && 'getResourceId' in resource) {
-		
-		id = resource.getResourceId();
-		
-	}
-	
-	if (typeof id != 'string') {
-		
-		return Promise.reject('Resource could not be converted to a string.');
-	
-	}
-	
-	if (undefined === typeof(this.rules[id])) {
+	if (undefined === this.rules[resource]) {
 		
 		return Promise.reject(false);
 		
 	}
 	
-	if (!Array.isArray(privileges)) {
-		
-		privileges = [privileges];
-		
-	}
-	
-	if (privileges.length === 0) {
-		
-		return Promise.resolve(resource);
-		
-	}
-	
-	privileges = this.normalizePrivilege(privileges);
-	
-	for (var i = 0, length = privileges.length; i < length; i++) {
-		
-		//console.log('Acl Trying',id,privileges[i]);
-		
-		promises.push(this.isAllowedSingle(id,resource,privileges[i],scope).catch(function (exception) {
-			
-			console.error('Acl',exception,scope.roles);
-			
-			throw exception;
-			
-		}));
-		
-	}
-	
-	return Promise.all(promises).then(function () {
-		
-		return resource;
-		
-	});
-	
-};
-
-Acl.prototype.isAllowedSingle = function (id,resource,privilege,scope) {
-	
-	var acl = this, promises = [], promise;
+	privilege = this.normalizePrivilege(privilege);
 	
 	if (undefined === acl.rules['*']) {
 		
@@ -142,34 +95,47 @@ Acl.prototype.isAllowedSingle = function (id,resource,privilege,scope) {
 		
 	} else {
 		
-		//console.log('Trying * Rules');
-		
-		promise = acl.tryRules(acl.rules['*'],resource,privilege,scope);
+		promise = acl.tryRules(acl.rules['*'],scope,resource,privilege,context);
 		
 	}
 	
-	return promise.catch(function () {
+	return promise.then(function () {
 		
-		if (undefined === acl.rules[id]) {
-			
-			promise = Promise.reject(false);
-			
-		} else {
-			
-			//console.log('Trying '+id+' Rules');
-			
-			promise = acl.tryRules(acl.rules[id],resource,privilege,scope);
-			
-		}
+		return context;
 		
-		return promise.catch(function () {
+	}).catch(function (exception) {
+		
+		//console.error('*',exception,exception.stack);
+		
+		return acl.tryRules(acl.rules[resource],scope,resource,privilege,context).then(function (result) {
 			
-			throw new Exceptions.NotAllowed({
-				resource: id,
-				privilege: privilege
-			});
+			return context;
+			
+		}).catch(function (exception) {
+			
+			//console.error(exception,exception.stack);
+			
+			throw false;
 			
 		});
+		
+	});
+	
+};
+
+Acl.prototype.isAllowedMultiple = function (scope,resource,privileges,context) {
+	
+	var acl = this, promises = [];
+	
+	privileges.forEach(function (privilege) {
+		
+		promises.push(acl.isAllowed(scope,resource,privilege,context));
+		
+	});
+	
+	return Promise.all(promises).then(function () {
+		
+		return context;
 		
 	});
 	
@@ -197,7 +163,7 @@ Acl.prototype.normalizePrivilege = function (privilege) {
 	
 };
 
-Acl.prototype.tryRules = function (rules,resource,privilege,scope) {
+Acl.prototype.tryRules = function (rules,scope,resource,privilege,context) {
 	
 	var promises = [];
 	
@@ -205,27 +171,11 @@ Acl.prototype.tryRules = function (rules,resource,privilege,scope) {
 		
 		//console.log('Acl Trying Rule');
 		
-		promises.push(rules[i].isAllowed(resource,privilege,scope));
+		promises.push(rules[i].isAllowed(scope,resource,privilege,context));
 		
 	}
 	
-	return Promise.settle(promises).then(function (results) {
-		
-		for (var i = 0, length = results.length; i < length; i++) {
-			
-			//console.log('Acl Trying Result');
-			
-			if (results[i].isFulfilled()) {
-				
-				return true;
-				
-			}
-			
-		}
-		
-		throw false;
-		
-	});
+	return Promise.any(promises);
 	
 };
 
@@ -239,19 +189,11 @@ function AclRule(config) {
 	
 }
 
-AclRule.prototype.isAllowed = function (resource,privilege,scope) {
-	
-	scope = scope || {};
-	
-	roles = scope.roles || [];
-	
-	if (!Array.isArray(roles)) {
-		
-		roles = [roles];
-		
-	}
+AclRule.prototype.isAllowed = function (scope,id,privilege,context) {
 	
 	var match = false;
+	
+	roles = scope.roles;
 	
 	if (this.roles.length === 0) {
 		
@@ -268,9 +210,17 @@ AclRule.prototype.isAllowed = function (resource,privilege,scope) {
 				if (roles[i] === this.roles[r]) {
 				
 					match = true;
+					
+					break;
 				
 				}	
 			
+			}
+			
+			if (match) {
+				
+				break;
+				
 			}
 			
 		}
@@ -295,9 +245,11 @@ AclRule.prototype.isAllowed = function (resource,privilege,scope) {
 			
 			//console.log('AclRule Privilege Match',privilege,this.privileges[i]);
 			
-			if (privilege == this.privileges[i]) {
+			if (privilege === this.privileges[i]) {
 			
 				match = true;
+				
+				break;
 			
 			}
 		
@@ -309,7 +261,7 @@ AclRule.prototype.isAllowed = function (resource,privilege,scope) {
 			
 			for (var i = 0, length = this.assertions.length; i < length; i++) {
 				
-				promises.push(this.assertions[i](resource,privilege,scope));
+				promises.push(this.assertions[i](scope,id,privilege,context));
 				
 			}
 			
@@ -319,7 +271,7 @@ AclRule.prototype.isAllowed = function (resource,privilege,scope) {
 				
 			}).catch(function (exception) {
 				
-				console.log('AclRule','Assertion Failed',exception,exception.stack);
+				//console.log('AclRule','Assertion Failed',exception,exception.stack);
 				
 				throw false;
 			

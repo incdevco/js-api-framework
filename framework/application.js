@@ -1,112 +1,99 @@
-var base = process.env.PWD;
-
-var bunyan = require('bunyan');
 var objectMerge = require('object-merge');
 
 var Cache = require('./cache');
 var Injector = require('./injector');
 var Moment = require('./moment');
 var NotFound = require('./exceptions/not-found');
-var Plugins = require('./plugins');
 var Promise = require('./promise');
 var Route = require('./route');
 var Scope = require('./scope');
 
 function Application (config) {
 	
+	config = config || {};
+	
 	this.injector = config.injector || new Injector();
-	this.log = config.log || bunyan.createLogger({
-		name: 'app',
-		level: 'trace'
-	});
-	this.plugins = [
-		Plugins.ParseUrl,
-		Plugins.ParseBody
-	];
+	this.log = config.log;
+	this.modules = {};
+	this.plugins = [];
 	this.routes = [];
 	
 }
 
-Application.prototype.afterController = function (request,response,scope) {
+Application.prototype.afterController = function (scope,request,response) {
 	
-	return this.runPlugins('afterController',request,response,scope);
-	
-};
-
-Application.prototype.afterRoute = function (request,response,scope) {
-	
-	return this.runPlugins('afterRoute',request,response,scope);
+	return this.runPlugins('afterController',scope,request,response);
 	
 };
 
-Application.prototype.beforeController = function (request,response,scope) {
+Application.prototype.afterRoute = function (scope,request,response) {
 	
-	return this.runPlugins('beforeController',request,response,scope);
+	return this.runPlugins('afterRoute',scope,request,response);
 	
 };
 
-Application.prototype.beforeRoute = function (request,response,scope) {
+Application.prototype.beforeController = function (scope,request,response) {
 	
-	return this.runPlugins('beforeRoute',request,response,scope);
+	return this.runPlugins('beforeController',scope,request,response);
+	
+};
+
+Application.prototype.beforeRoute = function (scope,request,response) {
+	
+	return this.runPlugins('beforeRoute',scope,request,response);
+	
+};
+
+Application.prototype.bootstrap = function () {
+	
+	var application = this, modules = Object.keys(this.modules);
+	
+	modules.forEach(function (module) {
+		
+		application.modules[module](application);
+		
+	});
 	
 };
 
 Application.prototype.handle = function (request,response) {
 	
-	var app, scope;
+	var application = this, 
+		scope = new Scope({
+			cache: new Cache(),
+			injector: new Injector(this.injector),
+			time: Moment()
+		});
 	
-	console.log('New Request',request.method,request.url);
-	
-	app = this;
-	
-	scope = new Scope({
-		cache: new Cache(),
-		injector: new Injector(this.injector),
-		response: response,
-		time: Moment()
-	});
-	
-	scope.timeout = setTimeout(function () {
-		
-		response.statusCode = 500;
-		response.write('Request Timed Out');
-		response.end();
-		
-		scope.close();
-		
-	}, 30000);
-	
-	app.beforeRoute(request,response,scope).then(function () {
+	application.beforeRoute(scope,request,response).then(function () {
 		
 		//console.log('beforeRoute',request.method,request.url);
 		
-		scope.route = app.match(request);
+		scope.route = application.match(request);
 		
 		if (scope.route) {
 			
 			request.params = objectMerge(request.query,scope.route.params);
 			
-			return app.afterRoute(request,response,scope).then(function () {
+			return application.afterRoute(scope,request,response).then(function () {
 				
 				//console.log('afterRoute',request.method,request.url);
 				
-				return app.beforeController(request,response,scope).then(function () {
+				return application.beforeController(scope,request,response).then(function () {
 					
 					//console.log('beforeController',request.method,request.url);
 					
-					return scope.route.controller(request,response,scope).then(function () {
+					return scope.route.controller(scope,request,response).then(function () {
 						
 						//console.log('controller',request.method,request.url);
 						
-						return app.afterController(request,response,scope).then(function () {
+						return application.afterController(scope,request,response).then(function () {
 							
 							//console.log('afterController',request.method,request.url);
 							
 							response.statusCode = response.statusCode || 200;
 							
 							response.end();
-							
-							scope.close();
 							
 							return true;
 							
@@ -120,7 +107,7 @@ Application.prototype.handle = function (request,response) {
 			
 		} else {
 			
-			console.error('No Route Found');
+			//console.error('No Route Found');
 			
 			throw new NotFound();
 			
@@ -128,13 +115,11 @@ Application.prototype.handle = function (request,response) {
 		
 	}).catch(function (exception) {
 		
-		console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
+		//console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
 		
-		response.statusCode = exception.statusCode || 500;
-		response.write(exception.content || JSON.stringify(exception));
+		response.statusCode = exception.statusCode;
+		response.write(exception.content);
 		response.end();
-		
-		scope.close();
 		
 	});
 	
@@ -142,9 +127,7 @@ Application.prototype.handle = function (request,response) {
 
 Application.prototype.match = function (request) {
 	
-	var promises = [];
-	
-	if (request.method in this.routes) {
+	if (undefined !== this.routes[request.method]) {
 		
 		//console.log('Application.match',request.method,request.url);
 		
@@ -162,15 +145,18 @@ Application.prototype.match = function (request) {
 			
 		}
 		
-		return false;
-		
-	} else {
-		
-		console.log('Method Not Implemented: '+request.method);
-		
-		return false;
-		
 	}
+	
+	return false;
+	
+};
+
+Application.prototype.module = function (name,bootstrap) {
+	
+	this.modules[name] = bootstrap;
+	
+	return this;
+	
 };
 
 Application.prototype.plugin = function (plugin) {
@@ -181,31 +167,21 @@ Application.prototype.plugin = function (plugin) {
 
 };
 
-Application.prototype.runPlugins = function (fn,request,response,scope) {
+Application.prototype.runPlugins = function (fn,scope,request,response) {
 	
-	var app = this, result = Promise.resolve();
+	var application = this, promises = [];
 	
-	for (var i = 0, length = app.plugins.length; i < length; i++) {
+	for (var i = 0, length = application.plugins.length; i < length; i++) {
 		
-		(function (i) {
+		if ('function' === typeof(application.plugins[i][fn])) {
+		
+			promises.push(application.plugins[i][fn](scope,request,response));
 			
-			if ('function' === typeof app.plugins[i][fn]) {
-				
-				result = result.then(function () {
-					
-					//console.log(fn,app.plugins[i][fn]);
-					
-					return app.plugins[i][fn](request,response,scope);
-					
-				});
-				
-			}
-			
-		})(i);
+		}
 		
 	}
 	
-	return result;
+	return Promise.all(promises);
 	
 };
 

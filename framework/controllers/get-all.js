@@ -1,24 +1,14 @@
-module.exports = function (request,response,scope) {
+module.exports = function (scope,request,response) {
 	
-	var controller = this;
+	var service = scope.service('Service');
 	
-	console.log('get-all',controller);
-	
-	return scope.service(this.service).fetchAll(request.params,request.limit,request.offset,scope).then(function (set) {
+	return service.fetchAll(scope,request.query,request.limit,request.offset).then(function (set) {
 		
-		return set.toJson(scope).then(function (string) {
+		return service.toJson(scope,set).then(function (json) {
 			
 			response.statusCode = 200;
 			
-			if (controller.cache) {
-				
-				response.setHeader('Cache-Control','private, max-age='+controller.cache);
-				
-			}
-			
-			response.setHeader('X-Actual-Length',set.actualLength);
-			
-			response.write(string);
+			response.write(json);
 			
 			return true;
 			

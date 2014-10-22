@@ -1,6 +1,6 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
+var expect = require('chai').expect;
 
 var Framework = require(base+'/framework');
 
@@ -19,7 +19,7 @@ describe('Framework.Plugins.Cors',function () {
 				origin: 'test'
 			});
 		
-		plugin.beforeRoute(request,response,scope).then(function () {
+		plugin.beforeRoute(scope,request,response).then(function () {
 			
 			try {
 				

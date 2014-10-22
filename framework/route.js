@@ -41,7 +41,7 @@ Route.prototype.match = function (url) {
 	
 	if (null != match && match[0] == path) {
 		
-		console.log('Route.match',match[0],path);
+		//console.log('Route.match',match[0],path);
 			
 		var index = 1;
 		

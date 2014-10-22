@@ -1,3 +1,5 @@
+var mysql = require('./mysql');
+
 function Delete() {
 	this._limit = null;
 	this._offset = null;
@@ -34,10 +36,14 @@ Delete.prototype.build = function () {
 		str += ' OFFSET ?';
 		inserts.push(this._offset);
 	}
-	return {
-		sql: str,
-		inserts: inserts
-	};
+	
+	this.sql = str;
+	this.inserts = inserts;
+	
+	this.formatted = mysql.format(this.sql,this.inserts);
+	
+	return this;
+	
 };
 Delete.prototype.from = function (table) {
 	this._table = table;
@@ -71,17 +77,44 @@ Delete.prototype.where = function (key,value,comparator) {
 
 function Insert() {
 	this._table = null;
+	this._update = false;
 	this._values = null;
 }
 
 Insert.prototype.build = function () {
-	return {
-		sql: 'INSERT INTO ?? SET ?',
-		inserts: [
-			this._table,
-			this._values
-		]
-	};
+	
+	var query = this,
+		inserts = [
+			this._table
+		],
+		keys = Object.keys(this._values),
+		values = [],
+		str = 'INSERT INTO ?? (??) VALUES (?)';
+	
+	keys.forEach(function (key) {
+		
+		values.push(query._values[key]);
+		
+	});
+	
+	inserts.push(keys);
+	inserts.push(values);
+	
+	if (this._update) {
+		
+		str += ' ON DUPLICATE KEY UPDATE ?';
+		
+		inserts.push(this._values);
+		
+	}
+	
+	this.sql = str;
+	this.inserts = inserts;
+	
+	this.formatted = mysql.format(this.sql,this.inserts);
+	
+	return this;
+	
 };
 Insert.prototype.into = function (table) {
 	this._table = table;
@@ -90,6 +123,13 @@ Insert.prototype.into = function (table) {
 Insert.prototype.set = function (object) {
 	this._values = object;
 	return this;
+};
+Insert.prototype.update = function (update) {
+	
+	this._update = update;
+	
+	return this;
+	
 };
 
 function Join(config) {
@@ -201,7 +241,7 @@ Select.prototype.build = function () {
 				}
 			});
 		} else {
-			if (this._order.indexOf(' ')) {
+			if (this._order.indexOf(' ') > 0) {
 				var first = this._order.substr(0,this._order.indexOf(' ')),
 					second = this._order.substr(this._order.indexOf(' ')+1);
 				str += ' ??';
@@ -215,23 +255,25 @@ Select.prototype.build = function () {
 			}
 		}
 	}
+	
 	if (this._limit) {
 		str += ' LIMIT ?';
 		inserts.push(this._limit);
-	} else if (this._offset) {
+	} else if (null !== this._offset) {
 		str += ' LIMIT 18446744073709551615';
 	}
-	if (this._offset) {
+	
+	if (null !== this._offset) {
 		str += ' OFFSET ?';
 		inserts.push(this._offset);
 	}
-	return {
-		sql: str,
-		inserts: inserts
-	};
-};
-Select.prototype.buildOrder = function (order) {
-	console.log('Select.buildOrder',order);
+	
+	this.sql = str;
+	this.inserts = inserts;
+	
+	this.formatted = mysql.format(this.sql,this.inserts);
+	
+	return this;
 	
 };
 Select.prototype.fields = function (fields) {
@@ -334,10 +376,14 @@ Update.prototype.build = function () {
 		str += ' OFFSET ?';
 		inserts.push(this._offset);
 	}
-	return {
-		sql: str,
-		inserts: inserts
-	};
+	
+	this.sql = str;
+	this.inserts = inserts;
+	
+	this.formatted = mysql.format(this.sql,this.inserts);
+	
+	return this;
+	
 };
 Update.prototype.limit = function (limit) {
 	this._limit = parseInt(limit);
@@ -383,15 +429,24 @@ function Where(config) {
 }
 
 Where.prototype.build = function () {
+	
 	var str = '?? '+this._comparator+' ',
 		inserts = [this._key];
+	
 	if (this._value instanceof Select) {
+		
 		var select = this._value.build();
+		
 		str += ' ('+select.sql+')';
+		
 		for (var i in select.inserts) {
+			
 			inserts.push(select.inserts[i]);
+			
 		}
+		
 	} else {
+		
 		if (this._comparator === 'IS') {
 			
 			str += this._value;
@@ -403,11 +458,14 @@ Where.prototype.build = function () {
 			inserts.push(this._value);
 		
 		}
+		
 	}
+	
 	return {
 		sql: str,
 		inserts: inserts
 	};
+	
 };
 
 module.exports.delete = function () {

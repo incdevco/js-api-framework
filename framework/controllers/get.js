@@ -1,20 +1,12 @@
-module.exports = function (request,response,scope) {
+module.exports = function (scope,request,response) {
 	
-	var controller = this;
-	
-	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
+	return scope.service('Service').fetchOne(scope,request.params,request.offset).then(function (model) {
 		
-		return model.toJson(scope).then(function (string) {
+		return scope.service('Service').toJson(scope,model).then(function (json) {
 			
 			response.statusCode = 200;
 			
-			if (controller.cache) {
-				
-				response.setHeader('Cache-Control','private, max-age='+controller.cache);
-				
-			}
-			
-			response.write(string);
+			response.write(json);
 			
 			return true;
 			

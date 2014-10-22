@@ -1,17 +1,14 @@
-module.exports = function (request,response,scope) {
+module.exports = function (scope,request,response) {
 	
-	return scope.service(this.service).fetchNew().then(function (model) {
+	return scope.service('Service').insert(scope,request.body).then(function (model) {
 		
-		return model.save(request.body,scope).then(function (model) {
+		return scope.service('Service').toJson(scope,model).then(function (json) {
 			
-			return model.toJson(scope).then(function (string) {
-				
-				response.statusCode = 201;
-				response.write(string);
-				
-				return true;
-				
-			});
+			response.statusCode = 201;
+			
+			response.write(json);
+			
+			return true;
 			
 		});
 		

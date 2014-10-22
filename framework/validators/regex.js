@@ -12,7 +12,7 @@ RegexValidator.prototype.validate = function (value) {
 		if (self.regex.test(value)) {
 			resolve(true);
 		} else {
-			console.error(value);
+			//console.error(value);
 			reject(self.message+' ('+value+')');
 		}
 	});

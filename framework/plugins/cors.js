@@ -8,7 +8,7 @@ function Cors(config) {
 	
 }
 
-Cors.prototype.beforeRoute = function (request,response,scope) {
+Cors.prototype.beforeRoute = function (scope,request,response) {
 	
 	//console.log('Cors.beforeRoute');
 	

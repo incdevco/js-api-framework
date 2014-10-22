@@ -1,76 +1,73 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
-
 var Framework = require(base+'/framework');
 
 describe('Framework.Form',function () {
 	
-	it('form.validate',function (done) {
+	it('validate',function (done) {
 		
-		var form = new Framework.Form({
-			attributes: {
-				id: new Framework.Attribute({
-					required: true,
-					max: 5,
-					min: 4
-				}),
-				test: new Framework.Attribute({})
-			}
-		});
+		var form = new Framework.Form(),
+			id = new Framework.Attribute(),
+			mock = new Framework.Mock(),
+			scope = new Framework.Scope();
 		
-		form.validate({id: 'test'}).then(function (clean) {
+		form.attributes.id = id;
+		
+		form.validate(scope,{
+			id: '1',
+			test: 'test'
+		}).then(function (clean) {
 			
 			try {
 				
-				expect(clean).to.be.eql({id: 'test'});
+				Framework.Expect(clean).to.be.eql({
+					id: '1'
+				});
 				
-				done();
+				return mock.done(done);
 				
-			} catch (exception) {
+			} catch (error) {
 				
-				done(exception);
+				return done(error);
 				
 			}
 			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('form.validate rejected'));
-			
-		});
+		}).catch(done);
 		
 	});
 	
-	it('form.validate not valid',function (done) {
+	it('validate rejects',function (done) {
 		
-		var form = new Framework.Form({
-			attributes: {
-				id: new Framework.Attribute({
-					required: true
-				})
-			}
-		});
-		
-		form.validate().then(function (clean) {
+		var form = new Framework.Form(),
+			id = new Framework.Attribute(),
+			mock = new Framework.Mock(),
+			scope = new Framework.Scope();
 			
-			done(new Error('form.validate resolved'));
+		id.validators.push(new Framework.Validators.Alpha());
+		id.validators.push(new Framework.Validators.Email());
+		
+		form.attributes.id = id;
+		
+		form.validate(scope,{
+			id: '1'
+		}).then(function (clean) {
+			
+			return done(new Error('resolved'));
 			
 		}).catch(function (exception) {
 			
 			try {
 				
-				expect(exception).to.be.eql({
+				Framework.Expect(exception).to.be.eql({
 					statusCode: 400,
-					content: '{"id":"Required"}'
+					content: '{"id":["Only Alpha Characters Allowed (1)"]}'
 				});
 				
-				done();
+				return mock.done(done);
 				
-			} catch (exception) {
+			} catch (error) {
 				
-				done(exception);
+				return done(error);
 				
 			}
 			

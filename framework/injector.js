@@ -20,7 +20,7 @@ Injector.prototype.get = function (key) {
 		
 		if (undefined === item && undefined !== this.parent) {
 			
-			return this.parent.get(key,locals);
+			return this.parent.get(key);
 		
 		}
 	

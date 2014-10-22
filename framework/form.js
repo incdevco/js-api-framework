@@ -3,51 +3,63 @@ var Promise = require('./promise');
 
 function Form(config) {
 	
-	this.attributes = config.attributes;
+	config = config || {};
+	
+	this.attributes = config.attributes || {};
 	
 }
 
-Form.prototype.validate = function (data,scope) {
+Form.prototype.validate = function (scope,data) {
 	
-	var attributes = this.attributes, 
+	var attributes = this.attributes,
+		attributesKeys = Object.keys(attributes),
 		clean = {},
-		data = data || {},
-		messages = {}, 
+		dataKeys = Object.keys(data),
+		errors = {},
 		promises = [];
 	
-	for (var i in attributes) {
+	dataKeys.forEach(function (dataKey) {
 		
-		(function (i) {
+		attributesKeys.forEach(function (attributeKey) {
 			
-			var promise = attributes[i].validate(data[i],data,scope);
-			
-			if (undefined !== data[i]) {
+			if (dataKey.match(attributeKey)) {
 				
-				clean[i] = data[i];
+				promises.push(attributes[attributeKey].validate(scope,data[dataKey],data).then(function () {
+					
+					clean[dataKey] = data[dataKey];
+					
+					return true;
+					
+				}).catch(function (exception) {
+					
+					//console.error(exception,exception.stack);
+					
+					if (undefined === errors[dataKey]) {
+						
+						errors[dataKey] = [];
+						
+					}
+					
+					errors[dataKey].push(exception);
+					
+					throw exception;
+					
+				}));
+				
 			}
 			
-			promise.catch(function (exception) {
-				
-				messages[i] = exception;
-				
-				return exception;
-				
-			});
-			
-			promises.push(promise);
-			
-		})(i);
+		});
 		
-	}
+	});
 	
 	return Promise.all(promises).then(function () {
 		
 		return clean;
 		
-	}).catch(function (exception) {
+	}).catch(function () {
 		
 		throw new Exceptions.NotValid({
-			content: messages
+			content: errors
 		});
 		
 	});

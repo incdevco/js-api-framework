@@ -31,7 +31,7 @@ function Attribute(config) {
 	
 }
 
-Attribute.prototype.validate = function(value,context,scope) {
+Attribute.prototype.validate = function(scope,value,context) {
 	
 	var promises = [];
 	
