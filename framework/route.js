@@ -1,65 +1,71 @@
 var Promise = require('./promise');
 
-function Route(path,controller) {
+function Route(path,controllers,context) {
 	
-	var capture,captures,length;
+	var route = this;;
 	
-	this.controller = controller;
-	this.params = {};
+	this.context = context;
+	this.controllers = controllers;
+	this.params = [];
 	this.regex = path;
-	this.route = path;
+	this.path = path;
 	
-	captures = this.route.match(/:([^\/]+)/ig);
+	this.params = path.match(/:([^\/]+)/ig);
 	
-	if (captures) {
+	if (this.params) {
 		
-		length = captures.length;
+		this.params.forEach(function (param) {
+			
+			route.regex = route.regex.replace(param,'([a-zA-Z0-9]+)')
+			
+		});
 		
-	    for (var i = 0; i < length; i++) {
-	    	
-	    	capture = captures[i];
-	    	
-	    	this.params[capture.replace(':','')] = null;
-	    	
-	    	this.regex = this.regex.replace(capture,'([a-zA-Z0-9]+)');
-	    	
-	  	}
-	  	
 	}
 	
 	this.regex = new RegExp(this.regex);
 	
 }
 
-Route.prototype.match = function (url) {
+Route.prototype.controller = function (scope,request,response) {
 	
-	var self = this,
-		path = url.pathname || '/',
-		match = self.regex.exec(path);
+	return this.controllers[request.method].call(this.context,scope,request,response);
 	
-	//console.log('Route.match',path,self.regex);
+};
+
+Route.prototype.match = function (scope,request) {
 	
-	if (null != match && match[0] == path) {
+	var route = this;
+	
+	return new Promise(function (resolve,reject) {
 		
-		//console.log('Route.match',match[0],path);
+		var path = request.url.pathname || '/',
+			match = route.regex.exec(path);
+		
+		if (null !== match 
+			&& match[0] == path 
+			&& route.controllers[request.method]) {
 			
-		var index = 1;
-		
-		for (var i in self.params) {
-		
-			self.params[i] = match[index];
+			scope.route = route;
 			
-			index++;
+			if (route.params) {
+				
+				route.params.forEach(function (param,index) {
+					
+					request.query[param.replace(':','')] = match[index + 1];
+					
+				});
+				
+			}
+			
+			return resolve(true);
+			
+		} else {
+			
+			return reject(false);
 			
 		}
 		
-		return(self);
-		
-	} else {
-	
-		return(false);
-		
-	}
+	});
 	
 };
 

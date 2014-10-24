@@ -2,10 +2,22 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-var application = new Framework.Application();
+var BlogModule = require('./modules/blog');
 
-application.module('test',require('./modules/test'));
-
-application.bootstrap();
-
-module.exports = application;
+module.exports = function (config) {
+	
+	var application;
+	
+	if (undefined === config.modules) {
+		
+		config.modules = {
+			Blog: BlogModule
+		};
+		
+	}
+	
+	application = new Framework.Application(config);
+	
+	return application;
+	
+};

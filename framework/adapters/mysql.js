@@ -1,7 +1,6 @@
 var crypto = require('crypto');
 
 var Exceptions = require('../exceptions');
-var mysql = require('../mysql');
 var Promise = require('../promise');
 var Sql = require('../sql');
 
@@ -48,6 +47,8 @@ Mysql.prototype.createId = function (length,key) {
 			} else {
 				
 				var query = Sql.select().from(adapter.table).where(key,id);
+				
+				query.build();
 				
 				return connection.query(query.formatted,function (error,results) {
 					

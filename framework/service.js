@@ -1,33 +1,60 @@
 var Exceptions = require('./exceptions');
-var Adapters = require('./adapter');
+var Adapters = require('./adapters');
+var Form = require('./form');
 var Promise = require('./promise');
 
 function Service(config) {
 	
-	if (config.adapter === 'mysql') {
+	var service = this;
+	
+	config = config || {};
+	
+	this.acl = config.acl || null;
+	this.adapter = null;
+	this.forms = {};
+	this.resource = config.resource || null;
+	
+	this.adapter = config.adapter;
+	
+	if (config.forms) {
 		
-		this.adapter = new Adapters.Mysql({
-			attributes: config.attributes,
-			idLength: config.idLength,
-			primary: config.primary,
-			table: config.table
+		Object.keys(config.forms).forEach(function (name) {
+			
+			service.form(name,config.forms[name]);
+			
 		});
-		
-	} else {
-		
-		throw new Error('Only mysql adapter implemented');
 		
 	}
 	
-	this.acl = config.acl;
-	this.attributes = config.attributes;
-	this.forms = config.forms || {};
-	this.idLength = config.idLength;
-	this.primary = config.primary;
-	this.resourceId = config.resourceId;
-	this.table = config.table;
-	
 }
+
+Service.prototype.allowed = function (scope,model) {
+	
+	var allowed = {}, promises = [], acl = this.acl, resource = this.resource;
+	
+	Object.keys(model).forEach(function (attribute) {
+		
+		promises.push(acl.isAllowed(scope,resource,'get::'+attribute,model).then(function () {
+			
+			allowed[attribute] = model[attribute];
+			
+			return true;
+			
+		}).catch(function () {
+			
+			return true;
+			
+		}));
+		
+	});
+	
+	return Promise.all(promises).then(function () {
+		
+		return allowed;
+		
+	});
+	
+};
 
 Service.prototype.delete = function (scope,model) {
 	
@@ -165,6 +192,22 @@ Service.prototype.fetchOne = function (scope,where,offset) {
 	
 };
 
+Service.prototype.form = function (name,form) {
+	
+	if (form) {
+		
+		this.forms[name] = form;
+		
+		return this;
+		
+	} else {
+		
+		return this.forms[name];
+		
+	}
+	
+};
+
 Service.prototype.insert = function (scope,model) {
 	
 	var promise, service = this;
@@ -205,17 +248,17 @@ Service.prototype.insert = function (scope,model) {
 
 Service.prototype.toJson = function (scope,model) {
 	
-	var promises = [], service = this;
+	var promise, promises = [], service = this;
 	
 	if (Array.isArray(model)) {
 		
-		var string = '';
+		var set = [];
 		
 		model.forEach(function (model) {
 			
-			promises.push(service.toJson(scope,model).then(function (json) {
+			promises.push(service.allowed(scope,model).then(function (allowed) {
 				
-				string += json+',';
+				set.push(allowed);
 				
 				return true;
 				
@@ -223,39 +266,23 @@ Service.prototype.toJson = function (scope,model) {
 			
 		});
 		
-		return Promise.all(promises).then(function () {
+		promise = Promise.all(promises).then(function () {
 			
-			return '['+string.replace(/,$/,'')+']';
+			return set;
 			
 		});
 		
 	} else {
 		
-		var clean = {}, keys = Object.keys(model);
-		
-		keys.forEach(function (key) {
-			
-			promises.push(service.acl.isAllowed(scope,service.resourceId,'get::'+key,model).then(function () {
-				
-				clean[key] = model[key];
-				
-				return true;
-				
-			}).catch(function () {
-				
-				return true;
-				
-			}));
-			
-		});
-		
-		return Promise.all(promises).then(function () {
-			
-			return JSON.stringify(clean);
-			
-		});
+		promise = service.allowed(scope,model);
 		
 	}
+	
+	return promise.then(function (allowed) {
+		
+		return JSON.stringify(allowed);
+		
+	});
 	
 };
 

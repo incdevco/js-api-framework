@@ -21,9 +21,6 @@ LengthValidator.prototype.validate = function (value) {
 			} else {
 				resolve(true);
 			}
-		} else if (undefined !== self.min) {
-			//console.log('length not string',value);
-			reject('Too Short ('+self.min+' Characters)');
 		} else {
 			resolve(true);
 		}

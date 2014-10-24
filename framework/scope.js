@@ -12,6 +12,12 @@ function Scope(config) {
 	
 }
 
+Scope.prototype.module = function (name,module) {
+	
+	return this.injector.module(name,module);
+	
+};
+
 Scope.prototype.service = function (name,service) {
 	
 	return this.injector.service(name,service);

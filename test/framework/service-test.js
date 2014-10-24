@@ -4,22 +4,6 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Service',function () {
 	
-	it('constructor throws exception if adapter not mysql',function () {
-		
-		try {
-			
-			var service = new Framework.Service({
-				adapter: 'dog'
-			});
-			
-		} catch (error) {
-			
-			Framework.Expect(error).to.be.eql(new Error('Only mysql adapter implemented'));
-			
-		}
-		
-	});
-	
 	it('service.delete',function (done) {
 		
 		var acl = new Framework.Acl(),
@@ -28,9 +12,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'delete': new Framework.Form({})
+					'delete': {}
 				}
 			});
 		
@@ -72,7 +58,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').resolve(model);
@@ -111,9 +99,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'fetchAll': new Framework.Form({})
+					'fetchAll': {}
 				}
 			});
 		
@@ -155,7 +145,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').resolve(model);
@@ -194,9 +186,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'fetchAll': new Framework.Form({})
+					'fetchAll': {}
 				}
 			});
 		
@@ -233,7 +227,9 @@ describe('Framework.Service',function () {
 	it('service.fetchNew',function () {
 		
 		var service = new Framework.Service({
-			adapter: 'mysql'
+			adapter: function () {
+				return new Framework.Adapters.Mysql({})
+			}
 		});
 		
 		var model = service.fetchNew();
@@ -250,9 +246,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'fetchOne': new Framework.Form({})
+					'fetchOne': {}
 				}
 			});
 		
@@ -294,7 +292,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').resolve(model);
@@ -333,7 +333,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').reject(false);
@@ -362,6 +364,16 @@ describe('Framework.Service',function () {
 		
 	});
 	
+	it('service.form',function () {
+		
+		var service = new Framework.Service();
+		
+		form = service.form('test');
+		
+		Framework.Expect(form).to.be.equal(undefined);
+		
+	});
+	
 	it('service.insert',function (done) {
 		
 		var acl = new Framework.Acl(),
@@ -370,9 +382,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'insert': new Framework.Form({})
+					'insert': {}
 				}
 			});
 		
@@ -414,7 +428,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').resolve(model);
@@ -456,7 +472,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				resourceId: 'test'
 			});
 		
@@ -493,7 +511,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				resourceId: 'test'
 			});
 		
@@ -530,7 +550,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				resourceId: 'test'
 			});
 		
@@ -567,7 +589,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				resourceId: 'test'
 			});
 		
@@ -605,9 +629,11 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql',
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				},
 				forms: {
-					'update': new Framework.Form({})
+					'update': {}
 				}
 			});
 		
@@ -659,7 +685,9 @@ describe('Framework.Service',function () {
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
 				acl: acl,
-				adapter: 'mysql'
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
 		mock.mock(service.acl,'acl','isAllowed').resolve({

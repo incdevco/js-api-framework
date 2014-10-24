@@ -1,3 +1,5 @@
+var Promise = require('../promise');
+
 function NotExistsValidator(config) {
 	
 	this.key = config.key;
@@ -6,21 +8,33 @@ function NotExistsValidator(config) {
 	
 }
 
-NotExistsValidator.prototype.validate = function (value) {
+NotExistsValidator.prototype.validate = function (scope,value,context) {
 	
-	var data = {},message = this.message;
+	var data = {},
+		message = this.message,
+		service = scope.service(this.service);
 	
-	data[this.key] = value;
+	if (service) {
+		
+		data[this.key] = value;
+		
+		return service.fetchOne(data).then(function () {
+			
+			console.log('not-exists fetchOne resolved');
+			
+			throw message;
+			
+		},function () {
+			
+			console.log('not-exists fetchOne rejected');
+			
+			return true;
+			
+		});
+		
+	}
 	
-	return this.service.fetchOne(data).then(function () {
-		
-		throw message;
-		
-	}).catch(function () {
-		
-		return true;
-		
-	});
+	return Promise.reject('Service Not Found');
 	
 };
 

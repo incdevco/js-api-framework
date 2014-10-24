@@ -96,6 +96,19 @@ describe('Framework.Injector',function () {
 		
 	});
 	
+	it('module with parent',function () {
+		
+		var parent = new Framework.Injector(), 
+			injector = new Framework.Injector(parent);
+		
+		Framework.Expect(injector.module('test')).to.be.equal(undefined);
+		
+		parent.module('test','test');
+		
+		Framework.Expect(injector.module('test')).to.be.equal('test');
+		
+	});
+	
 	it('service with parent',function () {
 		
 		var parent = new Framework.Injector(), 

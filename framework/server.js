@@ -4,7 +4,9 @@ var url = require('url');
 
 function Server(config) {
 	
-	this.application = null;
+	config = config || {};
+	
+	this.application = config.application;
 	this._server = null;
 	
 }
@@ -23,13 +25,23 @@ Server.prototype.handle = function (request,response) {
 	
 	request.on('error',function (error) {
 		
-		console.error('server.handle request error',error);
+		//console.error('server.handle request error',error);
+		
+		response.statusCode = 400;
+		response.write(error);
+		
+		response.end();
 		
 	});
 	
 	request.on('close',function () {
 		
-		console.log('server.handle request close');
+		//console.log('server.handle request close');
+		
+		response.statusCode = 400;
+		response.write('Connection Closed');
+		
+		response.end();
 		
 	});
 	
@@ -43,21 +55,18 @@ Server.prototype.handle = function (request,response) {
 				
 			} catch (error) {
 				
-				console.error('server.handle request json body error',error);
+				//console.error('server.handle request json body error',error);
+				
+				response.statusCode = 400;
+				response.write('Bad JSON');
+				
+				return response.end();
 				
 			}
 			
 		} else {
-			
-			try {
 				
-				request.body = qs.parse(body);
-				
-			} catch (error) {
-				
-				console.error('server.handle request qs body error',error);
-				
-			}
+			request.body = qs.parse(body);
 			
 		}
 		

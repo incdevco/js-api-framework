@@ -3,52 +3,70 @@ var Promise = require('./promise');
 
 function Form(config) {
 	
+	var form = this;
+	
 	config = config || {};
 	
-	this.attributes = config.attributes || {};
+	this.attributes = {};
+	
+	if (config.attributes) {
+		
+		Object.keys(config.attributes).forEach(function (key) {
+			
+			form.attribute(key,config.attributes[key]);
+			
+		});
+		
+	}
 	
 }
+
+Form.prototype.attribute = function (key,attribute) {
+	
+	if (attribute) {
+		
+		if ('function' === typeof attribute) {
+			
+			attribute = attribute();
+			
+		}
+		
+		this.attributes[key] = attribute;
+		
+		return this;
+		
+	} else {
+		
+		return this.attributes[key];
+		
+	}
+	
+};
 
 Form.prototype.validate = function (scope,data) {
 	
 	var attributes = this.attributes,
-		attributesKeys = Object.keys(attributes),
 		clean = {},
-		dataKeys = Object.keys(data),
 		errors = {},
 		promises = [];
 	
-	dataKeys.forEach(function (dataKey) {
+	Object.keys(attributes).forEach(function (key) {
 		
-		attributesKeys.forEach(function (attributeKey) {
+		promises.push(attributes[key].validate(scope,data[key],data).then(function () {
 			
-			if (dataKey.match(attributeKey)) {
-				
-				promises.push(attributes[attributeKey].validate(scope,data[dataKey],data).then(function () {
-					
-					clean[dataKey] = data[dataKey];
-					
-					return true;
-					
-				}).catch(function (exception) {
-					
-					//console.error(exception,exception.stack);
-					
-					if (undefined === errors[dataKey]) {
-						
-						errors[dataKey] = [];
-						
-					}
-					
-					errors[dataKey].push(exception);
-					
-					throw exception;
-					
-				}));
-				
-			}
+			clean[key] = data[key];
 			
-		});
+			return true;
+			
+		}).catch(function (exception) {
+			
+			errors[key] = [];
+			
+			errors[key].push(exception);
+			
+			throw exception;
+			
+		}));
 		
 	});
 	

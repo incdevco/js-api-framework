@@ -181,11 +181,11 @@ Acl.prototype.tryRules = function (rules,scope,resource,privilege,context) {
 
 function AclRule(config) {
 	
-	this.assertions = config.assertions || [];
+	this.assertions = config.assertions;
 	
-	this.privileges = config.privileges || [];
+	this.privileges = config.privileges;
 	
-	this.roles = config.roles || [];
+	this.roles = config.roles;
 	
 }
 

@@ -8,7 +8,7 @@ function ExistsValidator(config) {
 	
 }
 
-ExistsValidator.prototype.validate = function (value,context,scope) {
+ExistsValidator.prototype.validate = function (scope,value,context) {
 	
 	var data = {}, 
 		message = this.message, 
@@ -30,7 +30,7 @@ ExistsValidator.prototype.validate = function (value,context,scope) {
 		
 	}
 	
-	console.error('Exists Validator','Service Not Found',this.service,service);
+	//console.error('Exists Validator','Service Not Found',this.service,service);
 	
 	return Promise.reject(message);
 	

@@ -236,4 +236,42 @@ describe('Framework.Acl',function () {
 		
 	});
 	
+	it('acl.isAllowed resolves with multiple roles',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles = ['cat','dog'];
+		
+		acl.allow(['test','dog'],'test','test',function (scope,resource,privilege,context) {
+			
+			return Framework.Promise.reject(false);
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			return done();
+			
+		});
+		
+	});
+	
+	it('addResource',function () {
+		
+		var acl = new Framework.Acl();
+		
+		acl.addResource('test');
+		
+		acl.addResource('test');
+		
+		Framework.Expect(acl.rules['test']).to.be.eql([]);
+		
+	});
+	
 });

@@ -1,5 +1,7 @@
 function NotValidException(config) {
 	
+	config = config || {};
+	
 	this.statusCode = config.statusCode || 400;
 	this.content = 'Not Valid';
 	

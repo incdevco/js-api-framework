@@ -1,9 +1,12 @@
-
 var Promise = require('../promise');
 
 function RegexValidator(config) {
+	
+	config = config || {};
+	
 	this.message = config.message || 'Does Not Match';
 	this.regex = config.regex;
+	
 }
 
 RegexValidator.prototype.validate = function (value) {

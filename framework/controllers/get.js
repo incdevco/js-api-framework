@@ -1,8 +1,22 @@
 module.exports = function (scope,request,response) {
 	
-	return scope.service('Service').fetchOne(scope,request.params,request.offset).then(function (model) {
+	var promise, service = this.service;
+	
+	console.log(request.query);
+	
+	if (request.query[this.id]) {
 		
-		return scope.service('Service').toJson(scope,model).then(function (json) {
+		promise = service.fetchOne(scope,request.params);
+		
+	} else {
+		
+		promise = service.fetchAll(scope,request.params,request.limit,request.offset);
+		
+	}
+	
+	return promise.then(function (model) {
+		
+		return service.toJson(scope,model).then(function (json) {
 			
 			response.statusCode = 200;
 			

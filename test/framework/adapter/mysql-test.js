@@ -2,11 +2,11 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-describe('mysql-adapter',function () {
+describe('Framework.Adapters.Mysql',function () {
 	
 	it('constructor with array as primary',function () {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 			primary: ['id']
 		});
 		
@@ -18,7 +18,7 @@ describe('mysql-adapter',function () {
 		
 		var connection = {},
 			pool = {};
-			adapter = new Framework.Adapter.Mysql({
+			adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id',
 				pool: pool
@@ -33,9 +33,10 @@ describe('mysql-adapter',function () {
 	
 	it('createId',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				adapter: 'mysql',
 				primary: 'id',
+				table: 'test',
 				idLength: 5
 			}),
 			connection = {},
@@ -49,7 +50,7 @@ describe('mysql-adapter',function () {
 		
 		mock.mock(connection,'connection','query').callback(undefined,[]);
 		
-		adapter.createId(5,'id').then(function (id) {
+		adapter.createId(undefined,'id').then(function (id) {
 			
 			try {
 				
@@ -67,9 +68,43 @@ describe('mysql-adapter',function () {
 		
 	});
 	
+	it('createId connection error',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				table: 'test',
+				primary: 'id'
+			}),
+			connection = {},
+			mock = new Framework.Mock(),
+			result = {};
+		
+		mock.mock(adapter,'adapter','connection').callback('Connection Error');
+		
+		adapter.createId(1,'test').then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			try {
+				
+				Framework.Expect(exception).to.be.equal('Connection Error');
+				
+				return mock.done(done);
+				
+			} catch (exception) {
+				
+				return done(exception);
+				
+			}
+			
+		});
+		
+	});
+	
 	it('delete',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -107,7 +142,7 @@ describe('mysql-adapter',function () {
 	
 	it('delete throws exception when no rows affected',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -141,7 +176,7 @@ describe('mysql-adapter',function () {
 	
 	it('fetch',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -179,9 +214,79 @@ describe('mysql-adapter',function () {
 		
 	});
 	
+	it('createId query error',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				table: 'test',
+				primary: 'id'
+			}),
+			connection = {},
+			mock = new Framework.Mock(),
+			result = {};
+		
+		mock.mock(adapter,'adapter','connection').callback(undefined,connection);
+		
+		mock.mock(connection,'connection','query')
+			.callback('Query Error');
+		
+		adapter.createId(5,'id').then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			try {
+				
+				console.error(exception);
+				
+				Framework.Expect(exception).to.be.equal('Query Error');
+				
+				return mock.done(done);
+				
+			} catch (exception) {
+				
+				return done(exception);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('createPrimary',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				adapter: 'mysql',
+				primary: 'id',
+				table: 'test',
+				idLength: 5
+			}),
+			connection = {},
+			mock = new Framework.Mock();
+		
+		mock.mock(adapter,'adapter','createId').resolve('id');
+		
+		adapter.createPrimary({}).then(function (model) {
+			
+			try {
+				
+				Framework.Expect(model).to.be.eql({id: 'id'});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
+		
+	});
+	
 	it('fetch without where, limit or offset',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -219,7 +324,7 @@ describe('mysql-adapter',function () {
 	
 	it('fetch connection error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -255,7 +360,7 @@ describe('mysql-adapter',function () {
 	
 	it('fetch query error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -295,7 +400,7 @@ describe('mysql-adapter',function () {
 	
 	it('insert',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -335,7 +440,7 @@ describe('mysql-adapter',function () {
 	
 	it('insert throws exception when no rows affected',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -369,7 +474,7 @@ describe('mysql-adapter',function () {
 	
 	it('update',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -407,7 +512,7 @@ describe('mysql-adapter',function () {
 	
 	it('update throws exception when no rows affected',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -441,7 +546,7 @@ describe('mysql-adapter',function () {
 	
 	it('_delete',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -481,7 +586,7 @@ describe('mysql-adapter',function () {
 	
 	it('_delete without where',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -519,7 +624,7 @@ describe('mysql-adapter',function () {
 	
 	it('_delete with connection error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -553,7 +658,7 @@ describe('mysql-adapter',function () {
 	
 	it('_delete with query error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -591,7 +696,7 @@ describe('mysql-adapter',function () {
 	
 	it('_insert',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -631,7 +736,7 @@ describe('mysql-adapter',function () {
 	
 	it('_insert with connection error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -667,7 +772,7 @@ describe('mysql-adapter',function () {
 	
 	it('_insert with query error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -707,7 +812,7 @@ describe('mysql-adapter',function () {
 	
 	it('_update',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -749,7 +854,7 @@ describe('mysql-adapter',function () {
 	
 	it('_update without where',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -789,7 +894,7 @@ describe('mysql-adapter',function () {
 	
 	it('_update with connection error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),
@@ -827,7 +932,7 @@ describe('mysql-adapter',function () {
 	
 	it('_update with query error',function (done) {
 		
-		var adapter = new Framework.Adapter.Mysql({
+		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
 				primary: 'id'
 			}),

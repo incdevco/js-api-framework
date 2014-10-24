@@ -420,11 +420,15 @@ Update.prototype.where = function (key,value,comparator) {
 };
 
 function Where(config) {
+	
+	config = config || {};
+	
 	this._comparator = config.comparator || '=';
 	this._key = config.key;
 	this._value = config.value;
 	if (null === this._value) {
 		this._comparator = 'IS';
+		this._value = 'NULL';
 	}
 }
 
@@ -437,7 +441,7 @@ Where.prototype.build = function () {
 		
 		var select = this._value.build();
 		
-		str += ' ('+select.sql+')';
+		str += '('+select.sql+')';
 		
 		for (var i in select.inserts) {
 			
@@ -468,15 +472,21 @@ Where.prototype.build = function () {
 	
 };
 
-module.exports.delete = function () {
-	return new Delete();
+module.exports.delete = function (config) {
+	return new Delete(config);
 };
-module.exports.insert = function () {
-	return new Insert();
+module.exports.insert = function (config) {
+	return new Insert(config);
 };
-module.exports.select = function () {
-	return new Select();
+module.exports.join = function (config) {
+	return new Join(config);
 };
-module.exports.update = function () {
-	return new Update();
+module.exports.select = function (config) {
+	return new Select(config);
+};
+module.exports.update = function (config) {
+	return new Update(config);
+};
+module.exports.where = function (config) {
+	return new Where(config);
 };

@@ -4,6 +4,21 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Form',function () {
 	
+	it('constructor',function () {
+		
+		var attribute = new Framework.Attribute(),
+			form = new Framework.Form({
+				attributes: {
+					test: attribute,
+					dog: function () { return attribute; }
+				}
+			});
+		
+		Framework.Expect(form.attribute('test')).to.be.eql(attribute);
+		Framework.Expect(form.attributes.dog).to.be.eql(attribute);
+		
+	});
+	
 	it('validate',function (done) {
 		
 		var form = new Framework.Form(),

@@ -1,3 +1,4 @@
+var Expect = require('./expect');
 var Promise = require('./promise');
 
 function Mock() {
@@ -21,7 +22,7 @@ Mock.prototype.done = function (done) {
 			
 			if (mocked.calls.length !== mocked.called) {
 				
-				console.error('expected',mocked.mocked.calls.length);
+				console.error('expected',mocked.calls.length);
 				
 				console.error('actual',mocked.called);
 				
@@ -77,8 +78,6 @@ function Mocked(config) {
 
 Mocked.prototype.call = function (index) {
 	
-	index = index - 1;
-	
 	return this.calls[index];
 	
 };
@@ -97,15 +96,7 @@ Mocked.prototype.mocked = function () {
 		
 	}
 	
-	try {
-		
-		return this.calls[index].call.apply(this.calls[index],arguments);
-		
-	} catch (error) {
-		
-		throw new Error(this.name+'#'+this.fn+' '+error);
-		
-	}
+	return this.calls[index].call.apply(this.calls[index],arguments);
 	
 };
 
@@ -141,13 +132,25 @@ MockedCall.prototype.call = function () {
 		
 		keys.forEach(function (index) {
 			
-			if (mocked._with[index] !== args[index]) {
+			try {
+				
+				if (typeof mocked._with[index] === 'object') {
+				
+					Expect(mocked._with[index]).to.be.eql(args[index]);
+				
+				} else {
+					
+					Expect(mocked._with[index]).to.be.equal(args[index]);
+					
+				}
+				
+			} catch (error) {
 				
 				console.error('expected',index,mocked._with[index]);
 				
 				console.error('actual',index,args[index]);
 				
-				throw new Error('argument at '+index+' does not match');
+				throw error;
 				
 			}
 			

@@ -1,6 +1,7 @@
 function Injector(parent) {
 	
 	this.items = {};
+	this.modules = {};
 	this.parent = parent;
 	this.services = {};
 	
@@ -61,6 +62,30 @@ Injector.prototype.invoke = function (original,locals) {
 	}
 	
 	return fn.apply(null,args);
+	
+};
+
+Injector.prototype.module = function (name,module) {
+	
+	if (module) {
+		
+		this.modules[name] = module;
+		
+		return this;
+		
+	} else {
+	
+		var result = this.modules[name];
+		
+		if (undefined === result && this.parent) {
+				
+			return this.parent.module(name);
+			
+		}
+		
+		return result;
+		
+	}
 	
 };
 
