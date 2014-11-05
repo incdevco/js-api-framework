@@ -2,7 +2,15 @@ var Promise = require('../promise');
 
 function InArrayValidator(config) {
 	
-	this.array = config.array;
+	if (Array.isArray(config)) {
+		
+		this.array = config;
+		
+	} else {
+	
+		this.array = config.array;
+	
+	}
 	
 }
 

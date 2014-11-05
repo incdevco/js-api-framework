@@ -11,17 +11,7 @@ describe('Framework.Exceptions.NotAllowed',function () {
 			privilege: 'privilege'
 		});
 		
-		Framework.Expect(exception.statusCode).to.be.equal(403);
-		Framework.Expect(exception.content).to.be.equal('Not allowed to privilege on resource.');
-		
-	});
-	
-	it('constructor without privilege and resource',function () {
-		
-		var exception = new Framework.Exceptions.NotAllowed();
-		
-		Framework.Expect(exception.statusCode).to.be.equal(403);
-		Framework.Expect(exception.content).to.be.equal('Not Allowed');
+		Framework.Expect(exception.name).to.be.equal('NotAllowed');
 		
 	});
 	

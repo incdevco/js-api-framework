@@ -11,6 +11,12 @@ function Attribute(config) {
 	this.required = false;
 	this.validators = config.validators || [];
 	
+	if (Array.isArray(config.array)) {
+		
+		this.validators.push(new Validators.InArray(config.array));
+		
+	}
+	
 	if (typeof(config.exists) === 'object') {
 		
 		this.validators.push(new Validators.Exists(config.exists));

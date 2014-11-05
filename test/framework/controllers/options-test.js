@@ -6,15 +6,12 @@ describe('Framework.Controllers.Options',function () {
 	
 	it('options',function (done) {
 		
-		var resource = new Framework.Resource({
-				id: 'id',
-				service: {}
-			}),
+		var controller = Framework.Controllers.OPTIONS(),
 			scope = new Framework.Scope(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
 		
-		Framework.Controllers.Options.call(resource,scope,request,response).then(function () {
+		controller(scope,request,response).then(function () {
 			
 			try {
 				

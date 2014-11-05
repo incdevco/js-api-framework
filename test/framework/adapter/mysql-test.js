@@ -14,6 +14,24 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
+	it('_bootstrap',function () {
+		
+		var mock = new Framework.Mock(),
+			application = new Framework.Application(),
+			adapter = new Framework.Adapters.Mysql({});
+			
+		mock.mock(application,'application','get')
+			.with('Mysql')
+			.return({
+				Pool: 'test'
+			});
+			
+		adapter._bootstrap(application);
+		
+		Framework.Expect(adapter.pool).to.be.equal('test');
+		
+	});
+	
 	it('connection',function (done) {
 		
 		var connection = {},
@@ -49,6 +67,12 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query').callback(undefined,[{}]);
 		
 		mock.mock(connection,'connection','query').callback(undefined,[]);
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter.createId(undefined,'id').then(function (id) {
 			
@@ -190,6 +214,9 @@ describe('Framework.Adapters.Mysql',function () {
 			.callback(undefined,result)
 			.with('SELECT * FROM `test` WHERE `id` = \'1\' LIMIT 1 OFFSET 1');
 		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
 		adapter.fetch({
 			id: '1'
 		},1,1).then(function (result) {
@@ -228,6 +255,9 @@ describe('Framework.Adapters.Mysql',function () {
 		
 		mock.mock(connection,'connection','query')
 			.callback('Query Error');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter.createId(5,'id').then(function (result) {
 			
@@ -299,6 +329,9 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query')
 			.callback(undefined,result)
 			.with('SELECT * FROM `test`');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter.fetch().then(function (result) {
 			
@@ -373,6 +406,9 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query')
 			.callback('Query Error')
 			.with('SELECT * FROM `test` WHERE `id` = \'1\' LIMIT 1 OFFSET 1');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter.fetch({
 			id: '1'
@@ -560,6 +596,9 @@ describe('Framework.Adapters.Mysql',function () {
 			.callback(undefined,result)
 			.with('DELETE FROM `test` WHERE `id` = \'1\'');
 		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
 		adapter._delete({
 			id: '1'
 		}).then(function (result) {
@@ -599,6 +638,9 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query')
 			.callback(undefined,result)
 			.with('DELETE FROM `test`');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter._delete().then(function (result) {
 			
@@ -672,6 +714,9 @@ describe('Framework.Adapters.Mysql',function () {
 			.callback('Query Error')
 			.with('DELETE FROM `test`');
 		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
 		adapter._delete().then(function (result) {
 			
 			return done(new Error('resolved'));
@@ -709,6 +754,9 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query')
 			.callback(undefined,result)
 			.with('INSERT INTO `test` (`id`) VALUES (\'1\')');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter._insert({
 			id: '1'
@@ -786,6 +834,9 @@ describe('Framework.Adapters.Mysql',function () {
 			.callback('Query Error')
 			.with('INSERT INTO `test` (`id`) VALUES (\'1\')');
 		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
 		adapter._insert({
 			id: '1'
 		}).then(function (result) {
@@ -826,6 +877,9 @@ describe('Framework.Adapters.Mysql',function () {
 			.callback(undefined,result)
 			.with('UPDATE `test` SET `id` = \'1\' WHERE `id` = \'1\'');
 		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
 		adapter._update({
 			id: '1'
 		},{
@@ -862,11 +916,15 @@ describe('Framework.Adapters.Mysql',function () {
 			mock = new Framework.Mock(),
 			result = {};
 		
-		mock.mock(adapter,'adapter','connection').callback(undefined,connection);
+		mock.mock(adapter,'adapter','connection')
+			.callback(undefined,connection);
 		
 		mock.mock(connection,'connection','query')
 			.callback(undefined,result)
 			.with('UPDATE `test` SET `id` = \'1\'');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter._update({
 			id: '1'
@@ -945,6 +1003,9 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','query')
 			.callback('Query Error')
 			.with('UPDATE `test` SET `id` = \'1\' WHERE `id` = \'1\'');
+			
+		mock.mock(connection,'connection','release')
+			.return(true);
 		
 		adapter._update({
 			id: '1'

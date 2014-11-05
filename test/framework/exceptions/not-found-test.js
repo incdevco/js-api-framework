@@ -8,8 +8,7 @@ describe('Framework.Exceptions.NotFound',function () {
 		
 		var exception = new Framework.Exceptions.NotFound();
 		
-		Framework.Expect(exception.statusCode).to.be.equal(404);
-		Framework.Expect(exception.content).to.be.equal('Not Found');
+		Framework.Expect(exception.name).to.be.equal('NotFound');
 		
 	});
 	

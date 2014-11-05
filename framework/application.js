@@ -1,10 +1,16 @@
+var base = process.env.PWD;
+
+var fs = require('fs');
+var util = require('util');
+
 var objectMerge = require('object-merge');
 
 var Cache = require('./cache');
 var Injector = require('./injector');
+var Exceptions = require('./exceptions');
 var Module = require('./module');
 var Moment = require('./moment');
-var NotFound = require('./exceptions/not-found');
+var Numeral = require('./numeral');
 var Promise = require('./promise');
 var Route = require('./route');
 var Scope = require('./scope');
@@ -25,16 +31,27 @@ function Application (config) {
 	this.modules = {};
 	this.plugins = {};
 	this.routes = {};
+	this.services = {};
 	
-	for (var i in config.modules) {
+	Object.keys(config.modules).forEach(function (name) {
 		
-		application.module(i,config.modules[i]);
+		application.module(name,config.modules[name]);
 		
-	}
+	});
 	
-	for (var i in config.plugins) {
+	Object.keys(config.plugins).forEach(function (name) {
 		
-		application.plugin(i,config.plugins[i]);
+		application.plugin(name,config.plugins[name]);
+		
+	});
+	
+	if (config.services) {
+		
+		Object.keys(config.services).forEach(function (name) {
+			
+			application.service(name,config.services[name]);
+			
+		});
 		
 	}
 	
@@ -64,107 +81,37 @@ Application.prototype.beforeRoute = function (scope,request,response) {
 	
 };
 
-Application.prototype.bootstrap = function () {
+Application.prototype._bootstrap = function () {
 	
 	var application = this;
 	
 	Object.keys(application.modules).forEach(function (module) {
 		
-		application.modules[module].bootstrap();
+		application.modules[module]._bootstrap(application);
+		
+		if ('function' === typeof application.modules[module].bootstrap) {
+		
+			application.modules[module].bootstrap(application);
+		
+		}
 		
 	});
+	
+	Object.keys(application.services).forEach(function (service) {
+		
+		application.services[service]._bootstrap(application);
+		
+		if ('function' === typeof application.services[service].bootstrap) {
+			
+			application.services[service].bootstrap(application);
+			
+		}
+		
+	});
+	
+	console.log('Application Ready');
 	
 	return this;
-	
-};
-
-Application.prototype.handle = function (request,response) {
-	
-	var application = this, 
-		scope = new Scope({
-			cache: new Cache(),
-			injector: new Injector(this.injector),
-			time: Moment()
-		});
-	
-	application.beforeRoute(scope,request,response).then(function () {
-		
-		return application.match(scope,request).then(function () {
-			
-			return application.afterRoute(scope,request,response).then(function () {
-				
-				var promise;
-				
-				if (scope.route) {
-					
-					promise = application.beforeController(scope,request,response).then(function () {
-						
-						return scope.route.controller(scope,request,response).then(function () {
-							
-							return application.afterController(scope,request,response);
-							
-						});
-						
-					});
-					
-				} else {
-					
-					promise = Promise.reject(false);
-					
-				}
-				
-				return promise.then(function () {
-					
-					// Success
-					response.statusCode = response.statusCode || 200;
-					response.end();
-					
-					return true;
-					
-				}).catch(function (exception) {
-					
-					// Exception From Controller Loop
-					
-					//console.log('controller loop exception',exception,exception.stack);
-					
-					throw exception;
-					
-				});
-				
-			}).catch(function (exception) {
-				
-				// Exception After Route
-				
-				//console.log('after route exception',exception,exception.stack);
-				
-				throw exception;
-				
-			});
-			
-		}).catch(function (exception) {
-			
-			// Exception No Match
-			
-			//console.log('no route exception',exception,exception.stack);
-			
-			throw {
-				statusCode: 404,
-				content: 'Not Found'
-			};
-			
-		});
-		
-	}).catch(function (exception) {
-		
-		//console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
-		
-		response.statusCode = exception.statusCode;
-		response.write(exception.content);
-		response.end();
-		
-		return true;
-		
-	});
 	
 };
 
@@ -173,14 +120,16 @@ Application.prototype.evented = function (request,response) {
 	var application = this, 
 		scope = new Scope({
 			cache: new Cache(),
-			injector: new Injector(this.injector),
+			services: application.services,
 			time: Moment()
 		});
 	
 	response.on('exception',function (exception) {
 		
+		console.error(exception,exception.stack);
+		
 		response.statusCode = 500;
-		response.write(exception);
+		response.write(exception.message);
 		
 		response.end();
 		
@@ -330,6 +279,99 @@ Application.prototype.evented = function (request,response) {
 	
 };
 
+Application.prototype.get = function get(name) {
+	
+	return this.injector.get(name);
+	
+};
+
+Application.prototype.handle = function (request,response) {
+	
+	var application = this, 
+		scope = new Scope({
+			cache: new Cache(),
+			services: application.services,
+			time: Moment()
+		});
+	
+	application.beforeRoute(scope,request,response)
+		.then(function () {
+			
+			return application.match(scope,request)
+				.then(function () {
+					
+					return application.afterRoute(scope,request,response);
+					
+				})
+				.then(function () {
+					
+					if (scope.route) {
+						
+						return application.beforeController(scope,request,response)
+							.then(function () {
+								
+								return scope.route.controller(scope,request,response);
+								
+							})
+							.then(function () {
+								
+								return application.afterController(scope,request,response);
+								
+							});
+						
+					} else {
+						
+						throw new Exceptions.NotFound();
+						
+					}
+					
+				});
+			
+		})
+		.catch(Exceptions.NotAllowed,function notAllowed(exception) {
+			
+			response.statusCode = 403;
+			response.write('Not Allowed');
+			
+			return true;
+			
+		})
+		.catch(Exceptions.NotFound,function notFound(exception) {
+			
+			response.statusCode = 404;
+			response.write('Not Found');
+			
+			return true;
+			
+		})
+		.catch(Exceptions.NotValid,function notValid(exception) {
+			
+			response.statusCode = 400;
+			response.write('Not Valid');
+			
+			return true;
+			
+		})
+		.catch(function exception(exception) {
+			
+			console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
+			
+			response.statusCode = 500;;
+			response.write('An Exception Occurred');
+			
+			return true;
+			
+		})
+		.finally(function () {
+			
+			response.end();
+			
+			return true;
+			
+		});
+	
+};
+
 Application.prototype.match = function (scope,request) {
 	
 	var paths = Object.keys(this.routes),
@@ -337,17 +379,19 @@ Application.prototype.match = function (scope,request) {
 	
 	for (var i = 0, length = paths.length; i < length; i++) {
 		
-		promises.push(this.routes[paths[i]].match(scope,request));
+		if (this.routes[paths[i]].controllers[request.method]) {
+		
+			promises.push(this.routes[paths[i]].match(scope,request));
+			
+		}
 		
 	}
 	
-	if (promises.length === 0) {
+	return Promise.any(promises).catch(function () {
 		
-		return Promise.resolve(true);
+		return true;
 		
-	}
-	
-	return Promise.any(promises);
+	});
 	
 };
 
@@ -358,10 +402,6 @@ Application.prototype.module = function (name,module) {
 		module = module();
 		
 	}
-	
-	module.application = this;
-	
-	this.injector.module(name,module);
 	
 	this.modules[name] = module;
 	
@@ -403,23 +443,29 @@ Application.prototype.runPlugins = function (fn,scope,request,response) {
 
 Application.prototype.service = function (name,service) {
 	
-	if ('function' === typeof service) {
-		
-		service = service();
-		
-	}
-	
-	var result = this.injector.service(name,service);
-	
 	if (service) {
+		
+		if ('function' === typeof service) {
+			
+			service = service();
+			
+		}
+		
+		this.services[name] = service;
 		
 		return this;
 		
 	} else {
 		
-		return result;
+		return this.services[name];
 		
 	}
+	
+};
+
+Application.prototype.set = function set(name,item) {
+	
+	return this.injector.set(name,item);
 	
 };
 

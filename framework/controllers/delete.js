@@ -1,19 +1,19 @@
-module.exports = function (scope,request,response) {
+var Exceptions = require('../exceptions');
+
+module.exports = function (config) {
 	
-	var service = this.service;
-	
-	return service.delete(scope,request.params).then(function (model) {
+	return function controller(scope,request,response) {
 		
-		return service.toJson(scope,model).then(function (json) {
-			
-			response.statusCode = 200;
-			
-			response.write(json);
-			
-			return true;
-			
-		});
+		return scope.service(config.service).delete(scope,request.query)
+			.then(function deleted(model) {
+					
+				response.statusCode = 200;
+				response.write(JSON.stringify(model));
+				
+				return true;
+				
+			});
 		
-	});
+	};
 	
 };

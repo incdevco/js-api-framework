@@ -5,22 +5,31 @@ function Scope(config) {
 	config = config || {};
 	
 	this.cache = config.cache;
-	this.db = config.db;
-	this.injector = config.injector || new Injector();
 	this.roles = config.roles || [];
+	this.services = config.services || {};
 	this.time = config.time;
 	
 }
 
-Scope.prototype.module = function (name,module) {
-	
-	return this.injector.module(name,module);
-	
-};
-
 Scope.prototype.service = function (name,service) {
 	
-	return this.injector.service(name,service);
+	if (service) {
+		
+		if ('function' === typeof service) {
+			
+			service = service();
+			
+		}
+		
+		this.services[name] = service;
+		
+		return this;
+		
+	} else {
+		
+		return this.services[name];
+		
+	}
 	
 };
 

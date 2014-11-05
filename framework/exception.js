@@ -1,10 +1,11 @@
-function Exception(config) {
+function Exception() {
 	
-	config = config || {}
-	
-	this.statusCode = config.statusCode || 500;
-	this.content = config.content || 'Exception Occurred';
+	this.name = "Exception";
+	Error.captureStackTrace(this, Exception);
 	
 }
+
+Exception.prototype = Object.create(Error.prototype);
+Exception.prototype.constructor = Exception;
 
 module.exports = Exception;

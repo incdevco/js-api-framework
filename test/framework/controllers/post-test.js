@@ -4,26 +4,29 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Controllers.Post',function () {
 	
-	it('delete',function (done) {
+	it('post',function (done) {
 		
-		var resource = new Framework.Resource({
-				service: {}
+		var service = new Framework.Service(),
+			controller = Framework.Controllers.POST({
+				service: 'test'
 			}),
-			controller = Framework.Controllers.Post,
 			scope = new Framework.Scope(),
 			mock = new Framework.Mock(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
 		
-		mock.mock(resource.service,'service','insert').resolve({});
+		mock.mock(service,'service','add')
+			.resolve({
+				test: 'test'
+			});
 		
-		mock.mock(resource.service,'service','toJson').resolve('test');
+		scope.service('test',service);
 		
-		Framework.Controllers.Post.call(resource,scope,request,response).then(function () {
+		controller(scope,request,response).then(function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('test');
+				Framework.Expect(response.content).to.be.equal('{"test":"test"}');
 				
 				return mock.done(done);
 				

@@ -20,13 +20,19 @@ function Mysql(config) {
 	
 }
 
-Mysql.prototype.connection = function (callback) {
+Mysql.prototype._bootstrap = function _bootstrap(application) {
+	
+	this.pool = application.get('Mysql').Pool;
+	
+};
+
+Mysql.prototype.connection = function connection(callback) {
 	
 	return this.pool.getConnection(callback);
 	
 };
 
-Mysql.prototype.createId = function (length,key) {
+Mysql.prototype.createId = function createId(length,key) {
 	
 	var adapter = this, promise;
 	
@@ -51,6 +57,8 @@ Mysql.prototype.createId = function (length,key) {
 				query.build();
 				
 				return connection.query(query.formatted,function (error,results) {
+					
+					connection.release();
 					
 					if (error) {
 						
@@ -92,7 +100,7 @@ Mysql.prototype.createId = function (length,key) {
 	
 };
 
-Mysql.prototype.createPrimary = function (model) {
+Mysql.prototype.createPrimary = function createPrimary(model) {
 	
 	var adapter = this;
 	
@@ -142,7 +150,7 @@ Mysql.prototype.delete = function (model) {
 	
 };
 
-Mysql.prototype.fetch = function (where,limit,offset) {
+Mysql.prototype.fetch = function fetch(where,offset,limit) {
 	
 	var adapter = this;
 	
@@ -166,23 +174,25 @@ Mysql.prototype.fetch = function (where,limit,offset) {
 					
 				}
 				
-				if (limit) {
-					
-					query.limit(limit);
-					
-				}
-				
 				if (offset) {
 					
 					query.offset(offset);
 					
 				}
 				
+				if (limit) {
+					
+					query.limit(limit);
+					
+				}
+				
 				query.build();
 				
-				//console.log('mysql-adapter.fetch query',query.formatted);
+				console.log('mysql-adapter.fetch query',query.formatted);
 				
 				return connection.query(query.formatted,function (error,results) {
+					
+					connection.release();
 					
 					if (error) {
 						
@@ -191,6 +201,8 @@ Mysql.prototype.fetch = function (where,limit,offset) {
 						return reject(error);
 						
 					} else {
+						
+						//console.log('mysql-adapter.fetch results',results);
 						
 						return resolve(results);
 						
@@ -206,7 +218,7 @@ Mysql.prototype.fetch = function (where,limit,offset) {
 	
 };
 
-Mysql.prototype.insert = function (model) {
+Mysql.prototype.insert = function insert(model) {
 	
 	var adapter = this;
 	
@@ -230,7 +242,7 @@ Mysql.prototype.insert = function (model) {
 	
 };
 
-Mysql.prototype.update = function (model) {
+Mysql.prototype.update = function update(model) {
 	
 	return this._update(model,this.getPrimary(model)).then(function (result) {
 		
@@ -248,7 +260,7 @@ Mysql.prototype.update = function (model) {
 	
 };
 
-Mysql.prototype.getPrimary = function (model) {
+Mysql.prototype.getPrimary = function getPrimary(model) {
 	
 	var primary = {};
 	
@@ -262,7 +274,7 @@ Mysql.prototype.getPrimary = function (model) {
 	
 };
 
-Mysql.prototype._delete = function (where) {
+Mysql.prototype._delete = function _delete(where) {
 	
 	var adapter = this;
 	
@@ -288,9 +300,11 @@ Mysql.prototype._delete = function (where) {
 				
 				query.build();
 				
-				//console.log('mysql-adapter._delete query',query.formatted);
+				console.log('mysql-adapter._delete query',query.formatted);
 				
 				return connection.query(query.formatted,function (error,result) {
+					
+					connection.release();
 					
 					if (error) {
 						
@@ -314,7 +328,7 @@ Mysql.prototype._delete = function (where) {
 	
 };
 
-Mysql.prototype._insert = function (data) {
+Mysql.prototype._insert = function _insert(data) {
 	
 	var adapter = this;
 	
@@ -334,9 +348,11 @@ Mysql.prototype._insert = function (data) {
 				
 				query.build();
 				
-				//console.log('mysql-adapter._insert query',query.formatted);
+				console.log('mysql-adapter._insert query',query.formatted);
 				
 				return connection.query(query.formatted,function (error,result) {
+					
+					connection.release();
 					
 					if (error) {
 						
@@ -360,7 +376,7 @@ Mysql.prototype._insert = function (data) {
 	
 };
 
-Mysql.prototype._update = function (data,where) {
+Mysql.prototype._update = function _update(data,where) {
 	
 	var adapter = this;
 	
@@ -386,9 +402,11 @@ Mysql.prototype._update = function (data,where) {
 				
 				query.build();
 				
-				//console.log('mysql-adapter._update query',query.formatted);
+				console.log('mysql-adapter._update query',query.formatted);
 				
 				return connection.query(query.formatted,function (error,result) {
+					
+					connection.release();
 					
 					if (error) {
 						

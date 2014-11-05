@@ -2,31 +2,22 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-describe('Framework.Controllers.Put',function () {
+describe('Framework.Controllers.Options',function () {
 	
-	it('put',function (done) {
+	it('options',function (done) {
 		
-		var service = new Framework.Service(),
-			controller = Framework.Controllers.PUT({
-				service: 'test'
-			}),
+		var controller = Framework.Controllers.HealthCheck(),
 			scope = new Framework.Scope(),
-			mock = new Framework.Mock(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
-		
-		mock.mock(service,'service','edit')
-			.resolve({test: 'test'});
-			
-		scope.service('test',service);
 		
 		controller(scope,request,response).then(function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('{"test":"test"}');
+				Framework.Expect(response.content).to.be.equal('Healthy');
 				
-				return mock.done(done);
+				return done();
 				
 			} catch (error) {
 				

@@ -18,7 +18,7 @@ ExistsValidator.prototype.validate = function (scope,value,context) {
 	
 	if (service) {
 		
-		return service.fetchOne(data,scope,true).then(function () {
+		return service.fetchOne(scope,data).then(function () {
 			
 			return true;
 			

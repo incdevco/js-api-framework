@@ -1,19 +1,19 @@
-module.exports = function (scope,request,response) {
-	
-	var service = this.service;
-	
-	return service.insert(scope,request.body).then(function (model) {
+var Exceptions = require('../exceptions');
+
+module.exports = function post(config) {
+
+	return function controller(scope,request,response) {
 		
-		return service.toJson(scope,model).then(function (json) {
-			
-			response.statusCode = 201;
-			
-			response.write(json);
-			
-			return true;
-			
-		});
+		return scope.service(config.service).add(scope,request.body)
+			.then(function added(model) {
+				
+				response.statusCode = 201;
+				response.write(JSON.stringify(model));
+				
+				return true;
+				
+			});
 		
-	});
+	};
 	
 };

@@ -1,16 +1,14 @@
-function NotValidException(config) {
+function NotValid(config) {
 	
 	config = config || {};
 	
-	this.statusCode = config.statusCode || 400;
-	this.content = 'Not Valid';
-	
-	if (config.content) {
-		
-		this.content = JSON.stringify(config.content);
-		
-	}
+	this.errors = config.errors;
+	this.name = "NotValid";
+	Error.captureStackTrace(this, NotValid);
 	
 }
 
-module.exports = NotValidException;
+NotValid.prototype = Object.create(Error.prototype);
+NotValid.prototype.constructor = NotValid;
+
+module.exports = NotValid;

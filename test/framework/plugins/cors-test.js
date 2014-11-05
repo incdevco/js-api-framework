@@ -8,6 +8,14 @@ var Cors = require(base+'/framework/plugins/cors');
 
 describe('Framework.Plugins.Cors',function () {
 	
+	it('constructor',function () {
+		
+		var plugin = new Framework.Plugins.Cors();
+		
+		Framework.Expect(plugin.allowHeaders).to.be.eql([]);
+		
+	});
+	
 	it('plugin.beforeRoute',function (done) {
 		
 		var request = new Framework.Mocks.Request(),

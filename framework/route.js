@@ -9,6 +9,7 @@ function Route(path,controllers,context) {
 	this.params = [];
 	this.regex = path;
 	this.path = path;
+	this.parts = path.split('/');
 	
 	this.params = path.match(/:([^\/]+)/ig);
 	
@@ -28,7 +29,7 @@ function Route(path,controllers,context) {
 
 Route.prototype.controller = function (scope,request,response) {
 	
-	return this.controllers[request.method].call(this.context,scope,request,response);
+	return this.controllers[request.method](scope,request,response);
 	
 };
 
@@ -38,12 +39,12 @@ Route.prototype.match = function (scope,request) {
 	
 	return new Promise(function (resolve,reject) {
 		
-		var path = request.url.pathname || '/',
+		var path = request.url.pathname || '/', 
 			match = route.regex.exec(path);
 		
-		if (null !== match 
-			&& match[0] == path 
-			&& route.controllers[request.method]) {
+		if (null !== match && match[0] == path) {
+			
+			//console.log('route path',route.path);
 			
 			scope.route = route;
 			
@@ -59,11 +60,11 @@ Route.prototype.match = function (scope,request) {
 			
 			return resolve(true);
 			
-		} else {
-			
-			return reject(false);
-			
 		}
+		
+		//console.log('reject test',route.path);
+		
+		return reject(false);
 		
 	});
 	

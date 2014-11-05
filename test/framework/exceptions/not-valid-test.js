@@ -8,19 +8,7 @@ describe('Framework.Exceptions.NotValid',function () {
 		
 		var exception = new Framework.Exceptions.NotValid();
 		
-		Framework.Expect(exception.statusCode).to.be.equal(400);
-		Framework.Expect(exception.content).to.be.equal('Not Valid');
-		
-	});
-	
-	it('constructor without privilege and resource',function () {
-		
-		var exception = new Framework.Exceptions.NotValid({
-			content: {test: 'test'}
-		});
-		
-		Framework.Expect(exception.statusCode).to.be.equal(400);
-		Framework.Expect(exception.content).to.be.equal('{"test":"test"}');
+		Framework.Expect(exception.name).to.be.equal('NotValid');
 		
 	});
 	

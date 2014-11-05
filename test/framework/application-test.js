@@ -173,6 +173,141 @@ describe('Framework.Application',function () {
 		
 	});
 	
+	it('handle throws not allowed',function (done) {
+		
+		var application = new Framework.Application(),
+			request = new Framework.Mocks.Request(),
+			response = new Framework.Mocks.Response();
+		
+		application.when('/',{
+			GET: function (scope,request,response) {
+				
+				throw new Framework.Exceptions.NotAllowed();
+				
+			}
+		});
+		
+		application.when('/test',{
+			GET: function (scope,request,response) {
+				
+				response.write('test');
+				
+				return Framework.Promise.resolve(true);
+				
+			}
+		});
+		
+		application.handle(request,response);
+		
+		response.on('end',function () {
+			
+			try {
+				
+				Framework.Expect(response.statusCode).to.be.equal(403);
+				Framework.Expect(response.content).to.be.equal('Not Allowed');
+			
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('handle throws not valid',function (done) {
+		
+		var application = new Framework.Application(),
+			request = new Framework.Mocks.Request(),
+			response = new Framework.Mocks.Response();
+		
+		application.when('/',{
+			GET: function (scope,request,response) {
+				
+				throw new Framework.Exceptions.NotValid();
+				
+			}
+		});
+		
+		application.when('/test',{
+			GET: function (scope,request,response) {
+				
+				response.write('test');
+				
+				return Framework.Promise.resolve(true);
+				
+			}
+		});
+		
+		application.handle(request,response);
+		
+		response.on('end',function () {
+			
+			try {
+				
+				Framework.Expect(response.statusCode).to.be.equal(400);
+				Framework.Expect(response.content).to.be.equal('Not Valid');
+			
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('handle throws exception',function (done) {
+		
+		var application = new Framework.Application(),
+			request = new Framework.Mocks.Request(),
+			response = new Framework.Mocks.Response();
+		
+		application.when('/',{
+			GET: function (scope,request,response) {
+				
+				throw new Framework.Exception();
+				
+			}
+		});
+		
+		application.when('/test',{
+			GET: function (scope,request,response) {
+				
+				response.write('test');
+				
+				return Framework.Promise.resolve(true);
+				
+			}
+		});
+		
+		application.handle(request,response);
+		
+		response.on('end',function () {
+			
+			try {
+				
+				Framework.Expect(response.statusCode).to.be.equal(500);
+				Framework.Expect(response.content).to.be.equal('An Exception Occurred');
+			
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		});
+		
+	});
+	
 	it('service with name',function () {
 		
 		var application = new Framework.Application(),
@@ -274,20 +409,47 @@ describe('Framework.Application',function () {
 		
 	});
 	
-	it('bootstrap',function (done) {
+	it('_bootstrap',function (done) {
 		
-		var application = new Framework.Application({
+		var foo = new Framework.Module(),
+			bar = new Framework.Module(),
+			fooService = new Framework.Service(),
+			barService = new Framework.Service(),
+			application = new Framework.Application({
 				modules: {
-					foo: new Framework.Module(),
-					bar: new Framework.Module()
+					foo: foo,
+					bar: bar
+				},
+				services: {
+					foo: fooService,
+					bar: barService
 				}
 			}),
 			mock = new Framework.Mock();
 		
-		mock.mock(application.modules.foo,'foo','bootstrap').return(true);
-		mock.mock(application.modules.bar,'bar','bootstrap').return(true);
+		mock.mock(application.modules.foo,'foo','_bootstrap')
+			.return(true);
 		
-		application.bootstrap();
+		mock.mock(application.modules.foo,'foo','bootstrap')
+			.return(true);
+		
+		mock.mock(application.modules.bar,'bar','_bootstrap')
+			.return(true);
+		
+		application.modules.bar.bootstrap = 'test';
+		
+		mock.mock(fooService,'fooService','_bootstrap')
+			.return(true);
+		
+		mock.mock(fooService,'fooService','bootstrap')
+			.return(true);
+		
+		mock.mock(barService,'barService','_bootstrap')
+			.return(true);
+		
+		barService.bootstrap = 'test';
+		
+		application._bootstrap();
 		
 		mock.done(done);
 		
@@ -370,7 +532,7 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('false');
+				Framework.Expect(response.content).to.be.equal('undefined');
 			
 				return mock.done(done);
 				
@@ -399,7 +561,7 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('false');
+				Framework.Expect(response.content).to.be.equal('undefined');
 			
 				return mock.done(done);
 				
@@ -438,7 +600,7 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('false');
+				Framework.Expect(response.content).to.be.equal('undefined');
 			
 				return mock.done(done);
 				
@@ -475,7 +637,7 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('homepagefalse');
+				Framework.Expect(response.content).to.be.equal('homepageundefined');
 			
 				return mock.done(done);
 				
@@ -506,7 +668,8 @@ describe('Framework.Application',function () {
 			}
 		});
 		
-		mock.mock(application,'application','afterController').reject(false);
+		mock.mock(application,'application','afterController')
+			.reject(false);
 		
 		application.evented(request,response);
 		
@@ -514,7 +677,7 @@ describe('Framework.Application',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('homepagefalse');
+				Framework.Expect(response.content).to.be.equal('homepageundefined');
 			
 				return done();
 				
@@ -525,6 +688,41 @@ describe('Framework.Application',function () {
 			}
 			
 		});
+		
+	});
+	
+	it('get and set',function () {
+		
+		var application = new Framework.Application();
+		
+		Framework.Expect(application.get('test')).to.be.equal(undefined);
+		
+		application.set('test','test');
+		
+		Framework.Expect(application.get('test')).to.be.equal('test');
+		
+	});
+	
+	it('match route without method',function (done) {
+		
+		var application = new Framework.Application(),
+			request = new Framework.Mocks.Request(),
+			scope = new Framework.Scope();
+		
+		request.method = 'GET';
+		request.url = {path: '/test'};
+		
+		application.when('/test',{
+			POST: function (scope,request,response) {}
+		});
+		
+		application.match(scope,request).then(function () {
+			
+			Framework.Expect(scope.route).to.be.equal(undefined);
+			
+			done();
+			
+		},done);
 		
 	});
 	

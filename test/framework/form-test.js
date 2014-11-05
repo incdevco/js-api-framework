@@ -73,9 +73,10 @@ describe('Framework.Form',function () {
 			
 			try {
 				
-				Framework.Expect(exception).to.be.eql({
-					statusCode: 400,
-					content: '{"id":["Only Alpha Characters Allowed (1)"]}'
+				Framework.Expect(exception.errors).to.be.eql({
+					id: [
+						'Only Alpha Characters Allowed (1)'
+					]
 				});
 				
 				return mock.done(done);

@@ -13,20 +13,20 @@ NotExistsValidator.prototype.validate = function (scope,value,context) {
 	var data = {},
 		message = this.message,
 		service = scope.service(this.service);
-	
+		
 	if (service) {
 		
 		data[this.key] = value;
 		
-		return service.fetchOne(data).then(function () {
+		return service.fetchOne(scope,data).then(function () {
 			
-			console.log('not-exists fetchOne resolved');
+			//console.log('not-exists fetchOne resolved');
 			
 			throw message;
 			
 		},function () {
 			
-			console.log('not-exists fetchOne rejected');
+			//console.log('not-exists fetchOne rejected');
 			
 			return true;
 			

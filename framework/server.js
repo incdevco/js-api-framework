@@ -2,14 +2,44 @@ var http = require('http');
 var qs = require('qs');
 var url = require('url');
 
+var Exceptions = require('./exceptions');
+
 function Server(config) {
 	
 	config = config || {};
 	
-	this.application = config.application;
+	this._application = null;
 	this._server = null;
 	
 }
+
+Server.prototype.application = function application(application) {
+	
+	if (application) {
+		
+		if ('function' === typeof application) {
+			
+			application = application();
+			
+		}
+		
+		this._application = application;
+		
+		this._application._bootstrap();
+		
+		if ('function' === typeof this._application.bootstrap) {
+			
+			this._application.bootstrap();
+			
+		}
+		
+		return this;
+		
+	}
+	
+	return this._application;
+	
+};
 
 Server.prototype.handle = function (request,response) {
 	
@@ -92,7 +122,9 @@ Server.prototype.handle = function (request,response) {
 			
 		}
 		
-		server.application.handle(request,response);
+		//server.application().evented(request,response);
+		
+		server.application().handle(request,response);
 		
 	});
 	

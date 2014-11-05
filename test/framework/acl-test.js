@@ -118,37 +118,7 @@ describe('Framework.Acl',function () {
 			
 			try {
 			
-				Framework.Expect(exception).to.be.equal(false);
-				
-				return done();
-				
-			} catch (error) {
-				
-				return done(error);
-				
-			}
-			
-		});
-		
-	});
-	
-	it('acl.isAllowed rejects',function (done) {
-		
-		var acl = new Framework.Acl(),
-			context = {id: 'test'},
-			scope = new Framework.Scope();
-		
-		acl.allow('test','test');
-		
-		acl.isAllowed(scope,'test','test',context).then(function (result) {
-			
-			return done(new Error('resolved'));
-			
-		}).catch(function (exception) {
-			
-			try {
-			
-				Framework.Expect(exception).to.be.equal(false);
+				Framework.Expect(exception.name).to.be.equal('NotAllowed');
 				
 				return done();
 				

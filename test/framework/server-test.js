@@ -5,6 +5,26 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Server',function () {
 	
+	it('application',function (done) {
+		
+		var mock = new Framework.Mock(),
+			server = new Framework.Server();
+		
+		server.application(function () {
+			
+			var application = new Framework.Application();
+			
+			mock.mock(application,'application','bootstrap')
+				.return(true);
+				
+			return application;
+			
+		});
+		
+		mock.done(done);
+		
+	});
+	
 	it('handle',function (done) {
 		
 		var server = new Framework.Server(),
@@ -22,7 +42,7 @@ describe('Framework.Server',function () {
 			}
 		});
 		
-		server.application = application;
+		server.application(application);
 		
 		server.handle(request,response);
 		
@@ -69,7 +89,7 @@ describe('Framework.Server',function () {
 			}
 		});
 		
-		server.application = application;
+		server.application(application);
 		
 		request.headers['content-type'] = 'application/json';
 		
@@ -108,7 +128,7 @@ describe('Framework.Server',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
 		
-		server.application = application;
+		server.application(application);
 		
 		request.headers['content-type'] = 'application/json';
 		
@@ -159,7 +179,7 @@ describe('Framework.Server',function () {
 			}
 		});
 		
-		server.application = application;
+		server.application(application);
 		
 		server.handle(request,response);
 		
@@ -207,7 +227,7 @@ describe('Framework.Server',function () {
 			}
 		});
 		
-		server.application = application;
+		server.application(application);
 		
 		server.listen(9090);
 		

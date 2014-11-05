@@ -1,31 +1,19 @@
-module.exports = function (scope,request,response) {
+var Exceptions = require('../exceptions');
+
+module.exports = function get(config) {
 	
-	var promise, service = this.service;
-	
-	console.log(request.query);
-	
-	if (request.query[this.id]) {
+	return function controller(scope,request,response) {
 		
-		promise = service.fetchOne(scope,request.params);
+		return scope.service(config.service).fetchOne(scope,request.query)
+			.then(function found(model) {
+				
+				response.statusCode = 200;
+				response.write(JSON.stringify(model));
+				
+				return true;
+				
+			});
 		
-	} else {
-		
-		promise = service.fetchAll(scope,request.params,request.limit,request.offset);
-		
-	}
-	
-	return promise.then(function (model) {
-		
-		return service.toJson(scope,model).then(function (json) {
-			
-			response.statusCode = 200;
-			
-			response.write(json);
-			
-			return true;
-			
-		});
-		
-	});
+	};
 	
 };

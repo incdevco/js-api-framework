@@ -2,23 +2,23 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-describe('Framework.Controllers.Delete',function () {
+describe('Framework.Controllers.GETALL',function () {
 	
-	it('delete',function (done) {
+	it('get',function (done) {
 		
-		var service = new Framework.Service(),
-			controller = Framework.Controllers.DELETE({
+		var controller = Framework.Controllers.GETALL({
 				service: 'test'
 			}),
+			service = new Framework.Service(),
 			scope = new Framework.Scope(),
 			mock = new Framework.Mock(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
 		
-		mock.mock(service,'service','delete')
-			.resolve({
+		mock.mock(service,'service','fetchAll')
+			.resolve([{
 				test: 'test'
-			});
+			}]);
 		
 		scope.service('test',service);
 		
@@ -26,7 +26,7 @@ describe('Framework.Controllers.Delete',function () {
 			
 			try {
 				
-				Framework.Expect(response.content).to.be.equal('{"test":"test"}');
+				Framework.Expect(response.content).to.be.equal('[{"test":"test"}]');
 				
 				return mock.done(done);
 				

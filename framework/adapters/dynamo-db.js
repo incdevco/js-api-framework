@@ -1,4 +1,4 @@
-var DynamoDB = require('./dynamodb');
+var DynamoDB = require('./dynamo-db');
 
 module.exports = function DDBAdapter(table,key,attributes,dynamodb) {
 	"use strict";

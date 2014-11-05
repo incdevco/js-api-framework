@@ -2,6 +2,8 @@ var Promise = require('../promise');
 
 function Cors(config) {
 	
+	config = config || {};
+	
 	this.allowHeaders = config.allowHeaders || [];
 	this.exposeHeaders = config.exposeHeaders || [];
 	this.origin = config.origin;

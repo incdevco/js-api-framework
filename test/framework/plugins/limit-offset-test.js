@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 
 var Framework = require(base+'/framework');
 
-describe('Plugins.ParseParams',function () {
+describe('Framework.Plugins.LimitOffset',function () {
 	
 	it('afterRoute',function (done) {
 		
@@ -12,19 +12,20 @@ describe('Plugins.ParseParams',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response(),
 			scope = new Framework.Scope(),
-			mock = new Framework.Mock();
+			mock = new Framework.Mock(),
+			plugin = new Framework.Plugins.LimitOffset();
 		
-		request.params = {
+		request.query = {
 			test: 'test',
 			limit: 10,
 			offset: 50
 		};
 		
-		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
+		plugin.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				
-				expect(request.params).to.be.eql({
+				expect(request.query).to.be.eql({
 					test: 'test'
 				});
 				expect(request.limit).to.be.equal(10);
@@ -48,13 +49,14 @@ describe('Plugins.ParseParams',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response(),
 			scope = new Framework.Scope(),
-			mock = new Framework.Mock();
+			mock = new Framework.Mock(),
+			plugin = new Framework.Plugins.LimitOffset();
 		
-		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
+		plugin.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				
-				expect(request.params).to.be.equal(undefined);
+				expect(request.query).to.be.eql({});
 				
 				done();
 				
@@ -74,15 +76,16 @@ describe('Plugins.ParseParams',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response(),
 			scope = new Framework.Scope(),
-			mock = new Framework.Mock();
+			mock = new Framework.Mock(),
+			plugin = new Framework.Plugins.LimitOffset();
 		
-		request.params = {};
+		request.query = {};
 		
-		Framework.Plugins.ParseParams.afterRoute(scope,request,response).then(function () {
+		plugin.afterRoute(scope,request,response).then(function () {
 			
 			try {
 				
-				expect(request.params).to.be.eql({});
+				expect(request.query).to.be.eql({});
 				
 				done();
 				

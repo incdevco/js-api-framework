@@ -102,7 +102,7 @@ Mocked.prototype.mocked = function () {
 
 Mocked.prototype.next = function () {
 	
-	var call = new MockedCall();
+	var call = new MockedCall({name: this.name,fn: this.fn});
 	
 	this.calls.push(call);
 	
@@ -113,6 +113,9 @@ Mocked.prototype.next = function () {
 function MockedCall(config) {
 	
 	config = config || {};
+	
+	this.name = config.name;
+	this.fn = config.fn;
 	
 	this._callback = config.callback;
 	this._reject = config.reject;
@@ -146,9 +149,9 @@ MockedCall.prototype.call = function () {
 				
 			} catch (error) {
 				
-				console.error('expected',index,mocked._with[index]);
+				console.error('expected',mocked.name+'#'+mocked.fn,index,mocked._with[index]);
 				
-				console.error('actual',index,args[index]);
+				console.error('actual',mocked.name+'#'+mocked.fn,index,args[index]);
 				
 				throw error;
 				

@@ -4,6 +4,14 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Validators.InArray',function () {
 	
+	it('construct with array',function () {
+		
+		var validator = new Framework.Validators.InArray(['test','dog']);
+		
+		Framework.Expect(validator.array).to.be.eql(['test','dog']);
+		
+	});
+	
 	it('allows',function (done) {
 		
 		var validator = new Framework.Validators.InArray({

@@ -77,7 +77,7 @@ Form.prototype.validate = function (scope,data) {
 	}).catch(function () {
 		
 		throw new Exceptions.NotValid({
-			content: errors
+			errors: errors
 		});
 		
 	});

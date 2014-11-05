@@ -4,6 +4,16 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Attribute',function () {
 	
+	it('constructor with array',function () {
+		
+		var attribute = new Framework.Attribute({
+			array: ['test']
+		});
+		
+		Framework.Expect(attribute.validators.length).to.be.equal(1);
+		
+	});
+	
 	it('validate resolves when required',function (done) {
 		
 		var attribute = new Framework.Attribute({

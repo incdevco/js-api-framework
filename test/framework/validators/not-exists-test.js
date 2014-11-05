@@ -4,7 +4,7 @@ var Framework = require(base+'/framework');
 
 describe('Framework.Validators.NotExists',function () {
 	
-	it('allows',function (done) {
+	it('resolves',function (done) {
 		
 		var service = new Framework.Service(),
 			validator = new Framework.Validators.NotExists({

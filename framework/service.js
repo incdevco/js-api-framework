@@ -10,11 +10,16 @@ function Service(config) {
 	config = config || {};
 	
 	this.acl = config.acl || null;
-	this.adapter = null;
+	this._adapter = null;
 	this.forms = {};
+	this._primary = null;
 	this.resource = config.resource || null;
 	
-	this.adapter = config.adapter;
+	if (config.adapter) {
+		
+		service.adapter(config.adapter);
+		
+	}
 	
 	if (config.forms) {
 		
@@ -26,29 +31,86 @@ function Service(config) {
 		
 	}
 	
+	if (config.primary) {
+		
+		if (!Array.isArray(config.primary)) {
+			
+			config.primary = [config.primary];
+			
+		}
+		
+		this._primary = config.primary;
+		
+	}
+	
 }
 
-Service.prototype.allowed = function (scope,model) {
+Service.prototype.adapter = function adapter(adapter) {
 	
-	var allowed = {}, promises = [], acl = this.acl, resource = this.resource;
-	
-	Object.keys(model).forEach(function (attribute) {
+	if (adapter) {
 		
-		promises.push(acl.isAllowed(scope,resource,'get::'+attribute,model).then(function () {
+		if ('function' === typeof adapter) {
 			
-			allowed[attribute] = model[attribute];
+			adapter = adapter();
 			
-			return true;
+		}
+		
+		this._adapter = adapter;
+		
+		return this;
+		
+	} else {
+		
+		return this._adapter;
+		
+	}
+	
+};
+
+Service.prototype.add = function add(scope,data) {
+	
+	var service = this;
+	
+	return service.isValid('add',scope,data)
+		.then(function (clean) {
 			
-		}).catch(function () {
+			return service.isAllowed(scope,clean,'add','set');
 			
-			return true;
+		})
+		.then(function (clean) {
 			
-		}));
+			return service.adapter().add(clean);
+			
+		});
+	
+};
+
+Service.prototype.allowed = function allowed(scope,original,privilege) {
+	
+	var acl = this.acl, 
+		allowed = {}, 
+		promises = [], 
+		resource = this.resource;
+	
+	Object.keys(original).forEach(function (key) {
+		
+		promises.push(acl.isAllowed(scope,resource,privilege+'::'+key,original)
+			.then(function () {
+				
+				allowed[key] = original[key];
+				
+				return true;
+				
+			})
+			.catch(Exceptions.NotAllowed,function () {
+				
+				return true;
+				
+			}));
 		
 	});
 	
-	return Promise.all(promises).then(function () {
+	return Promise.all(promises).then(function done() {
 		
 		return allowed;
 		
@@ -56,145 +118,110 @@ Service.prototype.allowed = function (scope,model) {
 	
 };
 
-Service.prototype.delete = function (scope,model) {
+Service.prototype._bootstrap = function bootstrap(application) {
 	
-	var promise, service = this;
+	this.adapter()._bootstrap(application);
 	
-	if (service.forms.delete) {
+	if ('function' === typeof this.adapter().bootstrap) {
 		
-		promise = service.forms.delete.validate(scope,model);
-		
-	} else {
-		
-		promise = Promise.resolve(model);
+		this.adapter().bootstrap(application);
 		
 	}
-	
-	return promise.then(function (clean) {
-		
-		return service.acl.isAllowed(scope,service.resourceId,'delete',clean).then(function (clean) {
-			
-			return service.adapter.delete(clean);
-			
-		});
-		
-	});
 	
 };
 
-Service.prototype.fetchAll = function (scope,where,limit,offset) {
+Service.prototype.delete = function (scope,data) {
 	
-	var promise, service = this;
+	var service = this;
 	
-	if (service.forms.fetchAll) {
-		
-		promise = service.forms.fetchAll.validate(scope,where);
-		
-	} else {
-		
-		promise = Promise.resolve(where);
-		
-	}
+	return service.fetchOne(scope,data)
+		.then(function (model) {
+			
+			return service.isAllowed(scope,model,'delete');
+			
+		})
+		.then(function (clean) {
+			
+			return service.adapter().delete(service.primary(clean));
+			
+		});
 	
-	return promise.then(function (clean) {
-		
-		if (limit) {
+};
+
+Service.prototype.edit = function edit(scope,data) {
+	
+	var service = this;
+	
+	return service.fetchOne(scope,data)
+		.then(function (model) {
 			
-			limit = parseInt(limit);
+			return service.isValid('edit',scope,data);
 			
-		}
-		
-		if (offset) {
+		})
+		.then(function (clean) {
 			
-			offset = parseInt(offset);
+			return service.isAllowed(scope,clean,'edit','set');
 			
-		}
-		
-		return service.adapter.fetch(clean,undefined,offset).then(function (original) {
+		})
+		.then(function (clean) {
 			
-			var promises = [], set = [];
+			return service.adapter().edit(clean);
 			
-			if (undefined === limit) {
+		});
+	
+};
+
+Service.prototype.fetchAll = function fetchAll(scope,where,limit,offset) {
+	
+	var service = this;
+	
+	return service.isValid('fetchAll',scope,where)
+		.then(function (clean) {
+			
+			return service.adapter().fetch(clean,limit,offset);
+			
+		})
+		.then(function found(set) {
+			
+			return service.isAllowed(scope,set,'view','get');
+			
+		});
+	
+};
+
+Service.prototype.fetchOne = function fetchOne(scope,where,offset) {
+	
+	var service = this;
+	
+	return service.isValid('fetchOne',scope,where)
+		.then(function (clean) {
+			
+			return service.adapter().fetch(clean,offset,1);
+			
+		})
+		.then(function (results) {
+			
+			if (results.length === 0) {
 				
-				limit = original.length;
+				throw new Exceptions.NotFound();
 				
 			}
 			
-			for (var i = 0; i < limit; i ++) {
-				
-				promises.push(service.acl.isAllowed(scope,service.resourceId,'view',original[i]).then(function (model) {
-					
-					set.push(model);
-					
-					return true;
-					
-				}).catch(function () {
-					
-					return false;
-					
-				}));
-				
-			}
-			
-			return Promise.all(promises).then(function () {
-				
-				return set;
-				
-			});
+			return service.isAllowed(scope,results[0],'view','get');
 			
 		});
-		
-	});
 	
 };
 
-Service.prototype.fetchNew = function () {
-
-	return {};
-	
-};
-
-Service.prototype.fetchOne = function (scope,where,offset) {
-	
-	var promise, service = this;
-	
-	if (service.forms.fetchOne) {
-		
-		promise = service.forms.fetchOne.validate(scope,where);
-		
-	} else {
-		
-		promise = Promise.resolve(where);
-		
-	}
-	
-	return promise.then(function (clean) {
-		
-		limit = 1;
-		
-		if (offset) {
-			
-			offset = parseInt(offset);
-			
-		}
-		
-		return service.adapter.fetch(clean,limit,offset).then(function (model) {
-			
-			return service.acl.isAllowed(scope,service.resourceId,'view',model).then(function (model) {
-				
-				return model;
-				
-			});
-			
-		});
-		
-	});
-	
-};
-
-Service.prototype.form = function (name,form) {
+Service.prototype.form = function form(name,form) {
 	
 	if (form) {
+		
+		if ('function' === typeof form) {
+			
+			form = form();
+			
+		}
 		
 		this.forms[name] = form;
 		
@@ -208,119 +235,84 @@ Service.prototype.form = function (name,form) {
 	
 };
 
-Service.prototype.insert = function (scope,model) {
+Service.prototype.isAllowed = function isAllowed(scope,original,privilege,attribute) {
 	
-	var promise, service = this;
+	var service = this;
 	
-	if (service.forms.insert) {
+	if (Array.isArray(original)) {
 		
-		promise = service.forms.insert.validate(scope,model);
+		var allowed = [], promises = [];
+		
+		original.forEach(function (model) {
+			
+			promises.push(service.isAllowed(scope,model,privilege,attribute)
+				.then(function (model) {
+					
+					allowed.push(model);
+					
+					return true;
+					
+				})
+				.catch(Exceptions.NotAllowed,function () {
+					
+					return true;
+					
+				}));
+			
+		});
+		
+		return Promise.all(promises).then(function () {
+			
+			return allowed;
+			
+		});
 		
 	} else {
 		
-		promise = Promise.resolve(model);
-		
-	}
-	
-	return promise.then(function (clean) {
-		
-		var keys = Object.keys(clean), privileges = ['insert'];
-		
-		keys.forEach(function (key) {
-			
-			privileges.push('set::'+key);
-			
-		});
-		
-		return service.acl.isAllowedMultiple(scope,service.resourceId,privileges,clean).then(function (clean) {
-			
-			return service.adapter.insert(clean).then(function (clean) {
+		return service.acl.isAllowed(scope,service.resource,privilege,original)
+			.then(function (original) {
 				
-				return clean;
+				if (attribute) {
+				
+					return service.allowed(scope,original,attribute);
+				
+				} else {
+					
+					return original;
+					
+				}
 				
 			});
-			
-		});
 		
-	});
+	}
 	
 };
 
-Service.prototype.toJson = function (scope,model) {
+Service.prototype.isValid = function isValid(form,scope,data) {
 	
-	var promise, promises = [], service = this;
-	
-	if (Array.isArray(model)) {
+	if (this.forms[form]) {
 		
-		var set = [];
-		
-		model.forEach(function (model) {
-			
-			promises.push(service.allowed(scope,model).then(function (allowed) {
-				
-				set.push(allowed);
-				
-				return true;
-				
-			}));
-			
-		});
-		
-		promise = Promise.all(promises).then(function () {
-			
-			return set;
-			
-		});
+		return this.forms[form].validate(scope,data);
 		
 	} else {
 		
-		promise = service.allowed(scope,model);
+		return Promise.resolve(data);
 		
 	}
-	
-	return promise.then(function (allowed) {
-		
-		return JSON.stringify(allowed);
-		
-	});
 	
 };
 
-Service.prototype.update = function (scope,model) {
+Service.prototype.primary = function primary(data) {
 	
-	var promise, service = this;
+	var primary = {};
 	
-	if (service.forms.update) {
+	this._primary.forEach(function (key) {
 		
-		promise = service.forms.update.validate(scope,model);
-		
-	} else {
-		
-		promise = Promise.resolve(model);
-		
-	}
-	
-	return promise.then(function (clean) {
-		
-		var keys = Object.keys(clean), privileges = ['update'];
-		
-		keys.forEach(function (key) {
-			
-			privileges.push('set::'+key);
-			
-		});
-		
-		return service.acl.isAllowedMultiple(scope,service.resourceId,privileges,clean).then(function (clean) {
-			
-			return service.adapter.update(clean).then(function (clean) {
-				
-				return clean;
-				
-			});
-			
-		});
+		primary[key] = data[key];
 		
 	});
+	
+	return primary;
 	
 };
 
