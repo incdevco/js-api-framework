@@ -7,7 +7,7 @@ describe('Framework.Controllers.Put',function () {
 	it('put',function (done) {
 		
 		var service = new Framework.Service(),
-			controller = Framework.Controllers.PUT({
+			controller = Framework.Controllers.Put({
 				service: 'test'
 			}),
 			scope = new Framework.Scope(),

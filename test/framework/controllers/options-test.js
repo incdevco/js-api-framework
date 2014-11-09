@@ -6,7 +6,7 @@ describe('Framework.Controllers.Options',function () {
 	
 	it('options',function (done) {
 		
-		var controller = Framework.Controllers.OPTIONS(),
+		var controller = Framework.Controllers.Options(),
 			scope = new Framework.Scope(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();

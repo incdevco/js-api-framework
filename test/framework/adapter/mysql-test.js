@@ -74,7 +74,7 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','release')
 			.return(true);
 		
-		adapter.createId(undefined,'id').then(function (id) {
+		adapter.createId('id').then(function (id) {
 			
 			try {
 				
@@ -104,7 +104,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 		mock.mock(adapter,'adapter','connection').callback('Connection Error');
 		
-		adapter.createId(1,'test').then(function (result) {
+		adapter.createId('test',1).then(function (result) {
 			
 			return done(new Error('resolved'));
 			
@@ -123,6 +123,107 @@ describe('Framework.Adapters.Mysql',function () {
 			}
 			
 		});
+		
+	});
+	
+	it('createId query error',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				table: 'test',
+				primary: 'id'
+			}),
+			connection = {},
+			mock = new Framework.Mock(),
+			result = {};
+		
+		mock.mock(adapter,'adapter','connection').callback(undefined,connection);
+		
+		mock.mock(connection,'connection','query')
+			.callback('Query Error');
+		
+		mock.mock(connection,'connection','release')
+			.return(true);
+		
+		adapter.createId('id',5).then(function (result) {
+			
+			return done(new Error('resolved'));
+			
+		}).catch(function (exception) {
+			
+			try {
+				
+				console.error(exception);
+				
+				Framework.Expect(exception).to.be.equal('Query Error');
+				
+				return mock.done(done);
+				
+			} catch (exception) {
+				
+				return done(exception);
+				
+			}
+			
+		});
+		
+	});
+	
+	it('createPrimary',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				adapter: 'mysql',
+				primary: 'id',
+				table: 'test',
+				idLength: 5
+			}),
+			connection = {},
+			mock = new Framework.Mock();
+		
+		mock.mock(adapter,'adapter','createId').resolve('id');
+		
+		adapter.createPrimary({}).then(function (model) {
+			
+			try {
+				
+				Framework.Expect(model).to.be.eql({id: 'id'});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
+		
+	});
+	
+	it('createPrimary',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({
+				adapter: 'mysql',
+				primary: 'id',
+				table: 'test'
+			}),
+			connection = {},
+			mock = new Framework.Mock();
+		
+		adapter.createPrimary({}).then(function (model) {
+			
+			try {
+				
+				Framework.Expect(model).to.be.eql({});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
 		
 	});
 	
@@ -238,79 +339,6 @@ describe('Framework.Adapters.Mysql',function () {
 			return done(exception);
 			
 		});
-		
-	});
-	
-	it('createId query error',function (done) {
-		
-		var adapter = new Framework.Adapters.Mysql({
-				table: 'test',
-				primary: 'id'
-			}),
-			connection = {},
-			mock = new Framework.Mock(),
-			result = {};
-		
-		mock.mock(adapter,'adapter','connection').callback(undefined,connection);
-		
-		mock.mock(connection,'connection','query')
-			.callback('Query Error');
-		
-		mock.mock(connection,'connection','release')
-			.return(true);
-		
-		adapter.createId(5,'id').then(function (result) {
-			
-			return done(new Error('resolved'));
-			
-		}).catch(function (exception) {
-			
-			try {
-				
-				console.error(exception);
-				
-				Framework.Expect(exception).to.be.equal('Query Error');
-				
-				return mock.done(done);
-				
-			} catch (exception) {
-				
-				return done(exception);
-				
-			}
-			
-		});
-		
-	});
-	
-	it('createPrimary',function (done) {
-		
-		var adapter = new Framework.Adapters.Mysql({
-				adapter: 'mysql',
-				primary: 'id',
-				table: 'test',
-				idLength: 5
-			}),
-			connection = {},
-			mock = new Framework.Mock();
-		
-		mock.mock(adapter,'adapter','createId').resolve('id');
-		
-		adapter.createPrimary({}).then(function (model) {
-			
-			try {
-				
-				Framework.Expect(model).to.be.eql({id: 'id'});
-				
-				return mock.done(done);
-				
-			} catch (error) {
-				
-				return done(error);
-				
-			}
-			
-		}).catch(done);
 		
 	});
 	
@@ -434,7 +462,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('insert',function (done) {
+	it('add',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -446,15 +474,11 @@ describe('Framework.Adapters.Mysql',function () {
 			affectedRows: 1
 		});
 		
-		mock.mock(adapter,'adapter','createPrimary').resolve({
-			id: '1'
-		});
-		
-		adapter.insert({}).then(function (result) {
+		adapter.add({}).then(function (result) {
 			
 			try {
 				
-				Framework.Expect(result).to.be.eql({id: '1', _added: true});
+				Framework.Expect(result).to.be.eql({});
 				
 				return mock.done(done);
 				
@@ -474,7 +498,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('insert throws exception when no rows affected',function (done) {
+	it('add throws exception when no rows affected',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -486,7 +510,7 @@ describe('Framework.Adapters.Mysql',function () {
 			affectedRows: 0
 		});
 		
-		adapter.insert({
+		adapter.add({
 			id: '1'
 		}).then(function (result) {
 			
@@ -508,7 +532,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('update',function (done) {
+	it('edit',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -520,13 +544,13 @@ describe('Framework.Adapters.Mysql',function () {
 			affectedRows: 1
 		});
 		
-		adapter.update({
+		adapter.edit({
 			id: '1'
 		}).then(function (result) {
 			
 			try {
 				
-				Framework.Expect(result).to.be.eql({id: '1', _saved: true});
+				Framework.Expect(result).to.be.eql({id: '1'});
 				
 				return mock.done(done);
 				
@@ -546,7 +570,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('update throws exception when no rows affected',function (done) {
+	it('edit throws exception when no rows affected',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -558,7 +582,7 @@ describe('Framework.Adapters.Mysql',function () {
 			affectedRows: 0
 		});
 		
-		adapter.update({
+		adapter.edit({
 			id: '1'
 		}).then(function (result) {
 			

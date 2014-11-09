@@ -7,7 +7,7 @@ describe('Framework.Controllers.Delete',function () {
 	it('delete',function (done) {
 		
 		var service = new Framework.Service(),
-			controller = Framework.Controllers.DELETE({
+			controller = Framework.Controllers.Delete({
 				service: 'test'
 			}),
 			scope = new Framework.Scope(),

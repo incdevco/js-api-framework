@@ -112,8 +112,6 @@ Mocked.prototype.next = function () {
 
 function MockedCall(config) {
 	
-	config = config || {};
-	
 	this.name = config.name;
 	this.fn = config.fn;
 	

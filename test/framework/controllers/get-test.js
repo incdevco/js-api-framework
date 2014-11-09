@@ -6,7 +6,7 @@ describe('Framework.Controllers.GET',function () {
 	
 	it('get',function (done) {
 		
-		var controller = Framework.Controllers.GET({
+		var controller = Framework.Controllers.Get({
 				service: 'test'
 			}),
 			service = new Framework.Service(),

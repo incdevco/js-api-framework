@@ -67,12 +67,18 @@ Service.prototype.adapter = function adapter(adapter) {
 	
 };
 
-Service.prototype.add = function add(scope,data) {
+Service.prototype.add = function add(scope,data,bypass) {
 	
 	var service = this;
 	
 	return service.isValid('add',scope,data)
 		.then(function (clean) {
+			
+			if (bypass) {
+				
+				return clean;
+				
+			}
 			
 			return service.isAllowed(scope,clean,'add','set');
 			
@@ -171,7 +177,7 @@ Service.prototype.edit = function edit(scope,data) {
 	
 };
 
-Service.prototype.fetchAll = function fetchAll(scope,where,limit,offset) {
+Service.prototype.fetchAll = function fetchAll(scope,where,limit,offset,bypass) {
 	
 	var service = this;
 	
@@ -183,20 +189,28 @@ Service.prototype.fetchAll = function fetchAll(scope,where,limit,offset) {
 		})
 		.then(function found(set) {
 			
+			//console.log('service.fetchAll',set);
+			
+			if (bypass) {
+			
+				return set;
+				
+			}
+			
 			return service.isAllowed(scope,set,'view','get');
 			
 		});
 	
 };
 
-Service.prototype.fetchOne = function fetchOne(scope,where,offset) {
+Service.prototype.fetchOne = function fetchOne(scope,where,bypass) {
 	
 	var service = this;
 	
 	return service.isValid('fetchOne',scope,where)
 		.then(function (clean) {
 			
-			return service.adapter().fetch(clean,offset,1);
+			return service.adapter().fetch(clean,1);
 			
 		})
 		.then(function (results) {
@@ -204,6 +218,12 @@ Service.prototype.fetchOne = function fetchOne(scope,where,offset) {
 			if (results.length === 0) {
 				
 				throw new Exceptions.NotFound();
+				
+			}
+			
+			if (bypass) {
+				
+				return results[0];
 				
 			}
 			
@@ -299,20 +319,6 @@ Service.prototype.isValid = function isValid(form,scope,data) {
 		return Promise.resolve(data);
 		
 	}
-	
-};
-
-Service.prototype.primary = function primary(data) {
-	
-	var primary = {};
-	
-	this._primary.forEach(function (key) {
-		
-		primary[key] = data[key];
-		
-	});
-	
-	return primary;
 	
 };
 

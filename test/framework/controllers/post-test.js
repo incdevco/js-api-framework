@@ -7,7 +7,7 @@ describe('Framework.Controllers.Post',function () {
 	it('post',function (done) {
 		
 		var service = new Framework.Service(),
-			controller = Framework.Controllers.POST({
+			controller = Framework.Controllers.Post({
 				service: 'test'
 			}),
 			scope = new Framework.Scope(),

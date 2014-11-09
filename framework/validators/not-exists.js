@@ -18,7 +18,7 @@ NotExistsValidator.prototype.validate = function (scope,value,context) {
 		
 		data[this.key] = value;
 		
-		return service.fetchOne(scope,data).then(function () {
+		return service.fetchOne(scope,data,true).then(function () {
 			
 			//console.log('not-exists fetchOne resolved');
 			

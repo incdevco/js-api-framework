@@ -6,7 +6,7 @@ describe('Framework.Controllers.GETALL',function () {
 	
 	it('get',function (done) {
 		
-		var controller = Framework.Controllers.GETALL({
+		var controller = Framework.Controllers.GetAll({
 				service: 'test'
 			}),
 			service = new Framework.Service(),

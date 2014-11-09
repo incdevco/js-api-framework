@@ -51,23 +51,13 @@ describe('Framework.Resource',function () {
 		var application = new Framework.Application(),
 			controller = function (scope,request,response) {},
 			resource = new Framework.Resource({
-				attributes: {
-					blog: new Framework.Attribute()
-				},
-				controllers: {
-					GET: controller
-				},
-				forms: {
-					blog: new Framework.Form()
-				},
 				routes: {
-					blog: [
-						'GET'
-					],
+					'blog': {
+						'GET': controller
+					},
 					'blog-post': {
-						'GET': 'GET',
-						'GETALL': 'GETALL',
-						'POST': Framework.Controllers.POST
+						'GET': Framework.Controllers.Get,
+						'POST': Framework.Controllers.Post
 					}
 				},
 				service: 'test'
@@ -86,6 +76,34 @@ describe('Framework.Resource',function () {
 		resource._bootstrap(application);
 		
 		mock.done(done);
+		
+	});
+	
+	it('_bootstrap throws error when controller is not a function',function (done) {
+		
+		var application = new Framework.Application(),
+			controller = function (scope,request,response) {},
+			resource = new Framework.Resource({
+				routes: {
+					'blog': {
+						'GET': 'test'
+					}
+				},
+				service: 'test'
+			}),
+			mock = new Framework.Mock();
+		
+		try {
+		
+			resource._bootstrap(application);
+			
+			done(new Error('allowed'));
+		
+		} catch (error) {
+			
+			done();
+			
+		}
 		
 	});
 	

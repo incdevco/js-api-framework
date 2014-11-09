@@ -1,4 +1,9 @@
-function NotAllowed() {
+function NotAllowed(config) {
+	
+	config = config || {};
+	
+	this.resource = config.resource;
+	this.privilege = config.privilege;
 	
 	this.name = "NotAllowed";
 	Error.captureStackTrace(this, NotAllowed);

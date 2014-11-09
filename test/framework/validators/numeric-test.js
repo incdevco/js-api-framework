@@ -8,7 +8,7 @@ describe('Framework.Validators.Numeric',function () {
 		
 		var validator = new Framework.Validators.Numeric();
 		
-		validator.validate('0123456789',{},{}).then(function () {
+		validator.validate({},'0123456789',{}).then(function () {
 			
 			done();
 			
@@ -26,7 +26,7 @@ describe('Framework.Validators.Numeric',function () {
 		
 		var validator = new Framework.Validators.Numeric();
 		
-		validator.validate('abcdefg01&*^@23456789',{},{}).then(function () {
+		validator.validate({},'abcdefg01&*^@23456789',{}).then(function () {
 			
 			done(new Error('rejected'));
 			

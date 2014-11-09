@@ -66,48 +66,24 @@ Resource.prototype._bootstrap = function (application) {
 		
 		//console.log('route',path);
 		
-		var controllers = {}, methods = resource.routes[path];
+		var controllers = {};
 		
-		if (!Array.isArray(resource.routes[path])) {
+		Object.keys(resource.routes[path]).forEach(function (method) {
 			
-			methods = Object.keys(methods);
+			var controller = resource.routes[path][method];
 			
-		}
-		
-		methods.forEach(function (method) {
-			
-			var controller;
-			
-			if (Array.isArray(resource.routes[path])) {
+			if ('function' !== typeof controller) {
 				
-				controller = resource.controllers[method];
-				
-			} else {
-				
-				controller = resource.routes[path][method];
-				
-			}
-			
-			if ('string' === typeof controller) {
-				
-				controller = resource.controllers[controller];
+				throw new Error('controller must be a function');
 				
 			}
 			
 			if (controller.length != 3) {
 				
-				//console.log(controller,resource);
-				
 				controller = controller({
 					primary: resource.primary,
 					service: resource.id
 				});
-				
-			}
-			
-			if ('GETALL' === method) {
-				
-				method = 'GET';
 				
 			}
 			

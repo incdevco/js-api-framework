@@ -307,6 +307,8 @@ Application.prototype.handle = function (request,response) {
 					
 					if (scope.route) {
 						
+						//console.log('scope.route',scope.route,scope.route.controllers.POST);
+						
 						return application.beforeController(scope,request,response)
 							.then(function () {
 								

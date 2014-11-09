@@ -8,7 +8,7 @@ describe('Framework.Validators.Alpha',function () {
 		
 		var validator = new Framework.Validators.Alpha();
 		
-		validator.validate('abcdefghijklmnopqrstuvwxyz',{},{}).then(function () {
+		validator.validate({},'abcdefghijklmnopqrstuvwxyz',{}).then(function () {
 			
 			done();
 			
@@ -26,7 +26,7 @@ describe('Framework.Validators.Alpha',function () {
 		
 		var validator = new Framework.Validators.Alpha();
 		
-		validator.validate('abcdefg0123456789',{},{}).then(function () {
+		validator.validate({},'abcdefg0123456789',{}).then(function () {
 			
 			done(new Error('rejected'));
 			

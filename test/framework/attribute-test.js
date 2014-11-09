@@ -7,10 +7,51 @@ describe('Framework.Attribute',function () {
 	it('constructor with array',function () {
 		
 		var attribute = new Framework.Attribute({
-			array: ['test']
+			array: ['test'],
+			create: 'id',
+			service: 'test'
 		});
 		
 		Framework.Expect(attribute.validators.length).to.be.equal(1);
+		Framework.Expect(attribute.create).to.be.equal('id');
+		Framework.Expect(attribute.service).to.be.equal('test');
+		
+	});
+	
+	it('default with create',function (done) {
+		
+		var attribute = new Framework.Attribute({
+				create: 'id',
+				required: true,
+				service: 'test'
+			}),
+			mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: new Framework.Adapters.Mysql({})
+			});
+		
+		mock.mock(service.adapter(),'adapter','createId')
+			.with('id')
+			.resolve('test');
+		
+		scope.service('test',service);
+		
+		attribute.default(scope)
+			.then(function (result) {
+				
+				Framework.Expect(result).to.be.equal('test');
+				
+				mock.done(done);
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				done(exception);
+				
+			});
 		
 	});
 	

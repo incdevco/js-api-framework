@@ -34,6 +34,113 @@ describe('Framework.Acl',function () {
 		
 	});
 	
+	it('acl.allow with assertion function',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles.push('test');
+		
+		acl.allow('test','test','test',function (config) {
+			
+			return function (scope,resource,privilege,context) {
+				
+				return true;
+				
+			};
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			try {
+			
+				Framework.Expect(result).to.be.eql(context);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
+		
+	});
+	
+	it('acl.allow with assertion',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles.push('test');
+		
+		acl.allow('test','test','test',[
+			function (scope,resource,privilege,context) {
+				
+				return true;
+				
+			},
+			'test'
+		]);
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			try {
+			
+				Framework.Expect(result).to.be.eql(context);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
+		
+	});
+	
+	it('acl.allow without assertion not array',function (done) {
+		
+		var acl = new Framework.Acl(),
+			context = {id: 'test'},
+			scope = new Framework.Scope();
+		
+		scope.roles.push('test');
+		
+		acl.allow('test','test','test',function (config) {
+			
+			return function (scope,resource,privilege,context) {
+				
+				return true;
+				
+			};
+			
+		});
+		
+		acl.isAllowed(scope,'test','test',context).then(function (result) {
+			
+			try {
+			
+				Framework.Expect(result).to.be.eql(context);
+				
+				return done();
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(done);
+		
+	});
+	
 	it('acl.allow without resource or privilege',function (done) {
 		
 		var acl = new Framework.Acl(),
@@ -84,21 +191,13 @@ describe('Framework.Acl',function () {
 			
 			return done(new Error('resolved'));
 			
-		}).catch(function (exception) {
+		})
+		.catch(Framework.Exceptions.NotAllowed,function (exception) {
 			
-			try {
+			done();
 			
-				Framework.Expect(exception).to.be.equal(false);
-				
-				return done();
-				
-			} catch (error) {
-				
-				return done(error);
-				
-			}
-			
-		});
+		})
+		.catch(done);
 		
 	});
 	

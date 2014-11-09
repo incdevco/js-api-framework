@@ -42,9 +42,9 @@ Route.prototype.match = function (scope,request) {
 		var path = request.url.pathname || '/', 
 			match = route.regex.exec(path);
 		
-		if (null !== match && match[0] == path) {
+		if (null !== match && match[0] === path) {
 			
-			//console.log('route path',route.path);
+			//console.log('route match',route.path,route.controllers.POST);
 			
 			scope.route = route;
 			

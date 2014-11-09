@@ -14,7 +14,7 @@ function InArrayValidator(config) {
 	
 }
 
-InArrayValidator.prototype.validate = function (value) {
+InArrayValidator.prototype.validate = function (scope,value,context) {
 	var self = this;
 	return new Promise(function (resolve,reject) {
 		if (self.array.indexOf(value) >= 0) {

@@ -11,7 +11,7 @@ describe('Framework.Validators.Length',function () {
 			min: 3
 		});
 		
-		validator.validate('abcde',{},{}).then(function () {
+		validator.validate({},'abcde',{}).then(function () {
 			
 			done();
 			
@@ -32,7 +32,7 @@ describe('Framework.Validators.Length',function () {
 			min: 3
 		});
 		
-		validator.validate(5555,{},{}).then(function () {
+		validator.validate({},5555,{}).then(function () {
 			
 			done();
 			
@@ -74,7 +74,7 @@ describe('Framework.Validators.Length',function () {
 			min: 3
 		});
 		
-		validator.validate('abcdefg0123456789',{},{}).then(function () {
+		validator.validate({},'abcdefg0123456789',{}).then(function () {
 			
 			done(new Error('rejected'));
 			
@@ -103,7 +103,7 @@ describe('Framework.Validators.Length',function () {
 			min: 5
 		});
 		
-		validator.validate('abc',{},{}).then(function () {
+		validator.validate({},'abc',{}).then(function () {
 			
 			done(new Error('rejected'));
 			

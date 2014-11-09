@@ -6,7 +6,7 @@ function LengthValidator(config) {
 	this.min = config.min;
 }
 
-LengthValidator.prototype.validate = function (value) {
+LengthValidator.prototype.validate = function (scope,value,context) {
 	var self = this;
 	return new Promise(function (resolve,reject) {
 		if (typeof value == 'number') {

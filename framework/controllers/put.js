@@ -4,7 +4,7 @@ module.exports = function put(config) {
 
 	return function controller(scope,request,response) {
 		
-		return scope.service(config.service).edit(scope,request.query)
+		return scope.service(config.service).edit(scope,request.body)
 			.then(function edited(model) {
 				
 				response.statusCode = 200;

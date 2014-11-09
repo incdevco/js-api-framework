@@ -74,9 +74,7 @@ describe('Framework.Form',function () {
 			try {
 				
 				Framework.Expect(exception.errors).to.be.eql({
-					id: [
-						'Only Alpha Characters Allowed (1)'
-					]
+					id: 'Only Alpha Characters Allowed (1)'
 				});
 				
 				return mock.done(done);

@@ -9,7 +9,7 @@ function RegexValidator(config) {
 	
 }
 
-RegexValidator.prototype.validate = function (value) {
+RegexValidator.prototype.validate = function (scope,value,context) {
 	var self = this;
 	return new Promise(function (resolve,reject) {
 		if (self.regex.test(value)) {

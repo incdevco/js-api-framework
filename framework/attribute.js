@@ -5,7 +5,7 @@ function Attribute(config) {
 	
 	config = config || {};
 	
-	this.default = config.default;
+	this._default = config.default;
 	this.max = config.max;
 	this.min = config.min;
 	this.required = false;
@@ -17,15 +17,15 @@ function Attribute(config) {
 		
 	}
 	
-	if (typeof(config.exists) === 'object') {
+	if (config.create) {
 		
-		this.validators.push(new Validators.Exists(config.exists));
+		this.create = config.create;
 		
 	}
 	
-	if (undefined !== config.required) {
+	if (typeof(config.exists) === 'object') {
 		
-		this.required = config.required;
+		this.validators.push(new Validators.Exists(config.exists));
 		
 	}
 	
@@ -35,39 +35,86 @@ function Attribute(config) {
 		
 	}
 	
+	if (undefined !== config.required) {
+		
+		this.required = config.required;
+		
+	}
+	
+	if (undefined !== config.service) {
+		
+		this.service = config.service;
+		
+	}
+	
 }
 
-Attribute.prototype.validate = function(scope,value,context) {
+Attribute.prototype.default = function (scope) {
 	
-	var promises = [];
-	
-	if (undefined === value || null === value) {
+	if (this.required) {
 		
-		if (this.required) {
+		if (this.create) {
 			
-			return Promise.reject('Required');
-			
-		} else {
-			
-			return Promise.resolve(true);
+			return scope.service(this.service).adapter().createId(this.create);
 			
 		}
+		
+		return Promise.resolve(this._default);
+		
+	}
+	
+	return Promise.resolve(undefined);
+	
+};
+
+Attribute.prototype.validate = function validate(scope,value,context) {
+	
+	var attribute = this, promise;
+	
+	if (undefined === value) {
+		
+		promise = this.default(scope);
 		
 	} else {
 		
-		for (var i = 0, length = this.validators.length; i < length; i++) {
+		promise = Promise.resolve(value);
+		
+	}
+	
+	return promise.then(function (value) {
+		
+		var promises = [];
+		
+		if (undefined === value || null === value) {
 			
-			promises.push(this.validators[i].validate(value,context,scope));
+			if (attribute.required) {
+				
+				return Promise.reject('Required');
+				
+			} else {
+				
+				return Promise.resolve(value);
+				
+			}
+			
+		} else {
+			
+			attribute.validators.forEach(function (validator) {
+				
+				promises.push(validator.validate(scope,value,context));
+				
+			});
+			
+			return Promise.all(promises)
+				.then(function () {
+					
+					return value;
+					
+				});
 			
 		}
 		
-		return Promise.all(promises).then(function () {
-			
-			return true;
-			
-		});
-		
-	}
+	});
 	
 };
 

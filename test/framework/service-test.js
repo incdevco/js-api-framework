@@ -40,6 +40,122 @@ describe('Framework.Service',function () {
 		
 	});
 	
+	it('add',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('add',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{
+				test: 'test'
+			},'add','set')
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service.adapter(),'adapter','add')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.add(scope,{
+			test: 'test'
+		}).then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
+	it('add with bypass',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('add',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service.adapter(),'adapter','add')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.add(scope,{
+			test: 'test'
+		},true).then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
 	it('allowed',function (done) {
 		
 		var mock = new Framework.Mock(),
@@ -181,6 +297,76 @@ describe('Framework.Service',function () {
 		
 	});
 	
+	it('edit',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','fetchOne')
+			.with(scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('edit',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{
+				test: 'test'
+			},'edit','set')
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service.adapter(),'adapter','edit')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.edit(scope,{
+			test: 'test'
+		}).then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
 	it('fetchAll',function (done) {
 		
 		var mock = new Framework.Mock(),
@@ -229,6 +415,50 @@ describe('Framework.Service',function () {
 		
 	});
 	
+	it('fetchAll with bypass',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchAll',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
+		
+		service.fetchAll(scope,{},undefined,undefined,true)
+			.then(function (result) {
+				
+				try {
+					
+					Framework.Expect(result).to.be.eql([{}]);
+					
+					return mock.done(done);
+					
+				} catch (error) {
+					
+					return done(error);
+					
+				}
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
+			});
+		
+	});
+	
 	it('fetchOne',function (done) {
 		
 		var mock = new Framework.Mock(),
@@ -252,6 +482,50 @@ describe('Framework.Service',function () {
 			.resolve({});
 		
 		service.fetchOne(scope,{})
+			.then(function (result) {
+				
+				try {
+					
+					Framework.Expect(result).to.be.eql({});
+					
+					return mock.done(done);
+					
+				} catch (error) {
+					
+					return done(error);
+					
+				}
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
+			});
+		
+	});
+	
+	it('fetchOne with bypass',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchOne',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
+		
+		service.fetchOne(scope,{},true)
 			.then(function (result) {
 				
 				try {
@@ -325,138 +599,6 @@ describe('Framework.Service',function () {
 		form = service.form('test');
 		
 		Framework.Expect(form).to.be.equal('test');
-		
-	});
-	
-	it('add',function (done) {
-		
-		var mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				adapter: function () {
-					return new Framework.Adapters.Mysql({})
-				}
-			});
-		
-		mock.mock(service,'service','isValid')
-			.with('add',scope,{
-				test: 'test'
-			})
-			.resolve({
-				test: 'test'
-			});
-		
-		mock.mock(service,'service','isAllowed')
-			.with(scope,{
-				test: 'test'
-			},'add','set')
-			.resolve({
-				test: 'test'
-			});
-		
-		mock.mock(service.adapter(),'adapter','add')
-			.with({
-				test: 'test'
-			})
-			.resolve({
-				test: 'test'
-			});
-		
-		service.add(scope,{
-			test: 'test'
-		}).then(function (result) {
-			
-			try {
-				
-				Framework.Expect(result).to.be.eql({
-					test: 'test'
-				});
-				
-				return mock.done(done);
-				
-			} catch (error) {
-				
-				return done(error);
-				
-			}
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			return done(exception);
-			
-		});
-		
-	});
-	
-	it('edit',function (done) {
-		
-		var mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				adapter: function () {
-					return new Framework.Adapters.Mysql({})
-				}
-			});
-		
-		mock.mock(service,'service','fetchOne')
-			.with(scope,{
-				test: 'test'
-			})
-			.resolve({
-				test: 'test'
-			});
-		
-		mock.mock(service,'service','isValid')
-			.with('edit',scope,{
-				test: 'test'
-			})
-			.resolve({
-				test: 'test'
-			});
-		
-		mock.mock(service,'service','isAllowed')
-			.with(scope,{
-				test: 'test'
-			},'edit','set')
-			.resolve({
-				test: 'test'
-			});
-		
-		mock.mock(service.adapter(),'adapter','edit')
-			.with({
-				test: 'test'
-			})
-			.resolve({
-				test: 'test'
-			});
-		
-		service.edit(scope,{
-			test: 'test'
-		}).then(function (result) {
-			
-			try {
-				
-				Framework.Expect(result).to.be.eql({
-					test: 'test'
-				});
-				
-				return mock.done(done);
-				
-			} catch (error) {
-				
-				return done(error);
-				
-			}
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			return done(exception);
-			
-		});
 		
 	});
 	
@@ -608,6 +750,63 @@ describe('Framework.Service',function () {
 			return done(exception);
 			
 		});
+		
+	});
+	
+	it('isValid',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				forms: {
+					add: new Framework.Form()
+				}
+			});
+			
+		mock.mock(service.forms.add,'form','validate')
+			.resolve({});
+		
+		service.isValid('add',scope,{})
+			.then(function (clean) {
+				
+				Framework.Expect(clean).to.be.eql({});
+				
+				mock.done(done);
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				done(exception);
+				
+			});
+		
+	});
+	
+	it('isValid without form',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				forms: {}
+			});
+		
+		service.isValid('add',scope,{})
+			.then(function (clean) {
+				
+				Framework.Expect(clean).to.be.eql({});
+				
+				mock.done(done);
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				done(exception);
+				
+			});
 		
 	});
 	

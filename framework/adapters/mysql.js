@@ -20,6 +20,24 @@ function Mysql(config) {
 	
 }
 
+Mysql.prototype.add = function add(data) {
+	
+	var adapter = this;
+
+	return adapter._insert(data).then(function (result) {
+		
+		if (!result.affectedRows) {
+			
+			throw new Exceptions.NotInserted();
+			
+		}
+		
+		return data;
+		
+	});
+	
+};
+
 Mysql.prototype._bootstrap = function _bootstrap(application) {
 	
 	this.pool = application.get('Mysql').Pool;
@@ -32,7 +50,7 @@ Mysql.prototype.connection = function connection(callback) {
 	
 };
 
-Mysql.prototype.createId = function createId(length,key) {
+Mysql.prototype.createId = function createId(key,length) {
 	
 	var adapter = this, promise;
 	
@@ -86,17 +104,18 @@ Mysql.prototype.createId = function createId(length,key) {
 		
 	});
 	
-	return promise.then(function (id) {
-		
-		if (null === id) {
+	return promise
+		.then(function (id) {
 			
-			return adapter.createId(length,key);
+			if (null === id) {
+				
+				return adapter.createId(key,length);
+				
+			}
 			
-		}
-		
-		return id;
-		
-	});
+			return id;
+			
+		});
 	
 };
 
@@ -110,21 +129,23 @@ Mysql.prototype.createPrimary = function createPrimary(model) {
 		
 		this.primary.forEach(function (key) {
 			
-			promises.push(adapter.createId(this.idLength,key).then(function (id) {
-				
-				model[key] = id;
-				
-				return true;
-				
-			}));
+			promises.push(adapter.createId(key,this.idLength)
+				.then(function (id) {
+					
+					model[key] = id;
+					
+					return true;
+					
+				}));
 			
 		});
 		
-		return Promise.all(promises).then(function () {
-			
-			return model;
-			
-		});
+		return Promise.all(promises)
+			.then(function () {
+				
+				return model;
+				
+			});
 		
 	}
 	
@@ -150,7 +171,7 @@ Mysql.prototype.delete = function (model) {
 	
 };
 
-Mysql.prototype.fetch = function fetch(where,offset,limit) {
+Mysql.prototype.fetch = function fetch(where,limit,offset) {
 	
 	var adapter = this;
 	
@@ -218,33 +239,9 @@ Mysql.prototype.fetch = function fetch(where,offset,limit) {
 	
 };
 
-Mysql.prototype.insert = function insert(model) {
+Mysql.prototype.edit = function edit(data) {
 	
-	var adapter = this;
-	
-	return this.createPrimary(model).then(function (model) {
-		
-		return adapter._insert(model).then(function (result) {
-			
-			if (!result.affectedRows) {
-				
-				throw new Exceptions.NotInserted();
-				
-			}
-			
-			model._added = true;
-			
-			return model;
-			
-		});
-		
-	});
-	
-};
-
-Mysql.prototype.update = function update(model) {
-	
-	return this._update(model,this.getPrimary(model)).then(function (result) {
+	return this._update(data,this.getPrimary(data)).then(function (result) {
 		
 		if (!result.affectedRows) {
 			
@@ -252,9 +249,7 @@ Mysql.prototype.update = function update(model) {
 			
 		}
 		
-		model._saved = true;
-		
-		return model;
+		return data;
 		
 	});
 	

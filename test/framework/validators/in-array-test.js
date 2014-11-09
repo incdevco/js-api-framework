@@ -22,7 +22,7 @@ describe('Framework.Validators.InArray',function () {
 			]
 		});
 		
-		validator.validate('dog',{},{}).then(function () {
+		validator.validate({},'dog',{}).then(function () {
 			
 			done();
 			
@@ -46,7 +46,7 @@ describe('Framework.Validators.InArray',function () {
 			]
 		});
 		
-		validator.validate('abc',{},{}).then(function () {
+		validator.validate({},'abc',{}).then(function () {
 			
 			done(new Error('rejected'));
 			

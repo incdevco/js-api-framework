@@ -21,7 +21,7 @@ function Form(config) {
 	
 }
 
-Form.prototype.attribute = function (key,attribute) {
+Form.prototype.attribute = function attribute(key,attribute) {
 	
 	if (attribute) {
 		
@@ -43,7 +43,7 @@ Form.prototype.attribute = function (key,attribute) {
 	
 };
 
-Form.prototype.validate = function (scope,data) {
+Form.prototype.validate = function validate(scope,data) {
 	
 	var attributes = this.attributes,
 		clean = {},
@@ -52,17 +52,17 @@ Form.prototype.validate = function (scope,data) {
 	
 	Object.keys(attributes).forEach(function (key) {
 		
-		promises.push(attributes[key].validate(scope,data[key],data).then(function () {
+		promises.push(attributes[key].validate(scope,data[key],data).then(function (value) {
 			
-			clean[key] = data[key];
+			clean[key] = value;
 			
 			return true;
 			
-		}).catch(function (exception) {
+		},function (exception) {
 			
-			errors[key] = [];
+			console.error(exception,exception.stack);
 			
-			errors[key].push(exception);
+			errors[key] = exception;
 			
 			throw exception;
 			
@@ -70,17 +70,20 @@ Form.prototype.validate = function (scope,data) {
 		
 	});
 	
-	return Promise.all(promises).then(function () {
-		
-		return clean;
-		
-	}).catch(function () {
-		
-		throw new Exceptions.NotValid({
-			errors: errors
+	return Promise.all(promises)
+		.then(function () {
+			
+			return clean;
+			
+		},function () {
+			
+			console.log('form invalid',data,errors);
+			
+			throw new Exceptions.NotValid({
+				errors: errors
+			});
+			
 		});
-		
-	});
 	
 };
 
