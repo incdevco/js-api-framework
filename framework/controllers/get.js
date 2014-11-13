@@ -1,25 +1,26 @@
-module.exports = function (request,response,scope) {
+var Exceptions = require('../exceptions');
+
+module.exports = function get(config) {
 	
-	var controller = this;
-	
-	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
+	return function controller(scope,request,response) {
 		
-		return model.toJson(scope).then(function (string) {
-			
-			response.statusCode = 200;
-			
-			if (controller.cache) {
-				
-				response.setHeader('Cache-Control','private, max-age='+controller.cache);
-				
-			}
-			
-			response.write(string);
-			
-			return true;
-			
-		});
+		var service = scope.service(config.service);
 		
-	});
+		return service.fetchOne(scope,request.query)
+			.then(function found(model) {
+				
+				return service.fill(scope,model);
+				
+			})
+			.then(function toJson(model) {
+				
+				response.statusCode = 200;
+				response.write(JSON.stringify(model));
+				
+				return true;
+				
+			});
+		
+	};
 	
 };

@@ -1,11 +1,14 @@
 var Promise = require('../promise');
 
-module.exports = function (request,response,scope) {
+module.exports = function healthCheck(config) {
 	
-	response.statusCode = 200;
-	
-	response.write('Healthy');
-	
-	return Promise.resolve(true);
+	return function controller(scope,request,response) {
+		
+		response.statusCode = 200;
+		response.write('Healthy');
+		
+		return Promise.resolve(true);
+		
+	};
 	
 };

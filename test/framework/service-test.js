@@ -1,44 +1,94 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
-
 var Framework = require(base+'/framework');
 
 describe('Framework.Service',function () {
 	
-	it('service.add',function (done) {
+	it('constructor',function () {
 		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
+		var service = new Framework.Service({
+			forms: {
+				'test': new Framework.Form()
+			},
+			primary: 'id'
+		});
+		
+		Framework.Expect(service.forms.test instanceof Framework.Form).to.be.equal(true);
+		Framework.Expect(service._primary).to.be.eql(['id']);
+		
+		service = new Framework.Service({
+			primary: ['id']
+		});
+		
+		Framework.Expect(service._primary).to.be.eql(['id']);
+		
+	});
+	
+	it('adapter',function () {
+		
+		var service = new Framework.Service({
+			adapter: function () { return new Framework.Adapters.Mysql({}); }
+		});
+		
+		Framework.Expect(service.adapter() instanceof Framework.Adapters.Mysql).to.be.equal(true);
+		
+		service = new Framework.Service({
+			adapter: new Framework.Adapters.Mysql({})
+		});
+		
+		Framework.Expect(service.adapter() instanceof Framework.Adapters.Mysql).to.be.equal(true);
+		
+	});
+	
+	it('add',function (done) {
+		
+		var mock = new Framework.Mock(),
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'insert',
-			'return': deferred.promise
-		});
+		mock.mock(service,'service','isValid')
+			.with('add',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
 		
-		deferred.resolve({
-			affectedRows: 1
-		});
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{
+				test: 'test'
+			},'add','set')
+			.resolve({
+				test: 'test'
+			});
 		
-		service.add({},scope).then(function (result) {
+		mock.mock(service.adapter(),'adapter','add')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.add(scope,{
+			test: 'test'
+		}).then(function (result) {
 			
 			try {
-			
-				expect(result).to.be.ok();
 				
-				mock.done(done);
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
 				
-			} catch (exception) {
+				return mock.done(done);
 				
-				done(exception);
+			} catch (error) {
+				
+				return done(error);
 				
 			}
 			
@@ -46,94 +96,53 @@ describe('Framework.Service',function () {
 			
 			console.error(exception);
 			
-			done(new Error('service.add rejected'));
+			return done(exception);
 			
 		});
 		
 	});
 	
-	it('service.add rejects',function (done) {
+	it('add with bypass',function (done) {
 		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
+		var mock = new Framework.Mock(),
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'insert',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 0
-		});
-		
-		service.add({},scope).then(function (result) {
-			
-			done(new Error('service.add resolved'));
-			
-		}).catch(function (exception) {
-			
-			mock.done(done);
-			
-		});
-		
-	});
-	
-	it('service.createId',function () {
-		
-		var service = new Framework.Service({idLength:5});
-		
-		expect(service.createId().length).to.be.equal(5);
-		
-	});
-	
-	it('service.delete',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			model = new Framework.Model({}),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
+		mock.mock(service,'service','isValid')
+			.with('add',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
 			});
 		
-		mock.object(acl,{
-			expects: 1,
-			name: 'isAllowed',
-			'return': deferred.promise
-		});
+		mock.mock(service.adapter(),'adapter','add')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
 		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'delete',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 1
-		});
-		
-		service.delete(model,scope).then(function (result) {
+		service.add(scope,{
+			test: 'test'
+		},true).then(function (result) {
 			
 			try {
-			
-				expect(result).to.be.ok();
 				
-				mock.done(done);
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
 				
-			} catch (exception) {
+				return mock.done(done);
 				
-				done(exception);
+			} catch (error) {
+				
+				return done(error);
 				
 			}
 			
@@ -141,718 +150,683 @@ describe('Framework.Service',function () {
 			
 			console.error(exception);
 			
-			done(new Error('service.deleted rejected'));
+			return done(exception);
 			
 		});
 		
 	});
 	
-	it('service.delete bypasses acl',function (done) {
+	it('allowed',function (done) {
 		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			model = new Framework.Model({}),
-			scope = new Framework.Scope(),
+		var mock = new Framework.Mock(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'delete',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 1
-		});
-		
-		service.delete(model,scope,true).then(function (result) {
-			
-			try {
-			
-				expect(result).to.be.ok();
-				
-				mock.done(done);
-				
-			} catch (exception) {
-				
-				done(exception);
-				
-			}
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.deleted rejected'));
-			
-		});
-		
-	});
-	
-	it('service.delete rejects',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			model = new Framework.Model({}),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			});
-		
-		mock.object(acl,{
-			expects: 1,
-			name: 'isAllowed',
-			'return': deferred.promise
-		});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'delete',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 0
-		});
-		
-		service.delete(model,scope).then(function (result) {
-			
-			done(new Error('service.delete resolved'));
-			
-		}).catch(function (exception) {
-			
-			mock.done(done);
-			
-		});
-		
-	});
-	
-	it('service.edit',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'update',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 1
-		});
-		
-		service.edit({},{},scope).then(function (result) {
-			
-			try {
-			
-				expect(result).to.be.ok();
-				
-				mock.done(done);
-				
-			} catch (exception) {
-				
-				done(exception);
-				
-			}
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.deleted rejected'));
-			
-		});
-		
-	});
-	
-	it('service.edit rejects',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'update',
-			'return': deferred.promise
-		});
-		
-		deferred.resolve({
-			affectedRows: 0
-		});
-		
-		service.edit({},{},scope).then(function (result) {
-			
-			done(new Error('service.edit resolved'));
-			
-		}).catch(function (exception) {
-			
-			mock.done(done);
-			
-		});
-		
-	});
-	
-	it('service.fetchAll',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				model: Framework.Model
+				acl: new Framework.Acl(),
+				resource: 'test'
 			}),
-			model = new Framework.Model({
-				service: service
+			scope = new Framework.Scope();
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'test','get::denied')
+			.reject(new Framework.Exceptions.NotAllowed());
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'test','get::test')
+			.resolve(true);
+		
+		service.allowed(scope,{
+			denied: 'denied',
+			test: 'test'
+		},'get').then(function (result) {
+			
+			Framework.Expect(result).to.be.eql({
+				test: 'test'
+			});
+			
+			mock.done(done);
+			
+		}).catch(done);
+		
+	});
+	
+	it('_bootstrap',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({}),
+			mock = new Framework.Mock(),
+			service = new Framework.Service();
+		
+		mock.mock(adapter,'adapter','_bootstrap')
+			.return(true);
+		
+		mock.mock(adapter,'adapter','bootstrap')
+			.return(true);
+		
+		service.adapter(adapter);
+		
+		service._bootstrap();
+		
+		mock.done(done);
+				
+	});
+	
+	it('_bootstrap adapter without bootstrap',function (done) {
+		
+		var adapter = new Framework.Adapters.Mysql({}),
+			mock = new Framework.Mock(),
+			service = new Framework.Service();
+		
+		mock.mock(adapter,'adapter','_bootstrap')
+			.return(true);
+		
+		adapter.bootstrap = 'test';
+		
+		service.adapter(adapter);
+		
+		service._bootstrap();
+		
+		mock.done(done);
+				
+	});
+	
+	it('delete',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
-		mock.object(acl,{
-			expects: 2,
-			name: 'isAllowed',
-			'return': deferred1.promise
-		});
+		mock.mock(service,'service','fetchOne')
+			.with(scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
 		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchAll',
-			'return': deferred2.promise
-		});
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{
+				test: 'test'
+			},'delete')
+			.resolve({
+				test: 'test'
+			});
 		
-		deferred1.resolve(model);
+		mock.mock(service.adapter(),'adapter','delete')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
 		
-		deferred2.resolve([
-			{},
-			{}
-		]);
-		
-		service.fetchAll(undefined,undefined,undefined,scope).then(function (result) {
+		service.delete(scope,{
+			test: 'test'
+		}).then(function (result) {
 			
-			result.toJson(scope).then(function (string) {
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
+	it('edit',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','fetchOne')
+			.with(scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('edit',scope,{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{
+				test: 'test'
+			},'edit','set')
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service.adapter(),'adapter','edit')
+			.with({
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.edit(scope,{
+			test: 'test'
+		}).then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
+	it('fetchAll',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchAll',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
+		
+		mock.mock(service,'service','isAllowed')
+			.with(scope,[{}],'view','get')
+			.resolve({});
+		
+		service.fetchAll(scope,{})
+			.then(function (result) {
 				
 				try {
-				
-					expect(string).to.be.equal('[{},{}]');
 					
-					mock.done(done);
+					Framework.Expect(result).to.be.eql({});
 					
-				} catch (exception) {
+					return mock.done(done);
 					
-					done(exception);
+				} catch (error) {
+					
+					return done(error);
 					
 				}
 				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
 			});
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.deleted rejected'));
-			
-		});
 		
 	});
 	
-	it('service.fetchAll bypasses acl',function (done) {
+	it('fetchAll with bypass',function (done) {
 		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			mock = new Framework.Mock(),
+		var mock = new Framework.Mock(),
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				model: Framework.Model
-			}),
-			model = new Framework.Model({
-				service: service
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
 			});
 		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchAll',
-			'return': deferred2.promise
-		});
+		mock.mock(service,'service','isValid')
+			.with('fetchAll',scope,{})
+			.resolve({});
 		
-		deferred1.resolve(model);
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
 		
-		deferred2.resolve([
-			{},
-			{}
-		]);
-		
-		service.fetchAll(undefined,undefined,undefined,scope,true).then(function (result) {
-			
-			result.toJson(scope).then(function (string) {
+		service.fetchAll(scope,{},undefined,undefined,true)
+			.then(function (result) {
 				
 				try {
-				
-					expect(string).to.be.equal('[{},{}]');
 					
-					mock.done(done);
+					Framework.Expect(result).to.be.eql([{}]);
 					
-				} catch (exception) {
+					return mock.done(done);
 					
-					done(exception);
+				} catch (error) {
+					
+					return done(error);
 					
 				}
 				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
 			});
+		
+	});
+	
+	it('fetchOne',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchOne',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
+		
+		mock.mock(service,'service','isAllowed')
+			.with(scope,{},'view','get')
+			.resolve({});
+		
+		service.fetchOne(scope,{})
+			.then(function (result) {
+				
+				try {
+					
+					Framework.Expect(result).to.be.eql({});
+					
+					return mock.done(done);
+					
+				} catch (error) {
+					
+					return done(error);
+					
+				}
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
+			});
+		
+	});
+	
+	it('fetchOne with bypass',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchOne',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([{}]);
+		
+		service.fetchOne(scope,{},true)
+			.then(function (result) {
+				
+				try {
+					
+					Framework.Expect(result).to.be.eql({});
+					
+					return mock.done(done);
+					
+				} catch (error) {
+					
+					return done(error);
+					
+				}
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				return done(exception);
+				
+			});
+		
+	});
+	
+	it('fetchOne throw not found',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				adapter: function () {
+					return new Framework.Adapters.Mysql({})
+				}
+			});
+		
+		mock.mock(service,'service','isValid')
+			.with('fetchOne',scope,{})
+			.resolve({});
+		
+		mock.mock(service.adapter(),'adapter','fetch')
+			.with({})
+			.resolve([]);
+		
+		service.fetchOne(scope,{})
+			.then(function (result) {
+				
+				done(new Error('resolved'));
+				
+			})
+			.catch(Framework.Exceptions.NotFound,function (exception) {
+				
+				mock.done(done);
+				
+				return true;
+				
+			})
+			.catch(done);
+		
+	});
+	
+	it('fillSet with an object calls fill',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service();
+			
+			mock.mock(service,'service','fill')
+				.with(scope,{})
+				.resolve({filled: true});
+			
+			service.fillSet(scope,{})
+				.then(function (result) {
+					
+					Framework.Expect(result.filled).to.be.true;
+					
+					mock.done(done);
+					
+				})
+				.catch(function (exception) {
+					
+					console.error(exception);
+					
+					done(exception);
+					
+				});
+		
+	});
+	
+	it('form',function () {
+		
+		var service = new Framework.Service();
+		
+		form = service.form('test');
+		
+		Framework.Expect(form).to.be.equal(undefined);
+		
+		service.form('test',function () { return 'test'; });
+		
+		form = service.form('test');
+		
+		Framework.Expect(form).to.be.equal('test');
+		
+	});
+	
+	it('isAllowed',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				acl: new Framework.Acl(),
+				resource: 'resource'
+			});
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'resource','privilege',{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		service.isAllowed(scope,{
+			test: 'test'
+		},'privilege').then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
 			
 		}).catch(function (exception) {
 			
 			console.error(exception);
 			
-			done(new Error('service.deleted rejected'));
+			return done(exception);
 			
 		});
 		
 	});
 	
-	it('service.fetchAll with form',function (done) {
+	it('isAllowed with attribute',function (done) {
 		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			deferred3 = new Framework.Deferred(),
-			form = new Framework.Form({}),
-			mock = new Framework.Mock(),
+		var mock = new Framework.Mock(),
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
+				acl: new Framework.Acl(),
+				resource: 'resource'
+			});
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'resource','privilege',{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service,'service','allowed')
+			.with(scope,{
+				test: 'test'
+			},'attribute')
+			.resolve({
+				test: 'test'
+			});
+		
+		service.isAllowed(scope,{
+			test: 'test'
+		},'privilege','attribute').then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql({
+					test: 'test'
+				});
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
+	it('isAllowed with array',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
+				acl: new Framework.Acl(),
+				resource: 'resource'
+			});
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'resource','privilege',{
+				test: 'test'
+			})
+			.resolve({
+				test: 'test'
+			});
+		
+		mock.mock(service.acl,'acl','isAllowed')
+			.with(scope,'resource','privilege',{
+				test: 'test'
+			})
+			.reject(new Framework.Exceptions.NotAllowed());
+		
+		service.isAllowed(scope,[{
+			test: 'test'
+		},{
+			test: 'test'
+		}],'privilege').then(function (result) {
+			
+			try {
+				
+				Framework.Expect(result).to.be.eql([{
+					test: 'test'
+				}]);
+				
+				return mock.done(done);
+				
+			} catch (error) {
+				
+				return done(error);
+				
+			}
+			
+		}).catch(function (exception) {
+			
+			console.error(exception);
+			
+			return done(exception);
+			
+		});
+		
+	});
+	
+	it('isValid',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service({
 				forms: {
-					fetchAll: form
-				},
-				model: Framework.Model
-			}),
-			model = new Framework.Model({
-				service: service
-			});
-		
-		mock.object(acl,{
-			expects: 2,
-			name: 'isAllowed',
-			'return': deferred1.promise
-		});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchAll',
-			'return': deferred2.promise
-		});
-		
-		mock.object(form,{
-			expects: 1,
-			name: 'validate',
-			'return': deferred3.promise
-		});
-		
-		deferred1.resolve(model);
-		
-		deferred2.resolve([
-			{},
-			{}
-		]);
-		
-		deferred3.resolve({});
-		
-		service.fetchAll(undefined,undefined,undefined,scope).then(function (result) {
-			
-			result.toJson(scope).then(function (string) {
-				
-				try {
-				
-					expect(string).to.be.equal('[{},{}]');
-					
-					mock.done(done);
-					
-				} catch (exception) {
-					
-					done(exception);
-					
+					add: new Framework.Form()
 				}
-				
 			});
 			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.deleted rejected'));
-			
-		});
+		mock.mock(service.forms.add,'form','validate')
+			.resolve({});
+		
+		service.isValid('add',scope,{})
+			.then(function (clean) {
+				
+				Framework.Expect(clean).to.be.eql({});
+				
+				mock.done(done);
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				done(exception);
+				
+			});
 		
 	});
 	
-	it('service.fetchNew',function (done) {
+	it('isValid without form',function (done) {
 		
-		var adapter = new Framework.MysqlAdapter({}),
-			service = new Framework.Service({
-				model: Framework.Model
-			});
-		
-		service.fetchNew().then(function (result) {
-			
-			result.toJson({}).then(function (string) {
-				
-				try {
-				
-					expect(string).to.be.equal('{}');
-					
-					done();
-					
-				} catch (exception) {
-					
-					done(exception);
-					
-				}
-				
-			});
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.fetchNew rejected'));
-			
-		});
-		
-	});
-	
-	it('service.fetchOne',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			mock = new Framework.Mock(),
+		var mock = new Framework.Mock(),
 			scope = new Framework.Scope(),
 			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				model: Framework.Model
-			}),
-			model = new Framework.Model({
-				service: service
+				forms: {}
 			});
 		
-		mock.object(acl,{
-			expects: 1,
-			name: 'isAllowed',
-			'return': deferred1.promise
-		});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchRow',
-			'return': deferred2.promise
-		});
-		
-		deferred1.resolve(model);
-		
-		deferred2.resolve({});
-		
-		service.fetchOne(undefined,scope).then(function (result) {
-			
-			result.toJson(scope).then(function (string) {
+		service.isValid('add',scope,{})
+			.then(function (clean) {
 				
-				try {
+				Framework.Expect(clean).to.be.eql({});
 				
-					expect(string).to.be.equal('{}');
-					
-					mock.done(done);
-					
-				} catch (exception) {
-					
-					done(exception);
-					
-				}
+				mock.done(done);
+				
+			})
+			.catch(function (exception) {
+				
+				console.error(exception);
+				
+				done(exception);
 				
 			});
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.fetchOne rejected'));
-			
-		});
-		
-	});
-	
-	it('service.fetchOne bypasses acl',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				model: Framework.Model
-			}),
-			model = new Framework.Model({
-				service: service
-			});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchRow',
-			'return': deferred2.promise
-		});
-		
-		deferred1.resolve(model);
-		
-		deferred2.resolve({});
-		
-		service.fetchOne(undefined,scope,true).then(function (result) {
-			
-			result.toJson(scope).then(function (string) {
-				
-				try {
-				
-					expect(string).to.be.equal('{}');
-					
-					mock.done(done);
-					
-				} catch (exception) {
-					
-					done(exception);
-					
-				}
-				
-			});
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.fetchOne rejected'));
-			
-		});
-		
-	});
-	
-	it('service.fetchOne rejects',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				model: Framework.Model
-			});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchRow',
-			'return': deferred2.promise
-		});
-		
-		deferred1.resolve(true);
-		
-		deferred2.resolve(null);
-		
-		service.fetchOne(undefined,scope).then(function (result) {
-			
-			done(new Error('service.fetchOne resolved'));
-			
-		}).catch(function (exception) {
-			
-			mock.done(done);
-			
-		});
-		
-	});
-	
-	it('service.fetchOne with form',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred(),
-			deferred3 = new Framework.Deferred(),
-			form = new Framework.Form({}),
-			mock = new Framework.Mock(),
-			scope = new Framework.Scope(),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter,
-				forms: {
-					fetchOne: form
-				},
-				model: Framework.Model
-			}),
-			model = new Framework.Model({
-				service: service
-			});
-		
-		mock.object(acl,{
-			expects: 1,
-			name: 'isAllowed',
-			'return': deferred1.promise
-		});
-		
-		mock.object(adapter,{
-			expects: 1,
-			name: 'fetchRow',
-			'return': deferred2.promise
-		});
-		
-		mock.object(form,{
-			expects: 1,
-			name: 'validate',
-			'return': deferred3.promise
-		});
-		
-		deferred1.resolve(model);
-		
-		deferred2.resolve({});
-		
-		deferred3.resolve({});
-		
-		service.fetchOne(undefined,scope).then(function (result) {
-			
-			result.toJson(scope).then(function (string) {
-				
-				try {
-				
-					expect(string).to.be.equal('{}');
-					
-					mock.done(done);
-					
-				} catch (exception) {
-					
-					done(exception);
-					
-				}
-				
-			});
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('service.fetchOne rejected'));
-			
-		});
-		
-	});
-	
-	it('service.save',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			}),
-			scope = new Framework.Scope(),
-			model = new Framework.Model({}),
-			mock = new Framework.Mock(),
-			deferred1 = new Framework.Deferred(),
-			deferred2 = new Framework.Deferred();
-		
-		mock.object(acl,{
-			name: 'isAllowed',
-			return: deferred1.promise
-		});
-		
-		mock.object(adapter,{
-			name: 'update',
-			return: deferred2.promise
-		});
-		
-		deferred1.resolve(true);
-		deferred2.resolve({
-			affectedRows: 1
-		});
-		
-		service.save(model,scope).then(function () {
-			
-			mock.done(done);
-			
-		}).catch(function (exception) {
-			
-			console.error(exception,exception.stack);
-			
-			done(new Error('rejected'));
-			
-		});
-		
-	});
-	
-	it('service.save add',function (done) {
-		
-		var acl = new Framework.Acl(),
-			adapter = new Framework.MysqlAdapter({}),
-			service = new Framework.Service({
-				acl: acl,
-				adapter: adapter
-			}),
-			scope = new Framework.Scope(),
-			model = new Framework.Model({
-				new: true
-			}),
-			mock = new Framework.Mock(),
-			deferred2 = new Framework.Deferred();
-		
-		mock.object(adapter,{
-			name: 'insert',
-			return: deferred2.promise
-		});
-		
-		deferred2.resolve({
-			affectedRows: 1
-		});
-		
-		service.save(model,scope,true).then(function () {
-			
-			mock.done(done);
-			
-		}).catch(function (exception) {
-			
-			console.error(exception,exception.stack);
-			
-			done(new Error('rejected'));
-			
-		});
 		
 	});
 	

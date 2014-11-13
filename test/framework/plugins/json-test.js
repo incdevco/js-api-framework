@@ -1,10 +1,10 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
+var expect = require('chai').expect;
 
 var Framework = require(base+'/framework');
 
-describe('Plugins.Json',function () {
+describe('Framework.Plugins.Json',function () {
 	
 	it('beforeRoute',function (done) {
 		
@@ -12,9 +12,10 @@ describe('Plugins.Json',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response(),
 			scope = new Framework.Scope(),
-			mock = new Framework.Mock();
+			mock = new Framework.Mock(),
+			plugin = new Framework.Plugins.Json;
 		
-		Framework.Plugins.Json.beforeRoute(request,response,scope).then(function () {
+		plugin.beforeRoute(scope,request,response).then(function () {
 			
 			try {
 				

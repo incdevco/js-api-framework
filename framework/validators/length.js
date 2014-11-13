@@ -6,7 +6,7 @@ function LengthValidator(config) {
 	this.min = config.min;
 }
 
-LengthValidator.prototype.validate = function (value) {
+LengthValidator.prototype.validate = function (scope,value,context) {
 	var self = this;
 	return new Promise(function (resolve,reject) {
 		if (typeof value == 'number') {
@@ -21,9 +21,6 @@ LengthValidator.prototype.validate = function (value) {
 			} else {
 				resolve(true);
 			}
-		} else if (undefined !== self.min) {
-			//console.log('length not string',value);
-			reject('Too Short ('+self.min+' Characters)');
 		} else {
 			resolve(true);
 		}

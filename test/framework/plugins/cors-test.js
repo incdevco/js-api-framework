@@ -1,12 +1,20 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
+var expect = require('chai').expect;
 
 var Framework = require(base+'/framework');
 
 var Cors = require(base+'/framework/plugins/cors');
 
 describe('Framework.Plugins.Cors',function () {
+	
+	it('constructor',function () {
+		
+		var plugin = new Framework.Plugins.Cors();
+		
+		Framework.Expect(plugin.allowHeaders).to.be.eql([]);
+		
+	});
 	
 	it('plugin.beforeRoute',function (done) {
 		
@@ -19,7 +27,7 @@ describe('Framework.Plugins.Cors',function () {
 				origin: 'test'
 			});
 		
-		plugin.beforeRoute(request,response,scope).then(function () {
+		plugin.beforeRoute(scope,request,response).then(function () {
 			
 			try {
 				

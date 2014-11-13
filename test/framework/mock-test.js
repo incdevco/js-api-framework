@@ -1,26 +1,83 @@
 var base = process.env.PWD;
 
-var expect = require('expect.js');
-
 var Framework = require(base+'/framework');
 
 describe('Framework.Mock',function () {
 	
-	it('mock.done',function () {
+	it('mocked function not called enough times',function (done) {
 		
-		var error, mock = new Framework.Mock();
+		var test = {}, mock = new Framework.Mock();
 		
-		mock.called(1);
+		mock.mock(test,'test','test').return(true);
 		
-		mock.function({});
+		try {
 		
-		mock.done(function (e) {
+			mock.done();
+		
+		} catch (error) {
 			
-			error = e;
+			Framework.Expect(error.message).to.be.equal('test#test called count does not match');
 			
-		});
+			done();
+			
+		}
 		
-		expect(error.message).to.be.equal('function undefined was called 0 times, when expecting 1');
+	});
+	
+	it('call',function () {
+		
+		var test = {}, mock = new Framework.Mock();
+		
+		mock.mock(test,'test','test').return(true);
+			
+		Framework.Expect(mock.mocks['test']['test'].call(0)).to.be.ok;
+		
+	});
+	
+	it('mocked function not called to many times',function (done) {
+		
+		var test = {}, mock = new Framework.Mock();
+		
+		mock.mock(test,'test','test');
+		
+		
+		try {
+			
+			test.test();
+			
+			test.test();
+			
+			mock.done();
+		
+		} catch (error) {
+			
+			Framework.Expect(error.message).to.be.equal('test#test not expected to be called 2 times');
+			
+			done();
+			
+		}
+		
+	});
+	
+	it('mocked function not called with correct arguments',function (done) {
+		
+		var test = {}, mock = new Framework.Mock();
+		
+		mock.mock(test,'test','test').with('test').return(true);
+		
+		try {
+			
+			test.test('dog');
+			
+			mock.done(done);
+		
+		} catch (error) {
+			
+			Framework.Expect(error.message).to.be.equal('expected \'test\' to equal \'dog\'');
+			
+			done();
+			
+		}
 		
 	});
 	

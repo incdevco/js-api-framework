@@ -2,11 +2,19 @@ var Promise = require('../promise');
 
 function InArrayValidator(config) {
 	
-	this.array = config.array;
+	if (Array.isArray(config)) {
+		
+		this.array = config;
+		
+	} else {
+	
+		this.array = config.array;
+	
+	}
 	
 }
 
-InArrayValidator.prototype.validate = function (value) {
+InArrayValidator.prototype.validate = function (scope,value,context) {
 	var self = this;
 	return new Promise(function (resolve,reject) {
 		if (self.array.indexOf(value) >= 0) {

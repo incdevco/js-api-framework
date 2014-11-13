@@ -1,1 +1,1 @@
-module.exports = require('expect.js');
+module.exports = require('chai').expect;

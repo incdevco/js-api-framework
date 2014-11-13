@@ -1,20 +1,19 @@
-module.exports = function (request,response,scope) {
-	
-	return scope.service(this.service).fetchOne(request.params,scope).then(function (model) {
+var Exceptions = require('../exceptions');
+
+module.exports = function put(config) { 
+
+	return function controller(scope,request,response) {
 		
-		return model.save(request.body,scope).then(function (model) {
-			
-			return model.toJson(scope).then(function (string) {
+		return scope.service(config.service).edit(scope,request.body)
+			.then(function edited(model) {
 				
 				response.statusCode = 200;
-				response.write(string);
+				response.write(JSON.stringify(model));
 				
 				return true;
 				
 			});
-			
-		});
 		
-	});
+	};
 	
 };

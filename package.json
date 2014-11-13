@@ -1,6 +1,6 @@
 {
-  "name": "incdev-api-fw",
-  "version": "0.2.13",
+  "name": "incdevco-fw",
+  "version": "0.3.0",
   "description": "promise based node.js framework",
   "main": "framework/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/incdevco/js-api-framework.git"
+    "url": "https://github.com/incdevco/node.js-framework.git"
   },
   "keywords": [
     "promise",
@@ -18,17 +18,22 @@
   "author": "Inclusive Development Company",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/incdevco/js-api-framework/issues"
+    "url": "https://github.com/incdevco/node.js-framework/issues"
   },
-  "homepage": "https://github.com/incdevco/js-api-framework",
+  "homepage": "https://github.com/incdevco/node.js-framework",
   "dependencies": {
-    "bluebird": "^2.3.2",
-    "bunyan": "^1.0.1",
-    "expect.js": "^0.3.1",
+    "aws-sdk": "^2.0.23",
+    "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^2.3.6",
+    "chai": "^1.9.2",
     "moment": "^2.8.2",
-    "mysql": "^2.4.3",
+    "mysql": "^2.5.2",
+    "nodemailer": "^1.3.0",
+    "numeral": "^1.5.3",
     "object-merge": "^2.5.1",
-    "qs": "^2.2.2",
-    "raw-body": "^1.3.0"
+    "qs": "^2.2.4",
+    "raw-body": "^1.3.0",
+    "twilio": "^1.7.0",
+    "validator": "^3.22.1"
   }
 }

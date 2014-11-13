@@ -1,8 +1,11 @@
-function NotFoundException() {
+function NotFound() {
 	
-	this.statusCode = 404;
-	this.content = 'Not Found';
+	this.name = "NotFound";
+	Error.captureStackTrace(this, NotFound);
 	
 }
 
-module.exports = NotFoundException;
+NotFound.prototype = Object.create(Error.prototype);
+NotFound.prototype.constructor = NotFound;
+
+module.exports = NotFound;

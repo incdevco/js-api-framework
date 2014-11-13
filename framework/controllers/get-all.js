@@ -1,29 +1,26 @@
-module.exports = function (request,response,scope) {
+var Exceptions = require('../exceptions');
+
+module.exports = function getAll(config) {
 	
-	var controller = this;
-	
-	console.log('get-all',controller);
-	
-	return scope.service(this.service).fetchAll(request.params,request.limit,request.offset,scope).then(function (set) {
+	return function controller(scope,request,response) {
 		
-		return set.toJson(scope).then(function (string) {
-			
-			response.statusCode = 200;
-			
-			if (controller.cache) {
-				
-				response.setHeader('Cache-Control','private, max-age='+controller.cache);
-				
-			}
-			
-			response.setHeader('X-Actual-Length',set.actualLength);
-			
-			response.write(string);
-			
-			return true;
-			
-		});
+		var service = scope.service(config.service);
 		
-	});
+		return service.fetchAll(scope,request.query)
+			.then(function found(set) {
+				
+				return service.fillSet(scope,set);
+				
+			})
+			.then(function toJson(set) {
+				
+				response.statusCode = 200;
+				response.write(JSON.stringify(set));
+				
+				return true;
+				
+			});
+		
+	};
 	
 };

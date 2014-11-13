@@ -3,54 +3,107 @@ var Promise = require('./promise');
 
 function Form(config) {
 	
-	this.attributes = config.attributes;
+	var form = this;
 	
-}
-
-Form.prototype.validate = function (data,scope) {
+	config = config || {};
 	
-	var attributes = this.attributes, 
-		clean = {},
-		data = data || {},
-		messages = {}, 
-		promises = [];
+	this.attributes = {};
 	
-	for (var i in attributes) {
+	if (config.attributes) {
 		
-		(function (i) {
+		Object.keys(config.attributes).forEach(function (key) {
 			
-			var promise = attributes[i].validate(data[i],data,scope);
+			form.attribute(key,config.attributes[key]);
 			
-			if (undefined !== data[i]) {
-				
-				clean[i] = data[i];
-			}
-			
-			promise.catch(function (exception) {
-				
-				messages[i] = exception;
-				
-				return exception;
-				
-			});
-			
-			promises.push(promise);
-			
-		})(i);
+		});
 		
 	}
 	
-	return Promise.all(promises).then(function () {
+}
+
+Form.prototype.attribute = function attribute(key,attribute) {
+	
+	if (attribute) {
 		
-		return clean;
+		if ('function' === typeof attribute) {
+			
+			attribute = attribute();
+			
+		}
 		
-	}).catch(function (exception) {
+		this.attributes[key] = attribute;
 		
-		throw new Exceptions.NotValid({
-			content: messages
-		});
+		return this;
 		
+	} else {
+		
+		return this.attributes[key];
+		
+	}
+	
+};
+
+Form.prototype.validate = function validate(scope,data) {
+	
+	var attributes = this.attributes,
+		clean = {},
+		errors = {},
+		keys = Object.keys(attributes),
+		promises = new Array(keys.length);
+	
+	keys.forEach(function (key,i) {
+		
+		promises[i] = attributes[key].validate(scope,data[key],data)
+			.then(function (value) {
+				
+				clean[key] = value;
+				
+				return true;
+				
+			},function (exception) {
+				
+				console.error(exception,exception.stack);
+				
+				errors[key] = exception;
+				
+				throw exception;
+				
+			});
+		
+		/*
+		promises.push(attributes[key].validate(scope,data[key],data)
+		.then(function (value) {
+			
+			clean[key] = value;
+			
+			return true;
+			
+		},function (exception) {
+			
+			console.error(exception,exception.stack);
+			
+			errors[key] = exception;
+			
+			throw exception;
+			
+		}));
+		*/
 	});
+	
+	return Promise.all(promises)
+		.then(function () {
+			
+			return clean;
+			
+		},function () {
+			
+			console.log('form invalid',data,errors);
+			
+			throw new Exceptions.NotValid({
+				errors: errors
+			});
+			
+		});
 	
 };
 

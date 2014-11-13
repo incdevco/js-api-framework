@@ -2,13 +2,15 @@ var Promise = require('../promise');
 
 function Cors(config) {
 	
+	config = config || {};
+	
 	this.allowHeaders = config.allowHeaders || [];
 	this.exposeHeaders = config.exposeHeaders || [];
 	this.origin = config.origin;
 	
 }
 
-Cors.prototype.beforeRoute = function (request,response,scope) {
+Cors.prototype.beforeRoute = function (scope,request,response) {
 	
 	//console.log('Cors.beforeRoute');
 	

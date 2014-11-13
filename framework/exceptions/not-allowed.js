@@ -1,16 +1,16 @@
-function NotAllowedException(config) {
+function NotAllowed(config) {
 	
-	this.content = 'Not Allowed';
-	this.statusCode = 403;
+	config = config || {};
 	
-	if (config) {
-		
-		console.log(config);
-		
-		this.content = 'Not allowed to '+config.privilege+' on '+config.resource+'.';
-		
-	}
+	this.resource = config.resource;
+	this.privilege = config.privilege;
+	
+	this.name = "NotAllowed";
+	Error.captureStackTrace(this, NotAllowed);
 	
 }
 
-module.exports = NotAllowedException;
+NotAllowed.prototype = Object.create(Error.prototype);
+NotAllowed.prototype.constructor = NotAllowed;
+
+module.exports = NotAllowed;

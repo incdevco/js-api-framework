@@ -1,11 +1,21 @@
 var Promise = require('../promise');
 
-module.exports = function (request,response,scope) {
+module.exports = function options(config) { 
 	
-	response.statusCode = 200;
+	var methods;
 	
-	response.setHeader('Access-Control-Allow-Methods','DELETE,POST,PUT');
+	config = config || {};
 	
-	return Promise.resolve(true);
+	methods = config.methods || ['DELETE','GET','POST','PUT'];
+	
+	return function controller(scope,request,response) {
+		
+		response.statusCode = 200;
+		
+		response.setHeader('Access-Control-Allow-Methods',methods.join(','));
+		
+		return Promise.resolve(true);
+		
+	};
 	
 };

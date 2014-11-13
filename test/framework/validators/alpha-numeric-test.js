@@ -8,7 +8,7 @@ describe('Framework.Validators.Alphanumeric',function () {
 		
 		var validator = new Framework.Validators.Alphanumeric();
 		
-		validator.validate('abcdefghijklmnopqrstuvwxyz0123456789',{},{}).then(function () {
+		validator.validate({},'abcdefghijklmnopqrstuvwxyz0123456789',{}).then(function () {
 			
 			done();
 			
@@ -26,7 +26,7 @@ describe('Framework.Validators.Alphanumeric',function () {
 		
 		var validator = new Framework.Validators.Alphanumeric();
 		
-		validator.validate('abcdefg01&*^@23456789',{},{}).then(function () {
+		validator.validate({},'abcdefg01&*^@23456789',{}).then(function () {
 			
 			done(new Error('rejected'));
 			

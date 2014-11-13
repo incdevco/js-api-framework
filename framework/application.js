@@ -1,241 +1,496 @@
 var base = process.env.PWD;
 
-var bunyan = require('bunyan');
+var fs = require('fs');
+var util = require('util');
+
 var objectMerge = require('object-merge');
 
 var Cache = require('./cache');
 var Injector = require('./injector');
+var Exceptions = require('./exceptions');
+var Module = require('./module');
 var Moment = require('./moment');
-var NotFound = require('./exceptions/not-found');
-var Plugins = require('./plugins');
+var Numeral = require('./numeral');
 var Promise = require('./promise');
 var Route = require('./route');
 var Scope = require('./scope');
 
 function Application (config) {
 	
-	this.injector = config.injector || new Injector();
-	this.log = config.log || bunyan.createLogger({
-		name: 'app',
-		level: 'trace'
+	var application = this;
+	
+	config = config || {};
+		
+	config.injector = config.injector || new Injector();
+		
+	config.modules = config.modules || {};
+	
+	config.plugins = config.plugins || {};
+		
+	this.injector = config.injector;
+	this.modules = {};
+	this.plugins = {};
+	this._plugins = {
+		afterController: undefined,
+		afterRoute: undefined,
+		beforeController: undefined,
+		beforeRoute: undefined
+	}
+	this.routes = {};
+	this.services = {};
+	
+	Object.keys(config.modules).forEach(function (name) {
+		
+		application.module(name,config.modules[name]);
+		
 	});
-	this.plugins = [
-		Plugins.ParseUrl,
-		Plugins.ParseBody
-	];
-	this.routes = [];
+	
+	Object.keys(config.plugins).forEach(function (name) {
+		
+		application.plugin(name,config.plugins[name]);
+		
+	});
+	
+	if (config.services) {
+		
+		Object.keys(config.services).forEach(function (name) {
+			
+			application.service(name,config.services[name]);
+			
+		});
+		
+	}
 	
 }
 
-Application.prototype.afterController = function (request,response,scope) {
+Application.prototype.afterController = function (scope,request,response) {
 	
-	return this.runPlugins('afterController',request,response,scope);
-	
-};
-
-Application.prototype.afterRoute = function (request,response,scope) {
-	
-	return this.runPlugins('afterRoute',request,response,scope);
+	return this.runPlugins('afterController',scope,request,response);
 	
 };
 
-Application.prototype.beforeController = function (request,response,scope) {
+Application.prototype.afterRoute = function (scope,request,response) {
 	
-	return this.runPlugins('beforeController',request,response,scope);
+	return this.runPlugins('afterRoute',scope,request,response);
 	
 };
 
-Application.prototype.beforeRoute = function (request,response,scope) {
+Application.prototype.beforeController = function (scope,request,response) {
 	
-	return this.runPlugins('beforeRoute',request,response,scope);
+	return this.runPlugins('beforeController',scope,request,response);
+	
+};
+
+Application.prototype.beforeRoute = function (scope,request,response) {
+	
+	console.log('Application.beforeRoute');
+	
+	return this.runPlugins('beforeRoute',scope,request,response);
+	
+};
+
+Application.prototype._bootstrap = function () {
+	
+	var application = this,
+		afterController = [], 
+		afterRoute = [], 
+		beforeController = [], 
+		beforeRoute = [];
+	
+	Object.keys(application.modules).forEach(function (module) {
+		
+		application.modules[module]._bootstrap(application);
+		
+		if ('function' === typeof application.modules[module].bootstrap) {
+		
+			application.modules[module].bootstrap(application);
+		
+		}
+		
+	});
+	
+	Object.keys(application.services).forEach(function (service) {
+		
+		application.services[service]._bootstrap(application);
+		
+		if ('function' === typeof application.services[service].bootstrap) {
+			
+			application.services[service].bootstrap(application);
+			
+		}
+		
+	});
+	
+	console.log('Application Ready');
+	
+	return this;
+	
+};
+
+Application.prototype.evented = function (request,response) {
+	
+	var application = this, 
+		scope = new Scope({
+			cache: new Cache(),
+			services: application.services,
+			time: Moment()
+		});
+	
+	response.on('exception',function (exception) {
+		
+		console.error(exception,exception.stack);
+		
+		response.statusCode = 500;
+		response.write(exception.message);
+		
+		response.end();
+		
+	});
+	
+	request.on('beforeRoute',function () {
+		
+		//console.log('beforeRoute');
+		
+		application.beforeRoute(scope,request,response).then(function () {
+			
+			request.emit('route');
+			
+			return true;
+			
+		}).catch(function (exception) {
+			
+			response.emit('exception',exception);
+			
+			return true;
+			
+		});
+		
+	});
+	
+	request.on('route',function () {
+		
+		//console.log('route');
+		
+		application.match(scope,request).then(function () {
+			
+			request.emit('afterRoute');
+			
+			return true;
+			
+		}).catch(function (exception) {
+			
+			response.emit('exception',exception);
+			
+			return true;
+			
+		});
+		
+	});
+	
+	request.on('afterRoute',function () {
+		
+		//console.log('afterRoute');
+		
+		if (scope.route) {
+			
+			request.emit('beforeController');
+			
+		} else {
+			
+			request.emit('final');
+			
+		}
+		
+	});
+	
+	request.on('beforeController',function () {
+		
+		//console.log('beforeController');
+		
+		application.beforeController(scope,request,response).then(function () {
+			
+			request.emit('controller');
+			
+			return true;
+			
+		}).catch(function (exception) {
+			
+			response.emit('exception',exception);
+			
+			return true;
+			
+		});
+		
+	});
+	
+	request.on('controller',function () {
+		
+		//console.log('controller');
+		
+		scope.route.controller(scope,request,response).then(function () {
+			
+			request.emit('afterController');
+			
+			return true;
+			
+		}).catch(function (exception) {
+			
+			response.emit('exception',exception);
+			
+			return true;
+			
+		});
+		
+	});
+	
+	request.on('afterController',function () {
+		
+		//console.log('afterController');
+		
+		application.afterController(scope,request,response).then(function () {
+			
+			request.emit('final');
+			
+			return true;
+			
+		}).catch(function (exception) {
+			
+			response.emit('exception',exception);
+			
+			return true;
+			
+		});
+		
+	});
+	
+	// executed after afterController || afterRoute, but before response.final
+	request.on('final',function () {
+		
+		//console.log('request final');
+			
+		response.emit('final');
+			
+		return true;
+		
+	});
+	
+	// executed before sending response
+	response.on('final',function () {
+		
+		//console.log('response final');
+		
+		// Success
+		response.statusCode = response.statusCode || 200;
+		response.end();
+		
+		return true;
+		
+	});
+	
+	request.emit('beforeRoute');
+	
+};
+
+Application.prototype.get = function get(name) {
+	
+	return this.injector.get(name);
 	
 };
 
 Application.prototype.handle = function (request,response) {
 	
-	var app, scope;
+	var application = this, 
+		scope = new Scope({
+			cache: new Cache(),
+			services: application.services,
+			time: Moment()
+		});
 	
-	console.log('New Request',request.method,request.url);
-	
-	app = this;
-	
-	scope = new Scope({
-		cache: new Cache(),
-		injector: new Injector(this.injector),
-		response: response,
-		time: Moment()
-	});
-	
-	scope.timeout = setTimeout(function () {
-		
-		response.statusCode = 500;
-		response.write('Request Timed Out');
-		response.end();
-		
-		scope.close();
-		
-	}, 30000);
-	
-	app.beforeRoute(request,response,scope).then(function () {
-		
-		//console.log('beforeRoute',request.method,request.url);
-		
-		scope.route = app.match(request);
-		
-		if (scope.route) {
+	application.beforeRoute(scope,request,response)
+		.then(function () {
 			
-			request.params = objectMerge(request.query,scope.route.params);
-			
-			return app.afterRoute(request,response,scope).then(function () {
-				
-				//console.log('afterRoute',request.method,request.url);
-				
-				return app.beforeController(request,response,scope).then(function () {
+			return application.match(scope,request)
+				.then(function () {
 					
-					//console.log('beforeController',request.method,request.url);
+					return application.afterRoute(scope,request,response);
 					
-					return scope.route.controller(request,response,scope).then(function () {
+				})
+				.then(function () {
+					
+					if (scope.route) {
 						
-						//console.log('controller',request.method,request.url);
+						return application.beforeController(scope,request,response)
+							.then(function () {
+								
+								return scope.route.controller(scope,request,response);
+								
+							})
+							.then(function () {
+								
+								return application.afterController(scope,request,response);
+								
+							});
 						
-						return app.afterController(request,response,scope).then(function () {
-							
-							//console.log('afterController',request.method,request.url);
-							
-							response.statusCode = response.statusCode || 200;
-							
-							response.end();
-							
-							scope.close();
-							
-							return true;
-							
-						})
+					} else {
 						
-					});
+						console.error('no route found');
+						
+						throw new Exceptions.NotFound();
+						
+					}
 					
 				});
-				
-			});
 			
-		} else {
+		})
+		.catch(Exceptions.NotAllowed,function notAllowed(exception) {
 			
-			console.error('No Route Found');
+			response.statusCode = 403;
+			response.write('Not Allowed');
 			
-			throw new NotFound();
+			return true;
 			
-		}
-		
-	}).catch(function (exception) {
-		
-		console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
-		
-		response.statusCode = exception.statusCode || 500;
-		response.write(exception.content || JSON.stringify(exception));
-		response.end();
-		
-		scope.close();
-		
-	});
+		})
+		.catch(Exceptions.NotFound,function notFound(exception) {
+			
+			response.statusCode = 404;
+			response.write('Not Found');
+			
+			return true;
+			
+		})
+		.catch(Exceptions.NotValid,function notValid(exception) {
+			
+			response.statusCode = 400;
+			response.write('Not Valid');
+			
+			return true;
+			
+		})
+		.catch(function exception(exception) {
+			
+			console.error('Exception Occurred',request.method,request.url.path,exception,exception.stack);
+			
+			response.statusCode = 500;;
+			response.write('An Exception Occurred');
+			
+			return true;
+			
+		})
+		.finally(function () {
+			
+			response.end();
+			
+			return true;
+			
+		});
 	
 };
 
-Application.prototype.match = function (request) {
+Application.prototype.match = function (scope,request) {
 	
-	var promises = [];
+	var paths = Object.keys(this.routes),
+		promises = new Array(paths.length);
 	
-	if (request.method in this.routes) {
+	for (var i = 0, length; i < paths.length; i++) {
 		
-		//console.log('Application.match',request.method,request.url);
+		if (this.routes[paths[i]].controllers[request.method]) {
 		
-		for (var i = 0, length = this.routes[request.method].length; i < length; i++) {
+			//promises.push(this.routes[paths[i]].match(scope,request));
 			
-			//console.log('Application.match trying route',this.routes[request.method][i]);
-			
-			var result = this.routes[request.method][i].match(request.url);
-			
-			if (result) {
-				
-				return result;
-				
-			}
+			promises[i] = this.routes[paths[i]].match(scope,request);
 			
 		}
-		
-		return false;
-		
-	} else {
-		
-		console.log('Method Not Implemented: '+request.method);
-		
-		return false;
 		
 	}
+	
+	return Promise.any(promises)
+		.catch(function () {
+			
+			return true;
+			
+		});
+	
 };
 
-Application.prototype.plugin = function (plugin) {
+Application.prototype.module = function (name,module) {
 	
-	this.plugins.push(plugin);
+	if ('function' === typeof module) {
+		
+		module = module();
+		
+	}
+	
+	this.modules[name] = module;
+	
+	return this;
+	
+};
+
+Application.prototype.plugin = function (name,plugin) {
+	
+	if ('function' === typeof plugin) {
+		
+		plugin = plugin();
+		
+	}
+	
+	this.plugins[name] = plugin;
 	
 	return this;
 
 };
 
-Application.prototype.runPlugins = function (fn,request,response,scope) {
+Application.prototype.runPlugins = function (fn,scope,request,response) {
 	
-	var app = this, result = Promise.resolve();
+	var keys = Object.keys(this.plugins),
+		plugins = this.plugins,
+		promises = new Array(keys.length);
 	
-	for (var i = 0, length = app.plugins.length; i < length; i++) {
+	keys.forEach(function (key,index) {
 		
-		(function (i) {
+		if ('function' ===  typeof plugins[key][fn]) {
 			
-			if ('function' === typeof app.plugins[i][fn]) {
-				
-				result = result.then(function () {
-					
-					//console.log(fn,app.plugins[i][fn]);
-					
-					return app.plugins[i][fn](request,response,scope);
-					
-				});
-				
-			}
+			promises[index] = plugins[key][fn](scope,request,response);
 			
-		})(i);
+		}
 		
-	}
+	});
 	
-	return result;
+	return Promise.all(promises);
 	
 };
 
 Application.prototype.service = function (name,service) {
 	
-	var result = this.injector.service(name,service);
-	
 	if (service) {
+		
+		if ('function' === typeof service) {
+			
+			service = service();
+			
+		}
+		
+		this.services[name] = service;
 		
 		return this;
 		
 	} else {
 		
-		return result;
+		return this.services[name];
 		
 	}
 	
 };
 
-Application.prototype.when = function (method,path,controller) {
+Application.prototype.set = function set(name,item) {
 	
-	var route = new Route(path,controller);
+	return this.injector.set(name,item);
 	
-	if (undefined === this.routes[method]) {
+};
+
+Application.prototype.when = function (path,controllers,context) {
 	
-		this.routes[method] = [];
-	
-	}
-	
-	this.routes[method].push(route);
+	this.routes[path] = new Route(path,controllers,context);
 	
 	return this;
 	
