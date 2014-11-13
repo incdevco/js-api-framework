@@ -4,8 +4,15 @@ module.exports = function get(config) {
 	
 	return function controller(scope,request,response) {
 		
-		return scope.service(config.service).fetchOne(scope,request.query)
+		var service = scope.service(config.service);
+		
+		return service.fetchOne(scope,request.query)
 			.then(function found(model) {
+				
+				return service.fill(scope,model);
+				
+			})
+			.then(function toJson(model) {
 				
 				response.statusCode = 200;
 				response.write(JSON.stringify(model));

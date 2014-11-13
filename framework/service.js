@@ -136,6 +136,12 @@ Service.prototype._bootstrap = function bootstrap(application) {
 	
 };
 
+Service.prototype.createId = function createId(key,length) {
+	
+	return this.adapter().createId(key,length);
+	
+};
+
 Service.prototype.delete = function (scope,data) {
 	
 	var service = this;
@@ -148,7 +154,7 @@ Service.prototype.delete = function (scope,data) {
 		})
 		.then(function (clean) {
 			
-			return service.adapter().delete(service.primary(clean));
+			return service.adapter().delete(clean);
 			
 		});
 	
@@ -228,6 +234,37 @@ Service.prototype.fetchOne = function fetchOne(scope,where,bypass) {
 			}
 			
 			return service.isAllowed(scope,results[0],'view','get');
+			
+		});
+	
+};
+
+Service.prototype.fill = function fill(scope,model) {
+	
+	return Promise.resolve(model);
+	
+};
+
+Service.prototype.fillSet = function fillSet(scope,set) {
+	
+	if (!Array.isArray(set)) {
+		
+		return this.fill(scope,set);
+		
+	}
+	
+	var promises = [], service = this;
+	
+	set.forEach(function (model) {
+		
+		promises.push(service.fill(scope,model));
+		
+	});
+	
+	return Promise.all(promises)
+		.then(function () {
+			
+			return set;
 			
 		});
 	

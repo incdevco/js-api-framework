@@ -307,8 +307,6 @@ Application.prototype.handle = function (request,response) {
 					
 					if (scope.route) {
 						
-						//console.log('scope.route',scope.route,scope.route.controllers.POST);
-						
 						return application.beforeController(scope,request,response)
 							.then(function () {
 								
@@ -322,6 +320,8 @@ Application.prototype.handle = function (request,response) {
 							});
 						
 					} else {
+						
+						console.error('no route found');
 						
 						throw new Exceptions.NotFound();
 						

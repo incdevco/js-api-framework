@@ -5,10 +5,14 @@ function Attribute(config) {
 	
 	config = config || {};
 	
+	this.create = config.create;
 	this._default = config.default;
+	this.key = config.key;
 	this.max = config.max;
+	this.message = config.message;
 	this.min = config.min;
 	this.required = false;
+	this.service = config.service;
 	this.validators = config.validators || [];
 	
 	if (Array.isArray(config.array)) {
@@ -17,15 +21,28 @@ function Attribute(config) {
 		
 	}
 	
-	if (config.create) {
+	if (undefined === this.key
+		&& 'string' === typeof config.create) {
 		
-		this.create = config.create;
+		this.key = config.create;
 		
 	}
 	
-	if (typeof(config.exists) === 'object') {
+	if (config.exists) {
 		
-		this.validators.push(new Validators.Exists(config.exists));
+		var exists = {
+			message: this.message,
+			key: this.key,
+			service: this.service
+		};
+		
+		if ('object' === typeof config.exists) {
+			
+			exists = config.exists;
+			
+		}
+		
+		this.validators.push(new Validators.Exists(exists));
 		
 	}
 	
@@ -41,9 +58,13 @@ function Attribute(config) {
 		
 	}
 	
-	if (undefined !== config.service) {
+	if (config.unique) {
 		
-		this.service = config.service;
+		this.validators.push(new Validators.NotExists({
+			message: this.message,
+			key: this.key,
+			service: this.service
+		}));
 		
 	}
 	
@@ -55,7 +76,7 @@ Attribute.prototype.default = function (scope) {
 		
 		if (this.create) {
 			
-			return scope.service(this.service).adapter().createId(this.create);
+			return scope.service(this.service).createId(this.key);
 			
 		}
 		

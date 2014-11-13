@@ -4,11 +4,11 @@
   "description": "promise based node.js framework",
   "main": "framework/index.js",
   "scripts": {
-    "test": "BLUEBIRD_DEBUG=1 istanbul cover _mocha --"
+    "test": "istanbul cover _mocha --"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/incdevco/js-api-framework.git"
+    "url": "https://github.com/incdevco/node.js-framework.git"
   },
   "keywords": [
     "promise",
@@ -18,9 +18,9 @@
   "author": "Inclusive Development Company",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/incdevco/js-api-framework/issues"
+    "url": "https://github.com/incdevco/node.js-framework/issues"
   },
-  "homepage": "https://github.com/incdevco/js-api-framework",
+  "homepage": "https://github.com/incdevco/node.js-framework",
   "dependencies": {
     "aws-sdk": "^2.0.23",
     "bcrypt-nodejs": "0.0.3",

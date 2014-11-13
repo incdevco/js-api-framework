@@ -223,7 +223,7 @@ Mysql.prototype.fetch = function fetch(where,limit,offset) {
 						
 					} else {
 						
-						//console.log('mysql-adapter.fetch results',results);
+						//console.log('mysql-adapter.fetch results',query.formatted,results);
 						
 						return resolve(results);
 						

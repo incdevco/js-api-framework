@@ -52,6 +52,8 @@ Form.prototype.validate = function validate(scope,data) {
 	
 	Object.keys(attributes).forEach(function (key) {
 		
+		console.log(key);
+		
 		promises.push(attributes[key].validate(scope,data[key],data).then(function (value) {
 			
 			clean[key] = value;

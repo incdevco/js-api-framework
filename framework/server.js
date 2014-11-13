@@ -77,6 +77,8 @@ Server.prototype.handle = function (request,response) {
 	
 	request.on('end',function () {
 		
+		response.setHeader('content-type','text/html');
+		
 		if (request.headers['content-type'] && request.headers['content-type'].match('json')) {
 			
 			try {
