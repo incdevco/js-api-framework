@@ -1,5 +1,5 @@
 {
-  "name": "incdev-api-fw",
+  "name": "incdevco-fw",
   "version": "0.3.0",
   "description": "promise based node.js framework",
   "main": "framework/index.js",

@@ -83,6 +83,8 @@ Application.prototype.beforeController = function (scope,request,response) {
 
 Application.prototype.beforeRoute = function (scope,request,response) {
 	
+	console.log('Application.beforeRoute');
+	
 	return this.runPlugins('beforeRoute',scope,request,response);
 	
 };
@@ -118,66 +120,6 @@ Application.prototype._bootstrap = function () {
 		}
 		
 	});
-	
-	Object.keys(application.plugins).forEach(function (plugin) {
-		
-		if ('function' === typeof application.plugins[plugin].afterController) {
-			
-			afterController.push(application.plugins[plugin].afterController);
-			
-		}
-		
-		if ('function' === typeof application.plugins[plugin].afterRoute) {
-			
-			afterRoute.push(application.plugins[plugin].afterRoute);
-			
-		}
-		
-		if ('function' === typeof application.plugins[plugin].beforeController) {
-			
-			beforeController.push(application.plugins[plugin].beforeController);
-			
-		}
-		
-		if ('function' === typeof application.plugins[plugin].beforeRoute) {
-			
-			beforeRoute.push(application.plugins[plugin].beforeRoute);
-			
-		}
-		
-	});
-	
-	application._plugins.afterController = new Array(afterController.length);
-	
-	for (var i = 0; i < afterController.length; i++) {
-		
-		application._plugins.afterController[i] = afterController[i];
-		
-	}
-	
-	application._plugins.afterRoute = new Array(afterRoute.length);
-	
-	for (var i = 0; i < afterRoute.length; i++) {
-		
-		application._plugins.afterRoute[i] = afterRoute[i];
-		
-	}
-	
-	application._plugins.beforeController = new Array(beforeController.length);
-	
-	for (var i = 0; i < beforeController.length; i++) {
-		
-		application._plugins.beforeController[i] = beforeController[i];
-		
-	}
-	
-	application._plugins.beforeRoute = new Array(beforeRoute.length);
-	
-	for (var i = 0; i < beforeRoute.length; i++) {
-		
-		application._plugins.beforeRoute[i] = beforeRoute[i];
-		
-	}
 	
 	console.log('Application Ready');
 	
@@ -500,26 +442,20 @@ Application.prototype.plugin = function (name,plugin) {
 
 Application.prototype.runPlugins = function (fn,scope,request,response) {
 	
-	var application = this, 
-		promises = new Array(this._plugins[fn].length);
+	var keys = Object.keys(this.plugins),
+		plugins = this.plugins,
+		promises = new Array(keys.length);
 	
-	for (var i = 0; i < this._plugins[fn].length; i++) {
+	keys.forEach(function (key,index) {
 		
-		promises[i] = this._plugins[fn][i](scope,request,response);
-		
-	}	
-	
-	/*
-	Object.keys(application.plugins).forEach(function (name) {
-		
-		if ('function' === typeof(application.plugins[name][fn])) {
+		if ('function' ===  typeof plugins[key][fn]) {
 			
-			promises.push(application.plugins[name][fn](scope,request,response));
+			promises[index] = plugins[key][fn](scope,request,response);
 			
 		}
 		
 	});
-	*/
+	
 	return Promise.all(promises);
 	
 };

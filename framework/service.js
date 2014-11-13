@@ -256,19 +256,21 @@ Service.prototype.fetchOne = function fetchOne(scope,where,bypass) {
 	
 };
 
-Service.prototype.fill = function fill(scope,model) {
+Service.prototype.fill = function fill(scope,model,options) {
 	
 	return Promise.resolve(model);
 	
 };
 
-Service.prototype.fillSet = function fillSet(scope,set) {
+Service.prototype.fillSet = function fillSet(scope,set,options) {
 	
 	var promises;
 	
+	console.log('options service.fillSet',options);
+	
 	if (!Array.isArray(set)) {
 		
-		return this.fill(scope,set);
+		return this.fill(scope,set,options);
 		
 	}
 	
@@ -276,7 +278,9 @@ Service.prototype.fillSet = function fillSet(scope,set) {
 	
 	for (var i = 0; i < set.length; i++) {
 		
-		promises[i] = this.fill(scope,set[i]);
+		console.log('options service.fillSet',options);
+		
+		promises[i] = this.fill(scope,set[i],options);
 		
 	}
 	/*
