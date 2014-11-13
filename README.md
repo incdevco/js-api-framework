@@ -1,2 +1,2 @@
-js-api-framework
+node.js-framework
 ================
