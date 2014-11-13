@@ -245,14 +245,6 @@ describe('Framework.Service',function () {
 				test: 'test'
 			});
 		
-		mock.mock(service,'service','primary')
-			.with({
-				test: 'test'
-			})
-			.return({
-				test: 'test'
-			});
-		
 		mock.mock(service,'service','isAllowed')
 			.with(scope,{
 				test: 'test'
@@ -583,6 +575,34 @@ describe('Framework.Service',function () {
 				
 			})
 			.catch(done);
+		
+	});
+	
+	it('fillSet with an object calls fill',function (done) {
+		
+		var mock = new Framework.Mock(),
+			scope = new Framework.Scope(),
+			service = new Framework.Service();
+			
+			mock.mock(service,'service','fill')
+				.with(scope,{})
+				.resolve({filled: true});
+			
+			service.fillSet(scope,{})
+				.then(function (result) {
+					
+					Framework.Expect(result.filled).to.be.true;
+					
+					mock.done(done);
+					
+				})
+				.catch(function (exception) {
+					
+					console.error(exception);
+					
+					done(exception);
+					
+				});
 		
 	});
 	

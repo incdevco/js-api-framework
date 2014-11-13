@@ -48,13 +48,31 @@ Form.prototype.validate = function validate(scope,data) {
 	var attributes = this.attributes,
 		clean = {},
 		errors = {},
-		promises = [];
+		keys = Object.keys(attributes),
+		promises = new Array(keys.length);
 	
-	Object.keys(attributes).forEach(function (key) {
+	keys.forEach(function (key,i) {
 		
-		console.log(key);
+		promises[i] = attributes[key].validate(scope,data[key],data)
+			.then(function (value) {
+				
+				clean[key] = value;
+				
+				return true;
+				
+			},function (exception) {
+				
+				console.error(exception,exception.stack);
+				
+				errors[key] = exception;
+				
+				throw exception;
+				
+			});
 		
-		promises.push(attributes[key].validate(scope,data[key],data).then(function (value) {
+		/*
+		promises.push(attributes[key].validate(scope,data[key],data)
+		.then(function (value) {
 			
 			clean[key] = value;
 			
@@ -69,7 +87,7 @@ Form.prototype.validate = function validate(scope,data) {
 			throw exception;
 			
 		}));
-		
+		*/
 	});
 	
 	return Promise.all(promises)

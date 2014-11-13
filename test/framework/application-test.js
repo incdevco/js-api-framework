@@ -30,6 +30,8 @@ describe('Framework.Application',function () {
 			}
 		});
 		
+		application._bootstrap();
+		
 		application.handle(request,response);
 		
 		response.on('end',function () {
@@ -56,6 +58,8 @@ describe('Framework.Application',function () {
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
 		
+		application._bootstrap();
+		
 		application.handle(request,response);
 		
 		response.on('end',function () {
@@ -81,6 +85,8 @@ describe('Framework.Application',function () {
 		var application = new Framework.Application(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
+		
+		application._bootstrap();
 		
 		application.handle(request,response);
 		
@@ -153,6 +159,8 @@ describe('Framework.Application',function () {
 			afterRoute: 'test'
 		});
 		
+		application._bootstrap();
+		
 		application.handle(request,response);
 		
 		response.on('end',function () {
@@ -196,6 +204,8 @@ describe('Framework.Application',function () {
 				
 			}
 		});
+		
+		application._bootstrap();
 		
 		application.handle(request,response);
 		
@@ -242,6 +252,8 @@ describe('Framework.Application',function () {
 			}
 		});
 		
+		application._bootstrap();
+		
 		application.handle(request,response);
 		
 		response.on('end',function () {
@@ -286,6 +298,8 @@ describe('Framework.Application',function () {
 				
 			}
 		});
+		
+		application._bootstrap();
 		
 		application.handle(request,response);
 		
@@ -339,6 +353,8 @@ describe('Framework.Application',function () {
 				
 			}
 		});
+		
+		application._bootstrap();
 		
 		application.handle(request,response);
 		
@@ -471,6 +487,8 @@ describe('Framework.Application',function () {
 			}
 		});
 		
+		application._bootstrap();
+		
 		application.evented(request,response);
 		
 		response.on('end',function () {
@@ -496,6 +514,8 @@ describe('Framework.Application',function () {
 		var application = new Framework.Application(),
 			request = new Framework.Mocks.Request(),
 			response = new Framework.Mocks.Response();
+		
+		application._bootstrap();
 		
 		application.evented(request,response);
 		
@@ -526,6 +546,8 @@ describe('Framework.Application',function () {
 		
 		mock.mock(application,'application','beforeRoute').reject(false);
 		
+		application._bootstrap();
+		
 		application.evented(request,response);
 		
 		response.on('end',function () {
@@ -554,6 +576,8 @@ describe('Framework.Application',function () {
 			mock = new Framework.Mock();
 		
 		mock.mock(application,'application','match').reject(false);
+		
+		application._bootstrap();
 		
 		application.evented(request,response);
 		
@@ -594,6 +618,8 @@ describe('Framework.Application',function () {
 		
 		mock.mock(application,'application','beforeController').reject(false);
 		
+		application._bootstrap();
+		
 		application.evented(request,response);
 		
 		response.on('end',function () {
@@ -630,6 +656,8 @@ describe('Framework.Application',function () {
 				
 			}
 		});
+		
+		application._bootstrap();
 		
 		application.evented(request,response);
 		
@@ -670,6 +698,8 @@ describe('Framework.Application',function () {
 		
 		mock.mock(application,'application','afterController')
 			.reject(false);
+		
+		application._bootstrap();
 		
 		application.evented(request,response);
 		

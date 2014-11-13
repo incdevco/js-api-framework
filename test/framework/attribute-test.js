@@ -18,6 +18,34 @@ describe('Framework.Attribute',function () {
 		
 	});
 	
+	it('constructor with exists as true',function () {
+		
+		var attribute = new Framework.Attribute({
+			exists: true,
+			key: 'id',
+			service: 'test'
+		});
+		
+		Framework.Expect(attribute.validators[0] instanceof Framework.Validators.Exists).to.be.true;
+		Framework.Expect(attribute.key).to.be.equal('id');
+		Framework.Expect(attribute.service).to.be.equal('test');
+		
+	});
+	
+	it('constructor with unique as true',function () {
+		
+		var attribute = new Framework.Attribute({
+			unique: true,
+			key: 'id',
+			service: 'test'
+		});
+		
+		Framework.Expect(attribute.validators[0] instanceof Framework.Validators.NotExists).to.be.true;
+		Framework.Expect(attribute.key).to.be.equal('id');
+		Framework.Expect(attribute.service).to.be.equal('test');
+		
+	});
+	
 	it('default with create',function (done) {
 		
 		var attribute = new Framework.Attribute({

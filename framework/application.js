@@ -30,6 +30,12 @@ function Application (config) {
 	this.injector = config.injector;
 	this.modules = {};
 	this.plugins = {};
+	this._plugins = {
+		afterController: undefined,
+		afterRoute: undefined,
+		beforeController: undefined,
+		beforeRoute: undefined
+	}
 	this.routes = {};
 	this.services = {};
 	
@@ -83,7 +89,11 @@ Application.prototype.beforeRoute = function (scope,request,response) {
 
 Application.prototype._bootstrap = function () {
 	
-	var application = this;
+	var application = this,
+		afterController = [], 
+		afterRoute = [], 
+		beforeController = [], 
+		beforeRoute = [];
 	
 	Object.keys(application.modules).forEach(function (module) {
 		
@@ -108,6 +118,66 @@ Application.prototype._bootstrap = function () {
 		}
 		
 	});
+	
+	Object.keys(application.plugins).forEach(function (plugin) {
+		
+		if ('function' === typeof application.plugins[plugin].afterController) {
+			
+			afterController.push(application.plugins[plugin].afterController);
+			
+		}
+		
+		if ('function' === typeof application.plugins[plugin].afterRoute) {
+			
+			afterRoute.push(application.plugins[plugin].afterRoute);
+			
+		}
+		
+		if ('function' === typeof application.plugins[plugin].beforeController) {
+			
+			beforeController.push(application.plugins[plugin].beforeController);
+			
+		}
+		
+		if ('function' === typeof application.plugins[plugin].beforeRoute) {
+			
+			beforeRoute.push(application.plugins[plugin].beforeRoute);
+			
+		}
+		
+	});
+	
+	application._plugins.afterController = new Array(afterController.length);
+	
+	for (var i = 0; i < afterController.length; i++) {
+		
+		application._plugins.afterController[i] = afterController[i];
+		
+	}
+	
+	application._plugins.afterRoute = new Array(afterRoute.length);
+	
+	for (var i = 0; i < afterRoute.length; i++) {
+		
+		application._plugins.afterRoute[i] = afterRoute[i];
+		
+	}
+	
+	application._plugins.beforeController = new Array(beforeController.length);
+	
+	for (var i = 0; i < beforeController.length; i++) {
+		
+		application._plugins.beforeController[i] = beforeController[i];
+		
+	}
+	
+	application._plugins.beforeRoute = new Array(beforeRoute.length);
+	
+	for (var i = 0; i < beforeRoute.length; i++) {
+		
+		application._plugins.beforeRoute[i] = beforeRoute[i];
+		
+	}
 	
 	console.log('Application Ready');
 	
@@ -377,23 +447,26 @@ Application.prototype.handle = function (request,response) {
 Application.prototype.match = function (scope,request) {
 	
 	var paths = Object.keys(this.routes),
-		promises = [];
+		promises = new Array(paths.length);
 	
-	for (var i = 0, length = paths.length; i < length; i++) {
+	for (var i = 0, length; i < paths.length; i++) {
 		
 		if (this.routes[paths[i]].controllers[request.method]) {
 		
-			promises.push(this.routes[paths[i]].match(scope,request));
+			//promises.push(this.routes[paths[i]].match(scope,request));
+			
+			promises[i] = this.routes[paths[i]].match(scope,request);
 			
 		}
 		
 	}
 	
-	return Promise.any(promises).catch(function () {
-		
-		return true;
-		
-	});
+	return Promise.any(promises)
+		.catch(function () {
+			
+			return true;
+			
+		});
 	
 };
 
@@ -427,8 +500,16 @@ Application.prototype.plugin = function (name,plugin) {
 
 Application.prototype.runPlugins = function (fn,scope,request,response) {
 	
-	var application = this, promises = [];
+	var application = this, 
+		promises = new Array(this._plugins[fn].length);
 	
+	for (var i = 0; i < this._plugins[fn].length; i++) {
+		
+		promises[i] = this._plugins[fn][i](scope,request,response);
+		
+	}	
+	
+	/*
 	Object.keys(application.plugins).forEach(function (name) {
 		
 		if ('function' === typeof(application.plugins[name][fn])) {
@@ -438,7 +519,7 @@ Application.prototype.runPlugins = function (fn,scope,request,response) {
 		}
 		
 	});
-	
+	*/
 	return Promise.all(promises);
 	
 };

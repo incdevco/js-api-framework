@@ -16,7 +16,7 @@ describe('Framework.Controllers.Options',function () {
 			try {
 				
 				Framework.Expect(response.headers).to.be.eql({
-					'Access-Control-Allow-Methods':'DELETE,POST,PUT'
+					'Access-Control-Allow-Methods':'DELETE,GET,POST,PUT'
 				});
 				
 				return done();

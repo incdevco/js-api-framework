@@ -104,7 +104,7 @@ Attribute.prototype.validate = function validate(scope,value,context) {
 	
 	return promise.then(function (value) {
 		
-		var promises = [];
+		var promises = new Array(attribute.validators.length);
 		
 		if (undefined === value || null === value) {
 			
@@ -120,12 +120,18 @@ Attribute.prototype.validate = function validate(scope,value,context) {
 			
 		} else {
 			
+			for (var i = 0; i < attribute.validators.length; i++) {
+				
+				promises[i] = attribute.validators[i].validate(scope,value,context);
+				
+			}
+			/*
 			attribute.validators.forEach(function (validator) {
 				
 				promises.push(validator.validate(scope,value,context));
 				
 			});
-			
+			*/
 			return Promise.all(promises)
 				.then(function () {
 					

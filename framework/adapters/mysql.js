@@ -22,19 +22,18 @@ function Mysql(config) {
 
 Mysql.prototype.add = function add(data) {
 	
-	var adapter = this;
-
-	return adapter._insert(data).then(function (result) {
-		
-		if (!result.affectedRows) {
+	return this._insert(data)
+		.then(function (result) {
 			
-			throw new Exceptions.NotInserted();
+			if (!result.affectedRows) {
+				
+				throw new Exceptions.NotInserted();
+				
+			}
 			
-		}
-		
-		return data;
-		
-	});
+			return data;
+			
+		});
 	
 };
 
@@ -125,10 +124,19 @@ Mysql.prototype.createPrimary = function createPrimary(model) {
 	
 	if (this.idLength) {
 		
-		var promises = [];
+		var promises = new Array(this.primary.length);
 		
-		this.primary.forEach(function (key) {
+		this.primary.forEach(function (key,index) {
 			
+			promises[index] = adapter.createId(key)
+				.then(function (id) {
+					
+					model[key] = id;
+					
+					return true;
+					
+				});
+			/*
 			promises.push(adapter.createId(key,this.idLength)
 				.then(function (id) {
 					
@@ -137,7 +145,7 @@ Mysql.prototype.createPrimary = function createPrimary(model) {
 					return true;
 					
 				}));
-			
+			*/
 		});
 		
 		return Promise.all(promises)
@@ -155,19 +163,20 @@ Mysql.prototype.createPrimary = function createPrimary(model) {
 
 Mysql.prototype.delete = function (model) {
 	
-	return this._delete(this.getPrimary(model)).then(function (result) {
-		
-		if (!result.affectedRows) {
+	return this._delete(this.getPrimary(model))
+		.then(function (result) {
 			
-			throw new Exceptions.NotDeleted();
+			if (!result.affectedRows) {
+				
+				throw new Exceptions.NotDeleted();
+				
+			}
 			
-		}
-		
-		model._deleted = true;
-		
-		return model;
-		
-	});
+			model._deleted = true;
+			
+			return model;
+			
+		});
 	
 };
 
@@ -241,17 +250,18 @@ Mysql.prototype.fetch = function fetch(where,limit,offset) {
 
 Mysql.prototype.edit = function edit(data) {
 	
-	return this._update(data,this.getPrimary(data)).then(function (result) {
-		
-		if (!result.affectedRows) {
+	return this._update(data,this.getPrimary(data))
+		.then(function (result) {
 			
-			throw new Exceptions.NotUpdated();
+			if (!result.affectedRows) {
+				
+				throw new Exceptions.NotUpdated();
+				
+			}
 			
-		}
-		
-		return data;
-		
-	});
+			return data;
+			
+		});
 	
 };
 

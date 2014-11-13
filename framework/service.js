@@ -95,11 +95,27 @@ Service.prototype.allowed = function allowed(scope,original,privilege) {
 	
 	var acl = this.acl, 
 		allowed = {}, 
-		promises = [], 
+		keys = Object.keys(original),
+		promises = new Array(keys.length), 
 		resource = this.resource;
 	
-	Object.keys(original).forEach(function (key) {
+	keys.forEach(function (key,i) {
 		
+		promises[i] = acl.isAllowed(scope,resource,privilege+'::'+key,original)
+			.then(function () {
+				
+				allowed[key] = original[key];
+				
+				return true;
+				
+			})
+			.catch(Exceptions.NotAllowed,function () {
+				
+				return true;
+				
+			});
+		
+		/*
 		promises.push(acl.isAllowed(scope,resource,privilege+'::'+key,original)
 			.then(function () {
 				
@@ -113,14 +129,15 @@ Service.prototype.allowed = function allowed(scope,original,privilege) {
 				return true;
 				
 			}));
-		
+		*/
 	});
 	
-	return Promise.all(promises).then(function done() {
-		
-		return allowed;
-		
-	});
+	return Promise.all(promises)
+		.then(function done() {
+			
+			return allowed;
+			
+		});
 	
 };
 
@@ -247,20 +264,28 @@ Service.prototype.fill = function fill(scope,model) {
 
 Service.prototype.fillSet = function fillSet(scope,set) {
 	
+	var promises;
+	
 	if (!Array.isArray(set)) {
 		
 		return this.fill(scope,set);
 		
 	}
 	
-	var promises = [], service = this;
+	promises = new Array(set.length);
 	
+	for (var i = 0; i < set.length; i++) {
+		
+		promises[i] = this.fill(scope,set[i]);
+		
+	}
+	/*
 	set.forEach(function (model) {
 		
 		promises.push(service.fill(scope,model));
 		
 	});
-	
+	*/
 	return Promise.all(promises)
 		.then(function () {
 			
@@ -298,10 +323,25 @@ Service.prototype.isAllowed = function isAllowed(scope,original,privilege,attrib
 	
 	if (Array.isArray(original)) {
 		
-		var allowed = [], promises = [];
+		var allowed = [], promises = new Array(original.length);
 		
-		original.forEach(function (model) {
+		original.forEach(function (model,i) {
 			
+			promises[i] = service.isAllowed(scope,model,privilege,attribute)
+				.then(function (model) {
+					
+					allowed.push(model);
+					
+					return true;
+					
+				})
+				.catch(Exceptions.NotAllowed,function () {
+					
+					return true;
+					
+				});
+			
+			/*
 			promises.push(service.isAllowed(scope,model,privilege,attribute)
 				.then(function (model) {
 					
@@ -315,14 +355,15 @@ Service.prototype.isAllowed = function isAllowed(scope,original,privilege,attrib
 					return true;
 					
 				}));
-			
+			*/
 		});
 		
-		return Promise.all(promises).then(function () {
-			
-			return allowed;
-			
-		});
+		return Promise.all(promises)
+			.then(function () {
+				
+				return allowed;
+				
+			});
 		
 	} else {
 		

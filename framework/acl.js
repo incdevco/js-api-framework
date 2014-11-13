@@ -161,13 +161,15 @@ Acl.prototype.normalizePrivilege = function (privilege) {
 
 Acl.prototype.tryRules = function (rules,scope,resource,privilege,context) {
 	
-	var promises = [];
+	var promises = new Array(rules.length);
 	
 	for (var i = 0, length = rules.length; i < length; i++) {
 		
 		//console.log('Acl Trying Rule');
 		
-		promises.push(rules[i].isAllowed(scope,resource,privilege,context));
+		//promises.push(rules[i].isAllowed(scope,resource,privilege,context));
+		
+		promises[i] = rules[i].isAllowed(scope,resource,privilege,context);
 		
 	}
 	
@@ -279,11 +281,13 @@ AclRule.prototype.isAllowed = function (scope,id,privilege,context) {
 		
 		if (match) {
 			
-			var promises = [];
+			var promises = new Array(this.assertions.length);
 			
-			for (var i = 0, length = this.assertions.length; i < length; i++) {
+			for (var i = 0; i < this.assertions.length; i++) {
 				
-				promises.push(this.assertions[i](scope,id,privilege,context));
+				//promises.push(this.assertions[i](scope,id,privilege,context));
+				
+				promises[i] = this.assertions[i](scope,id,privilege,context);
 				
 			}
 			
