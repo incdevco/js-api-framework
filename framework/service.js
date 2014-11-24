@@ -266,8 +266,6 @@ Service.prototype.fillSet = function fillSet(scope,set,options) {
 	
 	var promises;
 	
-	console.log('options service.fillSet',options);
-	
 	if (!Array.isArray(set)) {
 		
 		return this.fill(scope,set,options);
@@ -277,8 +275,6 @@ Service.prototype.fillSet = function fillSet(scope,set,options) {
 	promises = new Array(set.length);
 	
 	for (var i = 0; i < set.length; i++) {
-		
-		console.log('options service.fillSet',options);
 		
 		promises[i] = this.fill(scope,set[i],options);
 		

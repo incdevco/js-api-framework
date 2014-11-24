@@ -34,20 +34,20 @@ module.exports = function (config) {
 	if (undefined === config.routes) {
 		
 		config.routes = {
-			'/blog/:blog_id/post': [
-				'GET',
-				'HEAD',
-				'OPTIONS',
-				'POST'
-			],
-			'/blog/:blog_id/post/:id': [
-				'DELETE',
-				'GET',
-				'HEAD',
-				'OPTIONS',
-				'PATCH',
-				'PUT'
-			]
+			'/:blog_id/post': {
+				'GET': Framework.Controllers.GetAll,
+				'HEAD' Framework.Controllers.HeadAll,
+				'OPTIONS': Framework.Controllers.Options,
+				'POST': Framework.Controllers.Post
+			},
+			'/:blog_id/post/:id': {
+				'DELETE': Framework.Controllers.Delete,
+				'GET': Framework.Controllers.Get,
+				'HEAD': Framework.Controllers.Head,
+				'OPTIONS': Framework.Controllers.Options,
+				'PATCH': Framework.Controllers.Patch,
+				'PUT': Framework.Controllers.Put
+			}
 		};
 		
 	}
