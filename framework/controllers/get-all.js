@@ -4,9 +4,18 @@ module.exports = function getAll(config) {
 	
 	return function controller(scope,request,response) {
 		
-		var service = scope.service(config.service);
+		var limit = config.limit || 100, 
+			offset = 0,
+			page = parseInt(request.query.page),
+			service = scope.service(config.service);
 		
-		return service.fetchAll(scope,request.query)
+		if (page) {
+			
+			offset = page * limit - limit;
+			
+		}
+		
+		return service.fetchAll(scope,request.query,limit,offset)
 			.then(function found(set) {
 				
 				return service.fillSet(scope,set);

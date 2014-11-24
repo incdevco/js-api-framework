@@ -63,33 +63,31 @@ function Application (config) {
 	
 }
 
-Application.prototype.afterController = function (scope,request,response) {
+Application.prototype.afterController = function afterController(scope,request,response) {
 	
 	return this.runPlugins('afterController',scope,request,response);
 	
 };
 
-Application.prototype.afterRoute = function (scope,request,response) {
+Application.prototype.afterRoute = function afterRoute(scope,request,response) {
 	
 	return this.runPlugins('afterRoute',scope,request,response);
 	
 };
 
-Application.prototype.beforeController = function (scope,request,response) {
+Application.prototype.beforeController = function beforeController(scope,request,response) {
 	
 	return this.runPlugins('beforeController',scope,request,response);
 	
 };
 
-Application.prototype.beforeRoute = function (scope,request,response) {
-	
-	console.log('Application.beforeRoute');
+Application.prototype.beforeRoute = function beforeRoute(scope,request,response) {
 	
 	return this.runPlugins('beforeRoute',scope,request,response);
 	
 };
 
-Application.prototype._bootstrap = function () {
+Application.prototype._bootstrap = function _bootstrap() {
 	
 	var application = this,
 		afterController = [], 
@@ -127,7 +125,7 @@ Application.prototype._bootstrap = function () {
 	
 };
 
-Application.prototype.evented = function (request,response) {
+Application.prototype.evented = function evented(request,response) {
 	
 	var application = this, 
 		scope = new Scope({
@@ -297,7 +295,7 @@ Application.prototype.get = function get(name) {
 	
 };
 
-Application.prototype.handle = function (request,response) {
+Application.prototype.handle = function handle(request,response) {
 	
 	var application = this, 
 		scope = new Scope({
@@ -386,7 +384,7 @@ Application.prototype.handle = function (request,response) {
 	
 };
 
-Application.prototype.match = function (scope,request) {
+Application.prototype.match = function match(scope,request) {
 	
 	var paths = Object.keys(this.routes),
 		promises = new Array(paths.length);
@@ -412,7 +410,7 @@ Application.prototype.match = function (scope,request) {
 	
 };
 
-Application.prototype.module = function (name,module) {
+Application.prototype.module = function module(name,module) {
 	
 	if ('function' === typeof module) {
 		
@@ -426,7 +424,7 @@ Application.prototype.module = function (name,module) {
 	
 };
 
-Application.prototype.plugin = function (name,plugin) {
+Application.prototype.plugin = function plugin(name,plugin) {
 	
 	if ('function' === typeof plugin) {
 		
@@ -440,7 +438,7 @@ Application.prototype.plugin = function (name,plugin) {
 
 };
 
-Application.prototype.runPlugins = function (fn,scope,request,response) {
+Application.prototype.runPlugins = function runPlugins(fn,scope,request,response) {
 	
 	var keys = Object.keys(this.plugins),
 		plugins = this.plugins,
@@ -460,7 +458,7 @@ Application.prototype.runPlugins = function (fn,scope,request,response) {
 	
 };
 
-Application.prototype.service = function (name,service) {
+Application.prototype.service = function service(name,service) {
 	
 	if (service) {
 		
@@ -488,7 +486,7 @@ Application.prototype.set = function set(name,item) {
 	
 };
 
-Application.prototype.when = function (path,controllers,context) {
+Application.prototype.when = function when(path,controllers,context) {
 	
 	this.routes[path] = new Route(path,controllers,context);
 	

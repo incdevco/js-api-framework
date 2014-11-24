@@ -20,6 +20,12 @@ module.exports = function (config) {
 		
 	}
 	
+	if (undefined === config.route) {
+		
+		config.route = '/blog';
+		
+	}
+	
 	module = new Framework.Module(config);
 	
 	return module;

@@ -23,7 +23,7 @@ function Route(path,controllers,context) {
 		
 	}
 	
-	this.regex = new RegExp(this.regex);
+	this.regex = new RegExp(this.regex,'i');
 	
 }
 
