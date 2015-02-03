@@ -35,38 +35,30 @@ Route.prototype.controller = function (scope,request,response) {
 
 Route.prototype.match = function (scope,request) {
 	
-	var route = this;
+	var path = request.url.pathname || '/', 
+		match = this.regex.exec(path);
 	
-	return new Promise(function (resolve,reject) {
+	if (null !== match && match[0] === path) {
 		
-		var path = request.url.pathname || '/', 
-			match = route.regex.exec(path);
+		console.log('route match',this.path);
 		
-		if (null !== match && match[0] === path) {
+		scope.route = this;
+		
+		if (this.params) {
 			
-			//console.log('route match',route.path,route.controllers.POST);
-			
-			scope.route = route;
-			
-			if (route.params) {
+			this.params.forEach(function (param,index) {
 				
-				route.params.forEach(function (param,index) {
-					
-					request.query[param.replace(':','')] = match[index + 1];
-					
-				});
+				request.query[param.replace(':','')] = match[index + 1];
 				
-			}
-			
-			return resolve(true);
+			});
 			
 		}
 		
-		//console.log('reject test',route.path);
+		return true;
 		
-		return reject(false);
-		
-	});
+	}
+	
+	return false;
 	
 };
 

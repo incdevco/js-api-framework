@@ -207,7 +207,7 @@ Service.prototype.fetchAll = function fetchAll(scope,where,limit,offset,bypass) 
 	return service.isValid('fetchAll',scope,where)
 		.then(function (clean) {
 			
-			return service.adapter().fetch(clean,limit,offset);
+			return service.adapter().fetchAll(clean,limit,offset);
 			
 		})
 		.then(function found(set) {
@@ -233,7 +233,7 @@ Service.prototype.fetchOne = function fetchOne(scope,where,bypass) {
 	return service.isValid('fetchOne',scope,where)
 		.then(function (clean) {
 			
-			return service.adapter().fetch(clean,1);
+			return service.adapter().fetchOne(clean);
 			
 		})
 		.then(function (results) {

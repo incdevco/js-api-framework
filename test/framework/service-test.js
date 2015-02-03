@@ -465,7 +465,7 @@ describe('Framework.Service',function () {
 			.with('fetchOne',scope,{})
 			.resolve({});
 		
-		mock.mock(service.adapter(),'adapter','fetch')
+		mock.mock(service.adapter(),'adapter','fetchOne')
 			.with({})
 			.resolve([{}]);
 		
@@ -513,7 +513,7 @@ describe('Framework.Service',function () {
 			.with('fetchOne',scope,{})
 			.resolve({});
 		
-		mock.mock(service.adapter(),'adapter','fetch')
+		mock.mock(service.adapter(),'adapter','fetchOne')
 			.with({})
 			.resolve([{}]);
 		
@@ -557,7 +557,7 @@ describe('Framework.Service',function () {
 			.with('fetchOne',scope,{})
 			.resolve({});
 		
-		mock.mock(service.adapter(),'adapter','fetch')
+		mock.mock(service.adapter(),'adapter','fetchOne')
 			.with({})
 			.resolve([]);
 		

@@ -180,74 +180,6 @@ Mysql.prototype.delete = function (model) {
 	
 };
 
-Mysql.prototype.fetch = function fetch(where,limit,offset) {
-	
-	var adapter = this;
-	
-	return new Promise(function (resolve,reject) {
-		
-		return adapter.connection(function (error,connection) {
-			
-			if (error) {
-				
-				//console.error('mysql-adapter.fetch error',error,error.stack);
-				
-				return reject(error);
-				
-			} else {
-				
-				var query = Sql.select().from(adapter.table);
-				
-				if (where) {
-					
-					query.where(where);
-					
-				}
-				
-				if (offset) {
-					
-					query.offset(offset);
-					
-				}
-				
-				if (limit) {
-					
-					query.limit(limit);
-					
-				}
-				
-				query.build();
-				
-				console.log('mysql-adapter.fetch query',query.formatted);
-				
-				return connection.query(query.formatted,function (error,results) {
-					
-					connection.release();
-					
-					if (error) {
-						
-						//console.error('mysql-adapter.fetch error',error,error.stack);
-						
-						return reject(error);
-						
-					} else {
-						
-						//console.log('mysql-adapter.fetch results',query.formatted,results);
-						
-						return resolve(results);
-						
-					}
-					
-				});
-				
-			}
-			
-		});
-		
-	});
-	
-};
-
 Mysql.prototype.edit = function edit(data) {
 	
 	return this._update(data,this.getPrimary(data))
@@ -262,6 +194,18 @@ Mysql.prototype.edit = function edit(data) {
 			return data;
 			
 		});
+	
+};
+
+Mysql.prototype.fetchAll = function fetchAll(where,limit,offset) {
+	
+	return this._fetch(where,limit,offset);
+	
+};
+
+Mysql.prototype.fetchOne = function fetchOne(where) {
+	
+	return this._fetch(where,1);
 	
 };
 
@@ -320,6 +264,74 @@ Mysql.prototype._delete = function _delete(where) {
 					} else {
 						
 						return resolve(result);
+						
+					}
+					
+				});
+				
+			}
+			
+		});
+		
+	});
+	
+};
+
+Mysql.prototype._fetch = function _fetch(where,limit,offset) {
+	
+	var adapter = this;
+	
+	return new Promise(function (resolve,reject) {
+		
+		return adapter.connection(function (error,connection) {
+			
+			if (error) {
+				
+				//console.error('mysql-adapter.fetch error',error,error.stack);
+				
+				return reject(error);
+				
+			} else {
+				
+				var query = Sql.select().from(adapter.table);
+				
+				if (where) {
+					
+					query.where(where);
+					
+				}
+				
+				if (offset) {
+					
+					query.offset(offset);
+					
+				}
+				
+				if (limit) {
+					
+					query.limit(limit);
+					
+				}
+				
+				query.build();
+				
+				console.log('mysql-adapter.fetch query',query.formatted);
+				
+				return connection.query(query.formatted,function (error,results) {
+					
+					connection.release();
+					
+					if (error) {
+						
+						//console.error('mysql-adapter.fetch error',error,error.stack);
+						
+						return reject(error);
+						
+					} else {
+						
+						//console.log('mysql-adapter.fetch results',query.formatted,results);
+						
+						return resolve(results);
 						
 					}
 					

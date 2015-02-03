@@ -14,7 +14,20 @@ Cors.prototype.beforeRoute = function (scope,request,response) {
 	
 	//console.log('Cors.beforeRoute');
 	
-	response.setHeader('Access-Control-Allow-Origin',this.origin);
+	if (Array.isArray(this.origin)) {
+		
+		if (this.origin.indexOf(request.headers.origin)) {
+			
+			response.setHeader('Access-Control-Allow-Origin',request.headers.origin);
+			
+		}
+		
+	} else {
+		
+		response.setHeader('Access-Control-Allow-Origin',this.origin);
+		
+	}
+	
 	response.setHeader('Access-Control-Allow-Headers',this.allowHeaders.join(','));
 	response.setHeader('Access-Control-Expose-Headers',this.exposeHeaders.join(','));
 	

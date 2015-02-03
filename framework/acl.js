@@ -27,6 +27,8 @@ Acl.prototype.allow = function (roles,resources,privileges,assertions) {
 	
 	resources = resources || ['*'];
 	
+	roles = roles || [];
+	
 	privileges = privileges || [];
 	
 	assertions = assertions || [];
