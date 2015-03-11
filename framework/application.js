@@ -392,21 +392,20 @@ Application.prototype.match = function match(scope,request) {
 	for (var i = 0, length; i < paths.length; i++) {
 		
 		if (this.routes[paths[i]].controllers[request.method]) {
-		
-			//promises.push(this.routes[paths[i]].match(scope,request));
 			
-			promises[i] = this.routes[paths[i]].match(scope,request);
+			//promises[i] = this.routes[paths[i]].match(scope,request);
+			
+			if (this.routes[paths[i]].match(scope,request)) {
+				
+				return Promise.resolve(this.routes[paths[i]]);
+				
+			} 
 			
 		}
 		
 	}
 	
-	return Promise.any(promises)
-		.catch(function () {
-			
-			return true;
-			
-		});
+	return Promise.resolve(false);
 	
 };
 

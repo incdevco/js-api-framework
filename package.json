@@ -1,6 +1,6 @@
 {
   "name": "incdevco-fw",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "promise based node.js framework",
   "main": "framework/index.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^2.3.6",
     "chai": "^1.9.2",
+    "memory-cache": "^0.1.1",
     "moment": "^2.8.2",
     "mysql": "^2.5.2",
     "nodemailer": "^1.3.0",

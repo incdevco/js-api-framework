@@ -299,7 +299,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('fetch',function (done) {
+	it('_fetch',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -318,7 +318,7 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','release')
 			.return(true);
 		
-		adapter.fetch({
+		adapter._fetch({
 			id: '1'
 		},1,1).then(function (result) {
 			
@@ -342,7 +342,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('fetch without where, limit or offset',function (done) {
+	it('_fetch without where, limit or offset',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -361,7 +361,7 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','release')
 			.return(true);
 		
-		adapter.fetch().then(function (result) {
+		adapter._fetch().then(function (result) {
 			
 			try {
 				
@@ -383,7 +383,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('fetch connection error',function (done) {
+	it('_fetch connection error',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -395,7 +395,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 		mock.mock(adapter,'adapter','connection').callback('Connection Error');
 		
-		adapter.fetch({
+		adapter._fetch({
 			id: '1'
 		},1,1).then(function (result) {
 			
@@ -419,7 +419,7 @@ describe('Framework.Adapters.Mysql',function () {
 		
 	});
 	
-	it('fetch query error',function (done) {
+	it('_fetch query error',function (done) {
 		
 		var adapter = new Framework.Adapters.Mysql({
 				table: 'test',
@@ -438,7 +438,7 @@ describe('Framework.Adapters.Mysql',function () {
 		mock.mock(connection,'connection','release')
 			.return(true);
 		
-		adapter.fetch({
+		adapter._fetch({
 			id: '1'
 		},1,1).then(function (result) {
 			
