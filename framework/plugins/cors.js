@@ -16,7 +16,7 @@ Cors.prototype.beforeRoute = function (scope,request,response) {
 	
 	if (Array.isArray(this.origin)) {
 		
-		if (this.origin.indexOf(request.headers.origin)) {
+		if (this.origin.indexOf(request.headers.origin) > -1) {
 			
 			response.setHeader('Access-Control-Allow-Origin',request.headers.origin);
 			
