@@ -1,18 +1,20 @@
+var util = require('util');
 
 var RegexValidator = require('./regex');
 
+var regex = /^[0-9]+$/;
+
 function NumericValidator(config) {
-	
+
 	config = config || {};
-	
+
 	config.message = config.message || 'Only Numeric Characters Allowed';
-	config.regex = /^[0-9]+$/;
-	
+	config.regex = config.regex || regex;
+
 	RegexValidator.call(this,config);
-	
+
 }
 
-NumericValidator.prototype = Object.create(RegexValidator.prototype);
-NumericValidator.prototype.constructor = NumericValidator;
+util.inherits(NumericValidator,RegexValidator);
 
 module.exports = NumericValidator;

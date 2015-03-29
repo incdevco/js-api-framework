@@ -1,28 +1,36 @@
+var Expect = require('../expect');
+var NotValid = require('../errors').NotValid;
 var Promise = require('../promise');
 
 function InArrayValidator(config) {
-	
-	if (Array.isArray(config)) {
-		
-		this.array = config;
-		
-	} else {
-	
-		this.array = config.array;
-	
-	}
-	
+
+	config = config || {};
+
+	Expect(config.values).to.be.instanceof(Array);
+
+	this.message = config.message || 'Value Not Allowed';
+	this.values = config.values;
+
 }
 
-InArrayValidator.prototype.validate = function (scope,value,context) {
+InArrayValidator.prototype.validate = function validate(value,context) {
+
 	var self = this;
+
 	return new Promise(function (resolve,reject) {
-		if (self.array.indexOf(value) >= 0) {
-			resolve(true);
+
+		if (self.values.indexOf(value) >= 0) {
+
+			return resolve(true);
+
 		} else {
-			reject('Value Not Allowed');
+
+			return reject(new NotValid(self.message));
+
 		}
+
 	});
+
 };
 
 module.exports = InArrayValidator;

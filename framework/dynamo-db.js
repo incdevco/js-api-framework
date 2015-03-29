@@ -1,5 +1,4 @@
 var AWS = require('aws-sdk');
-var q = require('q');
 
 
 module.exports = function DynamoDB(awsddb) {

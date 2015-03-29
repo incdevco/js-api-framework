@@ -2,22 +2,46 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-var BlogModule = require('./modules/blog');
+var application = Framework.Express();
 
-module.exports = function (config) {
-	
-	var application;
-	
-	if (undefined === config.modules) {
-		
-		config.modules = {
-			Blog: BlogModule
-		};
-		
-	}
-	
-	application = new Framework.Application(config);
-	
-	return application;
-	
-};
+application.use(Framework.Middleware.bodyParser.urlencoded({
+	extended: false
+}));
+
+application.use(Framework.Middleware.bodyParser.json());
+
+require('./modules/blog')(application);
+
+application.get('/',function (request,response) {
+
+	response.json({
+		version: '0.0.1'
+	});
+
+});
+
+application.use(Framework.Middleware.errorHandler());
+
+var server = application.listen(8080,function () {
+
+	console.log('Application Ready @ 8080');
+
+});
+
+process.on('SIGTERM',function () {
+
+	server.close(function () {
+
+		console.log('Application Closed Gracefully');
+
+	});
+
+	setTimeout(function () {
+
+		console.error('Application Closed Not Gracefully');
+
+		process.exit(1);
+
+	},30 * 1000);
+
+});

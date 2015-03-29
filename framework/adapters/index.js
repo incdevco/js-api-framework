@@ -1,1 +1,1 @@
-module.exports.Mysql = require('./mysql');
+module.exports.MysqlModel = require('./mysql-model');

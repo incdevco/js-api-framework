@@ -1,42 +1,27 @@
 var base = process.env.PWD;
+var util = require('util');
 
 var Framework = require(base+'/framework');
 
-var Forms = require('../forms/blog');
-var MysqlAdapter = require('../adapters/blog/mysql');
+var adapter = require('../adapters/blog/mysql');
+var validators = require('../validators/blog');
 
-module.exports = function (config) {
-	
-	var service;
-	
+function BlogService(config) {
+
 	config = config || {};
-	
-	if (undefined === config.adapter) {
-		
-		config.adapter = MysqlAdapter;
-		
-	}
-	
-	if (undefined === config.forms) {
-		
-		config.forms = Forms;
-		
-	}
-	
-	if (undefined === config.primary) {
-		
-		config.primary = 'id';
-		
-	}
-	
-	if (undefined === config.resource) {
-		
-		config.resource = 'blog';
-		
-	}
-	
+
+	config.adapter = config.adapter || adapter;
+
+}
+
+module.exports = function BlogService(config) {
+
+	config = config || {};
+
+	config.adapter = config.adapter || adapter;
+
 	service = new Framework.Service(config);
-	
+
 	return service;
-	
+
 };

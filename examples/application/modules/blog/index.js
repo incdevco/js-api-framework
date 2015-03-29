@@ -1,35 +1,24 @@
-var base = process.env.PWD;
+var blog = require('./controllers/blog');
+var post = require('./controllers/post');
 
-var Framework = require(base+'/framework');
+module.exports = function blogModule(application) {
 
-var BlogResource = require('./resources/blog');
-var PostResource = require('./resources/post');
+	application.route('/blogs')
+		.get(blog.fetchAll())
+		.post(blog.add());
 
-module.exports = function (config) {
-	
-	var module;
-	
-	config = config || {};
-	
-	if (undefined === config.resources) {
-		
-		config.resources = {
-			Blog: BlogResource,
-			Post: PostResource
-		};
-		
-	}
-	
-	if (undefined === config.route) {
-		
-		config.route = '/blog';
-		
-	}
-	
-	module = new Framework.Module(config);
-	
-	return module;
-	
+	application.route('/blogs/:id')
+		.delete(blog.delete())
+		.get(blog.fetchOne())
+		.put(blog.edit());
+
+	application.route('/blogs/:blog_id/posts')
+		.get(blog.fetchAll())
+		.post(blog.add());
+
+	application.route('/blogs/:blog_id/posts/:id')
+		.delete(blog.delete())
+		.get(blog.fetchOne())
+		.put(blog.edit());
+
 };
-
-module.exports = ;
