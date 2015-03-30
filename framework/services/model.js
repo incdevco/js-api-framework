@@ -64,9 +64,9 @@ ModelService.prototype.edit = function edit(oldModel,newModel) {
   var service = this;
 
   return service.validate('edit',newModel)
-    .then(function (model) {
+    .then(function (newModel) {
 
-      return service.adapter.edit(model);
+      return service.adapter.edit(oldModel,newModel);
 
     });
 
@@ -106,7 +106,7 @@ ModelService.prototype.validate = function validate(key,value) {
 
   } else {
 
-    return Promise.resolve(model);
+    return Promise.resolve(value);
 
   }
 

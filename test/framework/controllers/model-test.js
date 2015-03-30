@@ -20,7 +20,9 @@ describe('Framework.Controllers.Model',function () {
 
   });
 
-  it('add with acl calls acl.isAllowed with request.user, resource, privilege and body, service.add with model, response.status with 201 and response.json with model',function (done) {
+  it('add with acl calls acl.isAllowed with request.user, resource,'
+    +' privilege and body, service.add with model, response.status'
+    +' with 201 and response.json with model',function (done) {
 
     var controller = new Framework.Controllers.Model({
         acl: new Framework.Acl(),
@@ -105,7 +107,9 @@ describe('Framework.Controllers.Model',function () {
 
   });
 
-  it('delete with acl calls service.fetchOne with request.params, acl.isAllowed with request.user, resource, privilege and body, service.delete with model, response.status with 200 and response.json with model',function (done) {
+  it('delete with acl calls service.fetchOne with request.params,'
+    +' acl.isAllowed with request.user, resource, privilege and body,'
+    +' service.delete with model, response.status with 200 and response.json with model',function (done) {
 
     var controller = new Framework.Controllers.Model({
         acl: new Framework.Acl(),
