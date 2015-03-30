@@ -1,5 +1,7 @@
 var util = require('util');
 
+var RegexValidator = require('./regex');
+
 var regex = new RegExp(
   "^" +
     // protocol identifier

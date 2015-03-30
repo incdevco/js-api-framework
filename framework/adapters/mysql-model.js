@@ -1,7 +1,8 @@
-var env = process.env.NODE_ENV || 'development';
+/* istanbul ignore next */
+var env = process.env.NODE_ENV || 'production';
 var crypto = require('crypto');
 
-var Errors = require('./errors');
+var Errors = require('../errors');
 var Expect = require('../expect');
 var Promise = require('../promise');
 
@@ -10,19 +11,19 @@ var spaceAndRegex = /\sAND$/;
 
 function MysqlModelAdapter(config) {
 
-	config = config || {};
+	Expect(config).to.be.an('object','config');
 
-	Expect(config.pool).to.be.an('object');
+	Expect(config.pool).to.be.an('object','config.pool');
 
-	Expect(config.primary).to.be.instanceof(Array);
+	Expect(config.primary).to.be.instanceof(Array,'config.primary');
 
-	Expect(config.table).to.be.a('string');
+	Expect(config.table).to.be.a('string','config.table');
 
 	if (config.createPrimary) {
 
-		Expect(config.primary.length).to.equal(1);
+		Expect(config.primary.length).to.equal(1,'config.primary.length');
 
-		Expect(config.primaryLength).to.be.a('number');
+		Expect(config.primaryLength).to.be.a('number','config.primaryLength');
 
 	}
 
@@ -91,7 +92,8 @@ MysqlModelAdapter.prototype.add = function add(model) {
 
 MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
 
-	var key = this.primary[0],
+	var adapter = this,
+		key = this.primary[0],
 		primary = crypto.randomBytes(this.primaryLength)
       .toString('hex')
       .substr(0,this.primaryLength);
@@ -134,7 +136,7 @@ MysqlModelAdapter.prototype.delete = function _delete(model) {
 
 	sql += ' LIMIT 1';
 
-	this.query(sql,inserts)
+	return this.query(sql,inserts)
 		.then(function (result) {
 
 			if (result.affectedRows) {
@@ -174,11 +176,11 @@ MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
 
 	sql = sql.replace(commaSpaceRegex,'');
 
-	sql += ' WHERE ';
+	sql += ' WHERE';
 
 	Object.keys(oldModel).forEach(function (key) {
 
-		sql += '?? = ? AND';
+		sql += ' ?? = ? AND';
 
 		inserts.push(key);
 
@@ -277,7 +279,7 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 
 			if (typeof where[key] === 'object') {
 
-				sql += ' ?? '+where[key].comparator+' ? AND ';
+				sql += ' ?? '+where[key].comparator+' ? AND';
 
 				inserts.push(key);
 
@@ -298,6 +300,8 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 		sql = sql.replace(spaceAndRegex,'');
 
 	}
+
+	sql += ' LIMIT 1';
 
 	if (offset) {
 
@@ -372,6 +376,7 @@ MysqlModelAdapter.prototype.query = function query(sql,inserts) {
 
 			});
 
+			/* istanbul ignore else */
 			if (env !== 'production') {
 
 				console.log('MysqlAdapter.query',query);

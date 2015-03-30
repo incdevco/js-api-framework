@@ -2,7 +2,9 @@ var util = require('util');
 
 function NotAllowed(resource,privilege) {
 
-  Error.call(this,'Not Allowed');
+  Error.call(this);
+
+  this.message = 'Not Allowed';
 
   this.resource = resource;
 

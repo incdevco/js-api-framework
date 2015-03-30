@@ -4,8 +4,8 @@
   "description": "promise based node.js framework",
   "main": "framework/index.js",
   "scripts": {
-    "coverage": "istanbul cover _mocha --",
-    "test": "mocha"
+    "coverage": "NODE_ENV=testing istanbul cover _mocha --",
+    "test": "NODE_ENV=testing mocha"
   },
   "repository": {
     "type": "git",

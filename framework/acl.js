@@ -1,3 +1,6 @@
+var env = process.env.NODE_ENV || 'production';
+
+var Expect = require('./expect');
 var Promise = require('./promise');
 var NotAllowed = require('./errors').NotAllowed;
 
@@ -83,7 +86,11 @@ Acl.prototype.isAllowed = function isAllowed(user,resource,privilege,context) {
 
 	if (undefined === this.rules[resource]) {
 
-		console.log('acl no resource',resource);
+		if (env !== 'production') {
+
+			console.log('acl no resource',resource);
+
+		}
 
 		return Promise.reject(error);
 
@@ -131,7 +138,12 @@ Acl.prototype.tryRules = function tryRules(rules,user,resource,privilege,context
 
 	}
 
-	return Promise.any(promises);
+	return Promise.any(promises)
+		.catch(function (error) {
+
+			throw new NotAllowed(resource,privilege);
+
+		});
 
 };
 
@@ -143,11 +155,18 @@ function AclRule(config) {
 
 	this.roles = config.roles || [];
 
+	this.assertions.forEach(function (assertion) {
+
+		Expect(assertion).to.be.a('function','assertions must be a function');
+
+	});
+
 }
 
 AclRule.prototype.isAllowed = function (user,resource,privilege,context) {
 
-	var match = false;
+	var error = new NotAllowed(resource,privilege),
+		match = false;
 
 	if (this.roles.length === 0) {
 
@@ -218,19 +237,19 @@ AclRule.prototype.isAllowed = function (user,resource,privilege,context) {
 
 				},function () {
 
-					throw false;
+					throw error;
 
 				});
 
 		} else {
 
-			return Promise.reject(false);
+			return Promise.reject(error);
 
 		}
 
 	} else {
 
-		return Promise.reject(false);
+		return Promise.reject(error);
 
 	}
 

@@ -128,7 +128,7 @@ function MockedCall(config) {
 
 }
 
-MockedCall.prototype.call = function () {
+MockedCall.prototype.call = function _call() {
 
 	var args = arguments, mocked = this;
 
@@ -214,7 +214,7 @@ MockedCall.prototype.return = function _return(_return) {
 
 };
 
-MockedCall.prototype.with = function with() {
+MockedCall.prototype.with = function _with() {
 
 	this._with = arguments;
 

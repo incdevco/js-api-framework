@@ -25,7 +25,7 @@ ArrayValidator.prototype.validate = function validate(value,context) {
 
   errors.array = new Array(value.length);
 
-  promises = []];
+  promises = [];
 
   value.forEach(function (item,index) {
 
