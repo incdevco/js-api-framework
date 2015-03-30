@@ -1,31 +1,35 @@
-var Expect = require('../index').Expect;
-var Promise = require('../index').Promise;
+var Expect = require('../expect');
+var Promise = require('../promise');
 
 function ModelService(config) {
 
-  config = config || {};
+  Expect(config).to.be.an('object','config');
 
-  Expect(config.adapter).to.be.an('object');
+  Expect(config.adapter).to.be.an('object','config.adapter');
+
+  Expect(config.adapter.add).to.be.a('function','config.adapter.add');
+
+  Expect(config.adapter.delete).to.be.a('function','config.adapter.delete');
+
+  Expect(config.adapter.edit).to.be.a('function','config.adapter.edit');
+
+  Expect(config.adapter.fetchAll).to.be.a('function','config.adapter.fetchAll');
+
+  Expect(config.adapter.fetchOne).to.be.a('function','config.adapter.fetchOne');
+
+  if (config.validators) {
+
+    Object.keys(config.validators).forEach(function (key) {
+
+      Expect(config.validators[key].validate).to.be.a('function','config.validators.'+key);
+
+    });
+
+  }
 
   this.adapter = config.adapter;
   this.resource = config.resource;
   this.validators = config.validators || {};
-
-  Expect(this.adapter.add).to.be.a('function');
-
-  Expect(this.adapter.delete).to.be.a('function');
-
-  Expect(this.adapter.edit).to.be.a('function');
-
-  Expect(this.adapter.fetchAll).to.be.a('function');
-
-  Expect(this.adapter.fetchOne).to.be.a('function');
-
-  Object.keys(this.validators).forEach(function (key) {
-
-    Expect(this.validators[key].validate).to.be.a('function');
-
-  });
 
 }
 

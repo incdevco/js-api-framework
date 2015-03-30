@@ -1,8 +1,23 @@
-var Promise = require('./promise');
+var Expect = require('../expect');
+var Merge = require('../merge');
+var ModelService = require('../services').Model;
+var Promise = require('../promise');
 
-function Controller(config) {
+function ModelController(config) {
 
-  config = config || {};
+  Expect(config).to.be.an('object','config');
+
+  if (config.acl) {
+
+    Expect(config.acl).to.be.an('object','config.acl');
+
+    Expect(config.acl.isAllowed).to.be.a('function','config.acl.isAllowed');
+
+  }
+
+  Expect(config.resource).to.be.a('string','config.resource');
+
+  Expect(config.service).to.be.instanceof(ModelService,'config.service');
 
   this.acl = config.acl;
 
@@ -12,7 +27,7 @@ function Controller(config) {
 
 }
 
-Controller.prototype.add = function add() {
+ModelController.prototype.add = function add() {
 
   var crtl = this;
 
@@ -55,7 +70,7 @@ Controller.prototype.add = function add() {
 
 };
 
-Controller.prototype.delete = function _delete() {
+ModelController.prototype.delete = function _delete() {
 
   var crtl = this;
 
@@ -99,7 +114,7 @@ Controller.prototype.delete = function _delete() {
 
 };
 
-Controller.prototype.edit = function edit() {
+ModelController.prototype.edit = function edit() {
 
   var crtl = this;
 
@@ -143,16 +158,17 @@ Controller.prototype.edit = function edit() {
 
 };
 
-Controller.prototype.fetchAll = function fetchAll() {
+ModelController.prototype.fetchAll = function fetchAll() {
 
   var acl = this.acl,
-    resource = this.resource;
+    resource = this.resource,
+    service = this.service;
 
   return function handler(request,response,next) {
 
     var where = Merge(true,request.params,request.query);
 
-    return crtl.service.fetchAll(where)
+    return service.fetchAll(where)
       .then(function (set) {
 
         var allowed, promises;
@@ -186,7 +202,7 @@ Controller.prototype.fetchAll = function fetchAll() {
               return allowed;
 
             });
-          
+
         } else {
 
           return set;
@@ -213,7 +229,7 @@ Controller.prototype.fetchAll = function fetchAll() {
 
 };
 
-Controller.prototype.fetchOne = function fetchOne() {
+ModelController.prototype.fetchOne = function fetchOne() {
 
   var crtl = this;
 
@@ -230,7 +246,7 @@ Controller.prototype.fetchOne = function fetchOne() {
 
         } else {
 
-          return set;
+          return model;
 
         }
 
@@ -254,4 +270,4 @@ Controller.prototype.fetchOne = function fetchOne() {
 
 };
 
-module.exports = Controller;
+module.exports = ModelController;
