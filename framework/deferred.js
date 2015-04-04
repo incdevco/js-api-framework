@@ -1,4 +1,4 @@
-var Promise = require('./index').Promise;
+var Promise = require('./promise');
 
 function Deferred() {
 

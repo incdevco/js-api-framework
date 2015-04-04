@@ -150,7 +150,8 @@ MockedCall.prototype.call = function _call() {
 
 			} catch (error) {
 
-				throw new Error('Expected '+mocked.name+'.'+mocked.fn+' With '+mocked._with[index]+' Actual '+args[index]);
+				throw new Error('Expected '+mocked.name+'.'+mocked.fn
+					+' With: '+mocked._with[index]+' Actual: '+args[index]);
 
 			}
 

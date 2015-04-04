@@ -1,3 +1,4 @@
+var env = process.env.NODE_ENV || 'production';
 var Errors = require('../errors');
 
 module.exports = function errorHandler() {
@@ -30,6 +31,12 @@ module.exports = function errorHandler() {
   		response.status(500);
 
   	}
+
+    if (env !== 'production') {
+
+      console.error(error,error.stack);
+
+    }
 
     response.json(json);
 

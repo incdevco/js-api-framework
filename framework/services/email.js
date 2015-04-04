@@ -1,13 +1,30 @@
-var nodemailer = require('../index').NodeMailer;
-var Promise = require('../index').Promise;
+var Expect = require('../expect');
+var NodeMailer = require('../node-mailer');
+var Promise = require('../promise');
 
 function EmailService(config) {
 
-  config = config || {};
+  Expect(config).to.be.an('object','config');
+
+  if (config.defaults) {
+
+    Expect(config.defaults).to.be.an('object','config.defaults');
+
+  }
+
+  if (config.transport) {
+
+    Expect(config.transport).to.be.an('object','config.transport');
+
+  } else {
+
+    Expect(config.config).to.be.an('object','config.config');
+
+  }
 
   this.config = config.config || {};
   this.defaults = config.defaults || {};
-  this.transport = config.transport || nodemailer.createTransport(config.config);
+  this.transport = config.transport || NodeMailer.createTransport(config.config);
 
 }
 

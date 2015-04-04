@@ -196,7 +196,7 @@ describe('Framework.Acl',function () {
 
 		var acl = new Framework.Acl(),
 			context = {id: 'test'},
-			user = {roles: []};
+			user = {};
 
 		acl.allow('test','test');
 
@@ -276,7 +276,7 @@ describe('Framework.Acl',function () {
 			context = {id: 'test'},
 			user = {roles: ['test']};
 
-		acl.allow([],'test','test');
+		acl.allow(null,'test','test');
 
 		acl.isAllowed(user,'test','test',context)
 			.then(function (result) {

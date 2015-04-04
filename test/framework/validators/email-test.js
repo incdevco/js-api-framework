@@ -2,13 +2,13 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-describe('Framework.Validators.Alphanumeric',function () {
+describe('Framework.Validators.Email',function () {
 
 	it('allows a-z and 0-9',function (done) {
 
-		var validator = new Framework.Validators.Alphanumeric();
+		var validator = new Framework.Validators.Email();
 
-		validator.validate('abcdefghijklmnopqrstuvwxyz0123456789')
+		validator.validate('test@test.com')
 			.then(function () {
 
 				return done();
@@ -20,7 +20,7 @@ describe('Framework.Validators.Alphanumeric',function () {
 
 	it('rejects -*&^%$',function (done) {
 
-		var validator = new Framework.Validators.Alphanumeric();
+		var validator = new Framework.Validators.Email();
 
 		validator.validate('abcdefg01&*^@23456789')
 			.then(function () {
@@ -31,7 +31,7 @@ describe('Framework.Validators.Alphanumeric',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Only Alphanumeric Characters Allowed'
+					errors: 'Not Valid Email Address'
 				});
 
 				return done();

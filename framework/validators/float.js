@@ -9,7 +9,7 @@ function FloatValidator(config) {
 	config = config || {};
 
 	config.regex = config.regex || regex;
-	config.message = config.message || 'Must Be A Float';
+	config.message = config.message || 'Not Valid Float';
 
 	RegexValidator.call(this,config);
 

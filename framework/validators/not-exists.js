@@ -22,7 +22,7 @@ NotExistsValidator.prototype.validate = function (value,context) {
 
 	where[this.key] = value;
 
-	return service.fetchOne(where)
+	return this.service.fetchOne(where)
 		.then(function () {
 
 			throw new NotValid(message);

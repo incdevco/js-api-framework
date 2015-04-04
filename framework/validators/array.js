@@ -1,3 +1,4 @@
+var Expect = require('../expect');
 var NotValid = require('../errors').NotValid;
 var Promise = require('../promise');
 
@@ -5,17 +6,43 @@ function ArrayValidator(config) {
 
   config = config || {};
 
+  if (config.array) {
+
+    Expect(config.array).to.be.instanceof(Array);
+
+    config.array.forEach(function (validator) {
+
+      Expect(validator.validate).to.be.a('function');
+
+    });
+
+  }
+
+  if (config.item) {
+
+    Expect(config.item).to.be.instanceof(Array);
+
+    config.item.forEach(function (validator) {
+
+      Expect(validator.validate).to.be.a('function');
+
+    });
+
+  }
+
   this.array = config.array || [];
-  this.validators = config.validators || [];
+  this.item = config.item || [];
 
 }
 
 ArrayValidator.prototype.validate = function validate(value,context) {
 
   var errors = {
-      array: null,
-      validators: []
-    }, promises, validator = this;
+      array: [],
+      item: []
+    },
+    promises = [],
+    validator = this;
 
   if (!Array.isArray(value)) {
 
@@ -23,16 +50,12 @@ ArrayValidator.prototype.validate = function validate(value,context) {
 
   }
 
-  errors.array = new Array(value.length);
-
-  promises = [];
-
   value.forEach(function (item,index) {
 
     promises.push(validator.validateItem(item,value)
       .catch(NotValid,function (error) {
 
-        errors.array[index] = error.errors;
+        errors.item[index] = error.errors;
 
         throw error;
 
@@ -40,12 +63,12 @@ ArrayValidator.prototype.validate = function validate(value,context) {
 
   });
 
-  this.validators.forEach(function (validator) {
+  this.array.forEach(function (validator) {
 
     promises.push(validator.validate(value,value)
       .catch(NotValid,function (error) {
 
-        errors.validators.push(error.errors);
+        errors.array.push(error.errors);
 
         throw error;
 
@@ -71,7 +94,7 @@ ArrayValidator.prototype.validateItem = function validateItem(item,value) {
 
   var errors = [], promises = new Array(this.array.length);
 
-  this.array.forEach(function (validator,index) {
+  this.item.forEach(function (validator,index) {
 
     promises[index] = validator.validate(item,value)
       .catch(NotValid,function (error) {

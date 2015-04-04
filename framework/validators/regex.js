@@ -6,7 +6,7 @@ function RegexValidator(config) {
 
 	config = config || {};
 
-	Expect(config.regex).to.be.instanceof(Regex);
+	Expect(config.regex).to.be.instanceof(RegExp);
 
 	this.message = config.message || 'Does Not Match';
 	this.regex = config.regex;

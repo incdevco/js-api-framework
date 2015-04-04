@@ -2,8 +2,10 @@ var util = require('util');
 
 function NotValid(errors) {
 
-  Error.call(this,'Not Valid');
+  Error.call(this);
+  Error.captureStackTrace(this,this.constructor);
 
+  this.name = this.constructor.name;
   this.errors = errors;
 
 }

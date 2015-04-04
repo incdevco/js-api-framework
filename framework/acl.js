@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 var env = process.env.NODE_ENV || 'production';
 
 var Expect = require('./expect');
@@ -86,6 +87,7 @@ Acl.prototype.isAllowed = function isAllowed(user,resource,privilege,context) {
 
 	if (undefined === this.rules[resource]) {
 
+		/* istanbul ignore else */
 		if (env !== 'production') {
 
 			console.log('acl no resource',resource);
@@ -109,15 +111,7 @@ Acl.prototype.isAllowed = function isAllowed(user,resource,privilege,context) {
 	return promise
 		.catch(NotAllowed,function (error) {
 
-			if (acl.rules[resource]) {
-
-				return acl.tryRules(acl.rules[resource],user,resource,privilege,context);
-
-			} else {
-
-				throw error;
-
-			}
+			return acl.tryRules(acl.rules[resource],user,resource,privilege,context);
 
 		})
 		.then(function () {
@@ -149,11 +143,11 @@ Acl.prototype.tryRules = function tryRules(rules,user,resource,privilege,context
 
 function AclRule(config) {
 
-	this.assertions = config.assertions || [];
+	this.assertions = config.assertions;
 
-	this.privileges = config.privileges || [];
+	this.privileges = config.privileges;
 
-	this.roles = config.roles || [];
+	this.roles = config.roles;
 
 	this.assertions.forEach(function (assertion) {
 

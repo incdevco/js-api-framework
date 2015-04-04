@@ -24,7 +24,7 @@
   "homepage": "https://github.com/incdevco/node.js-framework",
   "dependencies": {
     "aws-sdk": "^2.0.23",
-    "bcrypt-nodejs": "0.0.3",
+    "bcrypt-nodejs": "^0.0.3",
     "bluebird": "^2.3.6",
     "body-parser": "^1.12.2",
     "chai": "^1.9.2",
@@ -40,7 +40,7 @@
     "twilio": "^1.7.0"
   },
   "devDependencies": {
-    "istanbul": "^0.3.11",
+    "istanbul": "^0.3.13",
     "mocha": "^2.2.1"
   }
 }

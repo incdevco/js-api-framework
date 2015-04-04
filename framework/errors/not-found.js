@@ -2,7 +2,9 @@ var util = require('util');
 
 function NotFound() {
 
-  Error.call(this,'Not Found');
+  Error.call(this);
+
+  this.message = 'Not Found';
 
 }
 

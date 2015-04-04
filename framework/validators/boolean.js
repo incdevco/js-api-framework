@@ -9,9 +9,7 @@ function BooleanValidator(config) {
 
 BooleanValidator.prototype.validate = function validate(value,context) {
 
-  var errors = [], promises = new Array(this.validators.length);
-
-  if (typeof value === 'boolean') {
+  if (typeof value !== 'boolean') {
 
     return Promise.reject(new NotValid('Must Be A Boolean'));
 

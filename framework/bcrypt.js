@@ -1,5 +1,5 @@
 var bcrypt = require('bcrypt-nodejs');
-var Promise = require('./index').Promise;
+var Promise = require('./promise');
 
 module.exports.compare = function compare(password,hash) {
 
@@ -14,15 +14,7 @@ module.exports.compare = function compare(password,hash) {
 
 			} else {
 
-				if (result) {
-
-					return resolve(true);
-
-				} else {
-
-					return reject(new Error('No Match'));
-
-				}
+				return resolve(result);
 
 			}
 

@@ -43,7 +43,7 @@ StringValidator.prototype.validate = function validate(value,context) {
 
   } else {
 
-    if (typeof value === 'string') {
+    if (typeof value !== 'string') {
 
       return Promise.reject(new NotValid('Must Be A String'));
 

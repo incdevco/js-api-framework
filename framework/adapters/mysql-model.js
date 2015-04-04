@@ -96,11 +96,12 @@ MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
 		key = this.primary[0],
 		primary = crypto.randomBytes(this.primaryLength)
       .toString('hex')
-      .substr(0,this.primaryLength);
+      .substr(0,this.primaryLength),
+		where = {};
 
-	return this.fetchOne({
-		key: primary
-	})
+	where[key] = primary;
+
+	return this.fetchOne(where)
 		.then(function () {
 
 			return adapter.createPrimaryId();
@@ -120,15 +121,16 @@ MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
 MysqlModelAdapter.prototype.delete = function _delete(model) {
 
 	var inserts = [this.table],
+		primary = this.primary,
 		sql = 'DELETE FROM ?? WHERE';
 
-	Object.keys(model).forEach(function (key) {
+	Object.keys(primary).forEach(function (key) {
 
 		sql += ' ?? = ? AND';
 
-		inserts.push(key);
+		inserts.push(primary[key]);
 
-		inserts.push(model[key]);
+		inserts.push(model[primary[key]]);
 
 	});
 
@@ -158,6 +160,7 @@ MysqlModelAdapter.prototype.delete = function _delete(model) {
 MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
 
 	var inserts = [this.table],
+		primary = this.primary,
 		sql = 'UPDATE ?? SET ';
 
 	Object.keys(newModel).forEach(function (key) {
@@ -178,13 +181,13 @@ MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
 
 	sql += ' WHERE';
 
-	Object.keys(oldModel).forEach(function (key) {
+	Object.keys(primary).forEach(function (key) {
 
 		sql += ' ?? = ? AND';
 
-		inserts.push(key);
+		inserts.push(primary[key]);
 
-		inserts.push(oldModel[key]);
+		inserts.push(oldModel[primary[key]]);
 
 	});
 
@@ -210,35 +213,42 @@ MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
 MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 	var inserts = [this.table],
-		sql = 'SELECT * FROM ??';
+		sql = 'SELECT * FROM ??',
+		whereKeys;
 
 	if (where) {
 
-		sql += ' WHERE';
+		whereKeys = Object.keys(where);
 
-		Object.keys(where).forEach(function (key) {
+		if (whereKeys.length) {
 
-			if (typeof where[key] === 'object') {
+			sql += ' WHERE';
 
-				sql += ' ?? '+where[key].comparator+' ? AND';
+			whereKeys.forEach(function (key) {
 
-				inserts.push(key);
+				if (typeof where[key] === 'object') {
 
-				inserts.push(where[key].value);
+					sql += ' ?? '+where[key].comparator+' ? AND';
 
-			} else {
+					inserts.push(key);
 
-				sql += ' ?? = ? AND';
+					inserts.push(where[key].value);
 
-				inserts.push(key);
+				} else {
 
-				inserts.push(where[key]);
+					sql += ' ?? = ? AND';
 
-			}
+					inserts.push(key);
 
-		});
+					inserts.push(where[key]);
 
-		sql = sql.replace(spaceAndRegex,'');
+				}
+
+			});
+
+			sql = sql.replace(spaceAndRegex,'');
+
+		}
 
 	}
 
@@ -269,35 +279,43 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 
-	var inserts = [this.table], sql = 'SELECT * FROM ??';
+	var inserts = [this.table],
+		sql = 'SELECT * FROM ??',
+		whereKeys;
 
 	if (where) {
 
-		sql += ' WHERE';
+		whereKeys = Object.keys(where);
 
-		Object.keys(where).forEach(function (key) {
+		if (whereKeys.length) {
 
-			if (typeof where[key] === 'object') {
+			sql += ' WHERE';
 
-				sql += ' ?? '+where[key].comparator+' ? AND';
+			whereKeys.forEach(function (key) {
 
-				inserts.push(key);
+				if (typeof where[key] === 'object') {
 
-				inserts.push(where[key].value);
+					sql += ' ?? '+where[key].comparator+' ? AND';
 
-			} else {
+					inserts.push(key);
 
-				sql += ' ?? = ? AND';
+					inserts.push(where[key].value);
 
-				inserts.push(key);
+				} else {
 
-				inserts.push(where[key]);
+					sql += ' ?? = ? AND';
 
-			}
+					inserts.push(key);
 
-		});
+					inserts.push(where[key]);
 
-		sql = sql.replace(spaceAndRegex,'');
+				}
+
+			});
+
+			sql = sql.replace(spaceAndRegex,'');
+
+		}
 
 	}
 
@@ -379,7 +397,7 @@ MysqlModelAdapter.prototype.query = function query(sql,inserts) {
 			/* istanbul ignore else */
 			if (env !== 'production') {
 
-				console.log('MysqlAdapter.query',query);
+				console.log('MysqlAdapter.query',query.sql);
 
 			}
 

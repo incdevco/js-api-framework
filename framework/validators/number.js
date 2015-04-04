@@ -13,7 +13,7 @@ NumberValidator.prototype.validate = function validate(value,context) {
 
   var errors = [], promises = new Array(this.validators.length);
 
-  if (typeof value === 'number') {
+  if (typeof value !== 'number') {
 
     return Promise.reject(new NotValid('Must Be A Number'));
 
