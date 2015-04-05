@@ -31,7 +31,8 @@ describe('Framework.Validators.PhoneNumber',function () {
 			.catch(Framework.Errors.NotValid,function (error) {
 
 				Framework.Expect(error).to.be.eql({
-					errors: 'Only + and 0-9 Allowed'
+					errors: 'Only + and 0-9 Allowed',
+					name: 'NotValid'
 				});
 
 				return done();

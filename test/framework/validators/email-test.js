@@ -31,7 +31,8 @@ describe('Framework.Validators.Email',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Not Valid Email Address'
+					errors: 'Not Valid Email Address',
+					name: 'NotValid'
 				});
 
 				return done();

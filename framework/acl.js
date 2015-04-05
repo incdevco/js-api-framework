@@ -85,6 +85,12 @@ Acl.prototype.isAllowed = function isAllowed(user,resource,privilege,context) {
 
 	user.roles = user.roles || [];
 
+	if (!Array.isArray(user.roles)) {
+
+		user.roles = [user.roles];
+
+	}
+
 	if (undefined === this.rules[resource]) {
 
 		/* istanbul ignore else */
@@ -118,7 +124,66 @@ Acl.prototype.isAllowed = function isAllowed(user,resource,privilege,context) {
 
 			return context;
 
+		})
+		.catch(NotAllowed,function (error) {
+
+			/* istanbul ignore else */
+			if (env !== 'production') {
+
+				console.error('acl',error,user.roles);
+
+			}
+
+			throw error;
+
 		});
+
+};
+
+Acl.prototype.isAllowedQuery = function isAllowedQuery(user,resource,privilege,query) {
+
+	var acl = this;
+
+	return new Promise(function (resolve,reject) {
+
+		var allowed = [], promises = [];
+
+		query.on('error',function (error) {
+
+			return reject(error);
+
+		});
+
+		query.on('row',function (row) {
+
+			promises.push(acl.isAllowed(user,resource,privilege,row)
+				.then(function () {
+
+					allowed.push(row);
+
+					return true;
+
+				})
+				.catch(NotAllowed,function (error) {
+
+					return false;
+
+				}));
+
+		});
+
+		query.on('end',function () {
+
+			return resolve(Promise.all(promises)
+				.then(function () {
+
+					return allowed;
+
+				},reject));
+
+		});
+
+	});
 
 };
 

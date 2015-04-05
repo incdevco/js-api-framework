@@ -2,11 +2,11 @@ var base = process.env.PWD;
 
 var Framework = require(base+'/framework');
 
-describe('Framework.Adapters.MysqlModel',function () {
+describe('Framework.Adapters.PostgresqlModel',function () {
 
   it('constructor',function () {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
       pool: {},
       primary: ['id'],
       table: 'table'
@@ -16,7 +16,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('add resolves when affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -27,13 +27,11 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('INSERT INTO ?? SET ?? = ?',[
-        adapter.table,
-        'test',
+      .with('INSERT INTO "table" ("test") VALUES ($1)',[
         'test'
       ])
       .resolve({
-        affectedRows: 1
+        rowCount: 1
       });
 
     adapter.add(model)
@@ -50,7 +48,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('add calls createPrimaryId and resolves when createPrimary',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         createPrimary: true,
         pool: {},
         primary: ['id'],
@@ -66,15 +64,12 @@ describe('Framework.Adapters.MysqlModel',function () {
       .resolve('test');
 
     mock.mock('adapter',adapter,'query')
-      .with('INSERT INTO ?? SET ?? = ?, ?? = ?',[
-        adapter.table,
+      .with('INSERT INTO "table" ("test","id") VALUES ($1,$2)',[
         'test',
-        'test',
-        'id',
         'test'
       ])
       .resolve({
-        affectedRows: 1
+        rowCount: 1
       });
 
     adapter.add(model)
@@ -91,7 +86,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('add rejects when not affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -102,13 +97,11 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('INSERT INTO ?? SET ?? = ?',[
-        adapter.table,
-        'test',
+      .with('INSERT INTO "table" ("test") VALUES ($1)',[
         'test'
       ])
       .resolve({
-        affectedRows: 0
+        rowCount: 0
       });
 
     adapter.add(model)
@@ -128,7 +121,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('createPrimaryId resolves when fetchOne rejects with NotFound',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         primaryLength: 10,
@@ -157,7 +150,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('createPrimaryId calls itself and then resolves when fetchOne resolves and then rejects',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         primaryLength: 10,
@@ -189,7 +182,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('delete resolves when affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -201,13 +194,11 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('DELETE FROM ?? WHERE ?? = ? LIMIT 1',[
-        adapter.table,
-        'id',
+      .with('DELETE FROM "table" WHERE "id" = $1 LIMIT 1',[
         'id'
       ])
       .resolve({
-        affectedRows: 1
+        rowCount: 1
       });
 
     adapter.delete(model)
@@ -224,7 +215,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('delete rejects with NoDelete when no affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -236,13 +227,11 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('DELETE FROM ?? WHERE ?? = ? LIMIT 1',[
-        adapter.table,
-        'id',
+      .with('DELETE FROM "table" WHERE "id" = $1 LIMIT 1',[
         'id'
       ])
       .resolve({
-        affectedRows: 0
+        rowCount: 0
       });
 
     adapter.delete(model)
@@ -262,7 +251,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('edit resolves when affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -280,15 +269,12 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('UPDATE ?? SET ?? = ? WHERE ?? = ? LIMIT 1',[
-        adapter.table,
-        'test',
+      .with('UPDATE "table" SET "test" = $1 WHERE "id" = $2 LIMIT 1',[
         'tested',
-        'id',
         'id'
       ])
       .resolve({
-        affectedRows: 1
+        rowCount: 1
       });
 
     adapter.edit(oldModel,newModel)
@@ -305,7 +291,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('edit rejects with NoUpdate when no affectedRows',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -321,15 +307,12 @@ describe('Framework.Adapters.MysqlModel',function () {
       };
 
     mock.mock('adapter',adapter,'query')
-      .with('UPDATE ?? SET ?? = ? WHERE ?? = ? LIMIT 1',[
-        adapter.table,
-        'test',
+      .with('UPDATE "table" SET "test" = $1 WHERE "id" = $2 LIMIT 1',[
         'tested',
-        'id',
         'id'
       ])
       .resolve({
-        affectedRows: 0
+        rowCount: 0
       });
 
     adapter.edit(oldModel,newModel)
@@ -349,7 +332,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('fetchAll with where, limit and offset resolves',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -360,17 +343,17 @@ describe('Framework.Adapters.MysqlModel',function () {
       },
       limit = 1,
       offset = 1,
+      returnResult = {
+        rowCount: 1,
+        rows: [{'test':'test'}]
+      },
       expected = [{'test':'test'}];
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? WHERE ?? = ? LIMIT ? OFFSET ?',[
-        adapter.table,
-        'test',
-        'test',
-        limit,
-        offset
+      .with('SELECT * FROM "table" WHERE "test" = $1 LIMIT 1 OFFSET 1',[
+        'test'
       ])
-      .resolve(expected);
+      .resolve(returnResult);
 
     adapter.fetchAll(where,limit,offset)
       .then(function (result) {
@@ -386,7 +369,7 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('fetchAll with where with comparator and value',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -400,17 +383,17 @@ describe('Framework.Adapters.MysqlModel',function () {
       },
       limit = 1,
       offset = 1,
+      returnResult = {
+        rowCount: 1,
+        rows: [{'test':'test'}]
+      },
       expected = [{'test':'test'}];
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? WHERE ?? > ? LIMIT ? OFFSET ?',[
-        adapter.table,
-        'test',
-        'test',
-        limit,
-        offset
+      .with('SELECT * FROM "table" WHERE "test" > $1 LIMIT 1 OFFSET 1',[
+        'test'
       ])
-      .resolve(expected);
+      .resolve(returnResult);
 
     adapter.fetchAll(where,limit,offset)
       .then(function (result) {
@@ -426,19 +409,21 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('fetchAll without where, limit or offset resolves',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
       }),
       mock = new Framework.Mock(),
+      returnResult = {
+        rowCount: 1,
+        rows: [{'test':'test'}]
+      },
       expected = [{'test':'test'}];
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ??',[
-        adapter.table
-      ])
-      .resolve(expected);
+      .with('SELECT * FROM "table"',[])
+      .resolve(returnResult);
 
     adapter.fetchAll()
       .then(function (result) {
@@ -452,9 +437,9 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('fetchOne with where and offset resolves when result[0]',function (done) {
+  it('fetchOne with where and offset resolves when result.rowCount',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -464,21 +449,22 @@ describe('Framework.Adapters.MysqlModel',function () {
         'test':'test'
       },
       offset = 1,
-      expected = [{'test':'test'}];
+      returnResult = {
+        rowCount: 1,
+        rows: [{'test':'test'}]
+      },
+      expected = {'test':'test'};
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? WHERE ?? = ? LIMIT 1 OFFSET ?',[
-        adapter.table,
-        'test',
-        'test',
-        offset
+      .with('SELECT * FROM "table" WHERE "test" = $1 LIMIT 1 OFFSET 1',[
+        'test'
       ])
-      .resolve(expected);
+      .resolve(returnResult);
 
     adapter.fetchOne(where,offset)
       .then(function (result) {
 
-        Framework.Expect(result).to.be.eql(expected[0]);
+        Framework.Expect(result).to.be.eql(expected);
 
         return mock.done(done);
 
@@ -487,9 +473,9 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('fetchOne with where with comparator and value resolves when result[0]',function (done) {
+  it('fetchOne with where with comparator and value resolves when result.rowCount',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -501,20 +487,22 @@ describe('Framework.Adapters.MysqlModel',function () {
           value: 'test'
         }
       },
-      expected = [{'test':'test'}];
+      returnResult = {
+        rowCount: 1,
+        rows: [{'test':'test'}]
+      },
+      expected = {'test':'test'};
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? WHERE ?? > ? LIMIT 1',[
-        adapter.table,
-        'test',
+      .with('SELECT * FROM "table" WHERE "test" > $1 LIMIT 1',[
         'test'
       ])
-      .resolve(expected);
+      .resolve(returnResult);
 
     adapter.fetchOne(where)
       .then(function (result) {
 
-        Framework.Expect(result).to.be.eql(expected[0]);
+        Framework.Expect(result).to.be.eql(expected);
 
         return mock.done(done);
 
@@ -523,26 +511,28 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('fetchOne without where or offset resolves when result[0]',function (done) {
+  it('fetchOne without where or offset resolves when result.rowCount',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
       }),
       mock = new Framework.Mock(),
-    expected = [{'test':'test'}];
+    returnResult = {
+      rowCount: 1,
+      rows: [{'test':'test'}]
+    },
+    expected = {'test':'test'};
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? LIMIT 1',[
-        adapter.table
-      ])
-      .resolve(expected);
+      .with('SELECT * FROM "table" LIMIT 1',[])
+      .resolve(returnResult);
 
     adapter.fetchOne()
       .then(function (result) {
 
-        Framework.Expect(result).to.be.eql(expected[0]);
+        Framework.Expect(result).to.be.eql(expected);
 
         return mock.done(done);
 
@@ -551,9 +541,9 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('fetchOne rejects with NotFound when not result[0]',function (done) {
+  it('fetchOne rejects with NotFound when not result.rowCount',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'table'
@@ -563,15 +553,17 @@ describe('Framework.Adapters.MysqlModel',function () {
         'test':'test'
       },
       limit = 1,
+      returnResult = {
+        rowCount: 0,
+        rows: []
+      },
       expected = [];
 
     mock.mock('adapter',adapter,'query')
-      .with('SELECT * FROM ?? WHERE ?? = ? LIMIT 1',[
-        adapter.table,
-        'test',
+      .with('SELECT * FROM "table" WHERE "test" = $1 LIMIT 1',[
         'test'
       ])
-      .resolve(expected);
+      .resolve(returnResult);
 
     adapter.fetchOne(where)
       .then(function () {
@@ -588,83 +580,29 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('getConnection resolves with connection',function (done) {
-
-    var adapter = new Framework.Adapters.MysqlModel({
-        pool: {},
-        primary: ['id'],
-        table: 'test'
-      }),
-      mock = new Framework.Mock(),
-      connection = 'test';
-
-    mock.mock('pool',adapter.pool,'getConnection')
-      .callback(null,connection);
-
-    adapter.getConnection()
-      .then(function (result) {
-
-        Framework.Expect(result).to.be.equal(connection);
-
-        return mock.done(done);
-
-      })
-      .catch(done);
-
-  });
-
-  it('getConnection rejects with error',function (done) {
-
-    var adapter = new Framework.Adapters.MysqlModel({
-        pool: {},
-        primary: ['id'],
-        table: 'test'
-      }),
-      mock = new Framework.Mock(),
-      connection = 'test',
-      error = 'error';
-
-    mock.mock('pool',adapter.pool,'getConnection')
-      .callback(error);
-
-    adapter.getConnection()
-      .then(function (result) {
-
-        return done(new Error('resolved'));
-
-      })
-      .catch(function (result) {
-
-        Framework.Expect(result).to.be.equal(error);
-
-        return mock.done(done);
-
-      });
-
-  });
-
   it('query resolves with result from connection.query',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'test'
       }),
       mock = new Framework.Mock(),
       connection = {},
+      finish = {},
       sql = 'sql',
       inserts = 'inserts',
       expected = 'expected';
 
-    mock.mock('pool',adapter.pool,'getConnection')
-      .callback(null,connection);
+    mock.mock('finish',finish,'done')
+      .return('');
+
+    mock.mock('pool',adapter.pool,'connect')
+      .callback(null,connection,finish.done);
 
     mock.mock('connection',connection,'query')
       .with(sql,inserts)
       .callback(null,expected);
-
-    mock.mock('connection',connection,'release')
-      .return('');
 
     adapter.query(sql,inserts)
       .then(function (result) {
@@ -678,9 +616,9 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   });
 
-  it('query rejects with error from pool.getConnection',function (done) {
+  it('query rejects with error from pool.connect',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'test'
@@ -691,7 +629,7 @@ describe('Framework.Adapters.MysqlModel',function () {
       inserts = 'inserts',
       error = 'error';
 
-    mock.mock('pool',adapter.pool,'getConnection')
+    mock.mock('pool',adapter.pool,'connect')
       .callback(error);
 
     adapter.query(sql,inserts)
@@ -713,26 +651,27 @@ describe('Framework.Adapters.MysqlModel',function () {
 
   it('query rejects with error from connection.query',function (done) {
 
-    var adapter = new Framework.Adapters.MysqlModel({
+    var adapter = new Framework.Adapters.PostgresqlModel({
         pool: {},
         primary: ['id'],
         table: 'test'
       }),
       mock = new Framework.Mock(),
       connection = {},
+      finish = {},
       sql = 'sql',
       inserts = 'inserts',
       error = 'error';
 
-    mock.mock('pool',adapter.pool,'getConnection')
-      .callback(null,connection);
+    mock.mock('finish',finish,'done')
+      .return('');
+
+    mock.mock('pool',adapter.pool,'connect')
+      .callback(null,connection,finish.done);
 
     mock.mock('connection',connection,'query')
       .with(sql,inserts)
       .callback(error);
-
-    mock.mock('connection',connection,'release')
-      .return('');
 
     adapter.query(sql,inserts)
       .then(function () {

@@ -1,3 +1,5 @@
+var env = process.env.NODE_ENV || 'production';
+
 var Expect = require('../expect');
 var NodeMailer = require('../node-mailer');
 var Promise = require('../promise');
@@ -40,17 +42,27 @@ EmailService.prototype.send = function send(email) {
 
   return new Promise(function (resolve,reject) {
 
-    return service.transport.sendEmail(email,function (error,result) {
+    if (env === 'production') {
 
-      if (error) {
+      return service.transport.sendEmail(email,function (error,result) {
 
-        return reject(error);
+        if (error) {
 
-      }
+          return reject(error);
 
-      return resolve(result);
+        }
 
-    });
+        return resolve(result);
+
+      });
+
+    } else {
+
+      console.log('email',email);
+
+      return resolve(email);
+
+    }
 
   });
 

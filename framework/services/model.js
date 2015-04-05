@@ -72,14 +72,14 @@ ModelService.prototype.edit = function edit(oldModel,newModel) {
 
 };
 
-ModelService.prototype.fetchAll = function fetchAll(where,limit,offset) {
+ModelService.prototype.fetchAll = function fetchAll(where,limit,offset,returnQuery) {
 
   var service = this;
 
   return service.validate('fetchAll',where)
     .then(function (where) {
 
-      return service.adapter.fetchAll(where,limit,offset);
+      return service.adapter.fetchAll(where,limit,offset,returnQuery);
 
     });
 

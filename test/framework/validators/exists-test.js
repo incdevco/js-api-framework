@@ -57,7 +57,8 @@ describe('Framework.Validators.Exists',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Does Not Exist'
+					errors: 'Does Not Exist',
+					name: 'NotValid'
 				});
 
 				return mock.done(done);

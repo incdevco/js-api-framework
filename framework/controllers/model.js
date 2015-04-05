@@ -168,47 +168,11 @@ ModelController.prototype.fetchAll = function fetchAll() {
 
     var where = Merge(true,request.params,request.query);
 
-    return service.fetchAll(where)
-      .then(function (set) {
+    return service.fetchAll(where,undefined,undefined,true)
+      .then(function (query) {
 
-        var allowed, promises;
-
-        if (acl) {
-
-          allowed = [];
-
-          promises = [];
-
-          for (var i = 0; i < set.length; i++) {
-
-            promises[i] = acl.isAllowed(request.user,resource,'view',set[i])
-              .then(function (model) {
-
-                allowed.push(model);
-
-                return true;
-
-              },function (error) {
-
-                return false;
-
-              });
-
-          }
-
-          return Promise.all(promises)
-            .then(function () {
-
-              return allowed;
-
-            });
-
-        } else {
-
-          return set;
-
-        }
-
+        return acl.isAllowedQuery(request.user,resource,'view',query);
+        
       })
       .then(function (set) {
 

@@ -31,7 +31,8 @@ describe('Framework.Validators.Float',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Not Valid Float'
+					errors: 'Not Valid Float',
+					name: 'NotValid'
 				});
 
 				return done();

@@ -80,7 +80,8 @@ describe('Framework.Validators.Array',function () {
             item: [
               ['item_error']
             ]
-          }
+          },
+          name: 'NotValid'
         });
 
         return mock.done(done);
@@ -106,7 +107,8 @@ describe('Framework.Validators.Array',function () {
       .catch(Framework.Errors.NotValid,function (error) {
 
         Framework.Expect(error).to.be.eql({
-          errors: 'Must Be An Array'
+          errors: 'Must Be An Array',
+          name: 'NotValid'
         });
 
         return done();

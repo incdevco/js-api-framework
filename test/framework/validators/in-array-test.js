@@ -53,7 +53,8 @@ describe('Framework.Validators.InArray',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Value Not Allowed'
+					errors: 'Value Not Allowed',
+					name: 'NotValid'
 				});
 
 				return done();

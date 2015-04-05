@@ -31,7 +31,8 @@ describe('Framework.Validators.Url',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 					Framework.Expect(exception).to.be.eql({
-						errors: 'Not A Valid Url'
+						errors: 'Not A Valid Url',
+						name: 'NotValid'
 					});
 
 					return done();

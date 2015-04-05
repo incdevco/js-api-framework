@@ -31,7 +31,8 @@ describe('Framework.Validators.Alphanumeric',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Only Alphanumeric Characters Allowed'
+					errors: 'Only Alphanumeric Characters Allowed',
+          name: 'NotValid'
 				});
 
 				return done();

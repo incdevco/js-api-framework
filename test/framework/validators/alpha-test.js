@@ -31,7 +31,8 @@ describe('Framework.Validators.Alpha',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Only Alpha Characters Allowed'
+					errors: 'Only Alpha Characters Allowed',
+          name: 'NotValid'
 				});
 
 				return done();

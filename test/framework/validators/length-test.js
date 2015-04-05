@@ -71,7 +71,8 @@ describe('Framework.Validators.Length',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Too Long'
+					errors: 'Too Long',
+					name: 'NotValid'
 				});
 
 				return done();
@@ -97,7 +98,8 @@ describe('Framework.Validators.Length',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Too Short'
+					errors: 'Too Short',
+					name: 'NotValid'
 				});
 
 				return done();

@@ -15,6 +15,7 @@ module.exports.Moment = require('moment');
 module.exports.Mysql = require('./mysql');
 module.exports.NodeMailer = require('./node-mailer');
 module.exports.Numeral = require('numeral');
+module.exports.Postgresql = require('./postgresql');
 module.exports.Promise = require('./promise');
 module.exports.Services = require('./services');
 module.exports.Twilio = require('twilio');

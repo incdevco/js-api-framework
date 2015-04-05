@@ -31,7 +31,8 @@ describe('Framework.Validators.Numeric',function () {
 			.catch(Framework.Errors.NotValid,function (exception) {
 
 				Framework.Expect(exception).to.be.eql({
-					errors: 'Only Numeric Characters Allowed'
+					errors: 'Only Numeric Characters Allowed',
+					name: 'NotValid'
 				});
 
 				return done();
