@@ -15,11 +15,21 @@ function ModelController(config) {
 
   }
 
+  if (config.preparer) {
+
+    Expect(config.preparer).to.be.an('object','config.preparer');
+    Expect(config.preparer.prepareModel).to.be.a('function','config.preparer.prepareModel');
+    Expect(config.preparer.prepareSet).to.be.a('function','config.preparer.prepareSet');
+
+  }
+
   Expect(config.resource).to.be.a('string','config.resource');
 
   Expect(config.service).to.be.instanceof(ModelService,'config.service');
 
   this.acl = config.acl;
+
+  this.preparer = config.preparer;
 
   this.resource = config.resource;
 
@@ -49,6 +59,19 @@ ModelController.prototype.add = function add() {
       .then(function (model) {
 
         return crtl.service.add(model);
+
+      })
+      .then(function (model) {
+
+        if (crtl.preparer) {
+
+          return crtl.preparer.prepareModel(model);
+
+        } else {
+
+          return model;
+
+        }
 
       })
       .then(function (model) {
@@ -97,6 +120,19 @@ ModelController.prototype.delete = function _delete() {
       })
       .then(function (model) {
 
+        if (crtl.preparer) {
+
+          return crtl.preparer.prepareModel(model);
+
+        } else {
+
+          return model;
+
+        }
+
+      })
+      .then(function (model) {
+
         response.status(200);
 
         response.json(model);
@@ -141,6 +177,19 @@ ModelController.prototype.edit = function edit() {
       })
       .then(function (model) {
 
+        if (crtl.preparer) {
+
+          return crtl.preparer.prepareModel(model);
+
+        } else {
+
+          return model;
+
+        }
+
+      })
+      .then(function (model) {
+
         response.status(200);
 
         response.json(model);
@@ -161,6 +210,7 @@ ModelController.prototype.edit = function edit() {
 ModelController.prototype.fetchAll = function fetchAll() {
 
   var acl = this.acl,
+    preparer = this.preparer,
     resource = this.resource,
     service = this.service;
 
@@ -172,7 +222,20 @@ ModelController.prototype.fetchAll = function fetchAll() {
       .then(function (query) {
 
         return acl.isAllowedQuery(request.user,resource,'view',query);
-        
+
+      })
+      .then(function (set) {
+
+        if (preparer) {
+
+          return preparer.prepareSet(set);
+
+        } else {
+
+          return set;
+
+        }
+
       })
       .then(function (set) {
 
@@ -207,6 +270,19 @@ ModelController.prototype.fetchOne = function fetchOne() {
         if (crtl.acl) {
 
           return crtl.acl.isAllowed(request.user,crtl.resource,'view',model);
+
+        } else {
+
+          return model;
+
+        }
+
+      })
+      .then(function (model) {
+
+        if (crtl.preparer) {
+
+          return crtl.preparer.prepareModel(model);
 
         } else {
 

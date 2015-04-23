@@ -43,5 +43,11 @@
   "devDependencies": {
     "istanbul": "^0.3.13",
     "mocha": "^2.2.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "mocha": true,
+      "node": true
+    }
   }
 }
