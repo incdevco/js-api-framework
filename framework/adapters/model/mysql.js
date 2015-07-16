@@ -1,29 +1,30 @@
 /* istanbul ignore next */
-var env = process.env.NODE_ENV || 'production';
-var crypto = require('crypto');
+var env = process.env.NODE_ENV || "production";
+var crypto = require("crypto");
 
-var Errors = require('../errors');
-var Expect = require('../expect');
-var Promise = require('../promise');
+var Errors = require("../../errors");
+var Expect = require("../../expect");
+var Promise = require("../../promise");
 
 var commaSpaceRegex = /,\s$/;
 var spaceAndRegex = /\sAND$/;
 
 function MysqlModelAdapter(config) {
+	"use strict";
 
-	Expect(config).to.be.an('object','config');
+	Expect(config).to.be.an("object", "config");
 
-	Expect(config.pool).to.be.an('object','config.pool');
+	Expect(config.pool).to.be.an("object", "config.pool");
 
-	Expect(config.primary).to.be.instanceof(Array,'config.primary');
+	Expect(config.primary).to.be.instanceof(Array, "config.primary");
 
-	Expect(config.table).to.be.a('string','config.table');
+	Expect(config.table).to.be.a("string", "config.table");
 
 	if (config.createPrimary) {
 
-		Expect(config.primary.length).to.equal(1,'config.primary.length');
+		Expect(config.primary.length).to.equal(1, "config.primary.length");
 
-		Expect(config.primaryLength).to.be.a('number','config.primaryLength');
+		Expect(config.primaryLength).to.be.a("number", "config.primaryLength");
 
 	}
 
@@ -36,6 +37,7 @@ function MysqlModelAdapter(config) {
 }
 
 MysqlModelAdapter.prototype.add = function add(model) {
+	"use strict";
 
 	var adapter = this, promise;
 
@@ -59,11 +61,11 @@ MysqlModelAdapter.prototype.add = function add(model) {
 	return promise
 		.then(function () {
 
-			var inserts = [adapter.table], sql = 'INSERT INTO ?? SET ';
+			var inserts = [adapter.table], sql = "INSERT INTO ?? SET ";
 
 			Object.keys(model).forEach(function (key) {
 
-				sql += '?? = ?, ';
+				sql += "?? = ?, ";
 
 				inserts.push(key);
 
@@ -71,9 +73,9 @@ MysqlModelAdapter.prototype.add = function add(model) {
 
 			});
 
-			sql = sql.replace(commaSpaceRegex,'');
+			sql = sql.replace(commaSpaceRegex, "");
 
-			return adapter.query(sql,inserts);
+			return adapter.query(sql, inserts);
 
 		})
 		.then(function (result) {
@@ -91,12 +93,13 @@ MysqlModelAdapter.prototype.add = function add(model) {
 };
 
 MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
+	"use strict";
 
 	var adapter = this,
 		key = this.primary[0],
 		primary = crypto.randomBytes(this.primaryLength)
-      .toString('hex')
-      .substr(0,this.primaryLength),
+      .toString("hex")
+      .substr(0, this.primaryLength),
 		where = {};
 
 	where[key] = primary;
@@ -107,7 +110,7 @@ MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
 			return adapter.createPrimaryId();
 
 		})
-		.catch(Errors.NotFound,function () {
+		.catch(Errors.NotFound, function () {
 
 			return primary;
 
@@ -116,14 +119,15 @@ MysqlModelAdapter.prototype.createPrimaryId = function createPrimaryId() {
 };
 
 MysqlModelAdapter.prototype.delete = function _delete(model) {
+	"use strict";
 
 	var inserts = [this.table],
 		primary = this.primary,
-		sql = 'DELETE FROM ?? WHERE';
+		sql = "DELETE FROM ?? WHERE";
 
 	Object.keys(primary).forEach(function (key) {
 
-		sql += ' ?? = ? AND';
+		sql += " ?? = ? AND";
 
 		inserts.push(primary[key]);
 
@@ -131,11 +135,11 @@ MysqlModelAdapter.prototype.delete = function _delete(model) {
 
 	});
 
-	sql = sql.replace(spaceAndRegex,'');
+	sql = sql.replace(spaceAndRegex, "");
 
-	sql += ' LIMIT 1';
+	sql += " LIMIT 1";
 
-	return this.query(sql,inserts)
+	return this.query(sql, inserts)
 		.then(function (result) {
 
 			if (result.affectedRows) {
@@ -150,50 +154,59 @@ MysqlModelAdapter.prototype.delete = function _delete(model) {
 
 };
 
-MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
+MysqlModelAdapter.prototype.edit = function edit(model, old) {
+	"use strict";
 
 	var inserts = [this.table],
 		primary = this.primary,
-		sql = 'UPDATE ?? SET ';
+		sql = "UPDATE ?? SET ";
 
-	Object.keys(newModel).forEach(function (key) {
+	Object.keys(model).forEach(function (key) {
 
-		if (oldModel[key] !== newModel[key]) {
+		if (!old || old[key] !== model[key]) {
 
-			sql += '?? = ?, ';
+			sql += "?? = ?, ";
 
 			inserts.push(key);
 
-			inserts.push(newModel[key]);
+			inserts.push(model[key]);
 
 		}
 
 	});
 
-	sql = sql.replace(commaSpaceRegex,'');
+	sql = sql.replace(commaSpaceRegex, "");
 
-	sql += ' WHERE';
+	sql += " WHERE";
 
 	Object.keys(primary).forEach(function (key) {
 
-		sql += ' ?? = ? AND';
+		sql += " ?? = ? AND";
 
 		inserts.push(primary[key]);
 
-		inserts.push(oldModel[primary[key]]);
+		if (old) {
+
+			inserts.push(old[primary[key]]);
+
+		} else {
+
+			inserts.push(model[primary[key]]);
+
+		}
 
 	});
 
-	sql = sql.replace(spaceAndRegex,'');
+	sql = sql.replace(spaceAndRegex, "");
 
-	sql += ' LIMIT 1';
+	sql += " LIMIT 1";
 
-	return this.query(sql,inserts)
+	return this.query(sql, inserts)
 		.then(function (result) {
 
 			if (result.affectedRows) {
 
-				return newModel;
+				return model;
 
 			}
 
@@ -203,10 +216,11 @@ MysqlModelAdapter.prototype.edit = function edit(oldModel,newModel) {
 
 };
 
-MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
+MysqlModelAdapter.prototype.fetchAll = function fetchAll(where, limit, offset) {
+	"use strict";
 
 	var inserts = [this.table],
-		sql = 'SELECT * FROM ??',
+		sql = "SELECT * FROM ??",
 		whereKeys;
 
 	if (where) {
@@ -215,13 +229,13 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 		if (whereKeys.length) {
 
-			sql += ' WHERE';
+			sql += " WHERE";
 
 			whereKeys.forEach(function (key) {
 
-				if (typeof where[key] === 'object') {
+				if (typeof where[key] === "object") {
 
-					sql += ' ?? '+where[key].comparator+' ? AND';
+					sql += " ?? " + where[key].comparator + " ? AND";
 
 					inserts.push(key);
 
@@ -229,7 +243,7 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 				} else {
 
-					sql += ' ?? = ? AND';
+					sql += " ?? = ? AND";
 
 					inserts.push(key);
 
@@ -239,7 +253,7 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 			});
 
-			sql = sql.replace(spaceAndRegex,'');
+			sql = sql.replace(spaceAndRegex, "");
 
 		}
 
@@ -247,7 +261,7 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 	if (limit) {
 
-		sql += ' LIMIT ?';
+		sql += " LIMIT ?";
 
 		inserts.push(limit);
 
@@ -255,13 +269,13 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 	if (offset) {
 
-		sql += ' OFFSET ?';
+		sql += " OFFSET ?";
 
 		inserts.push(offset);
 
 	}
 
-	return this.query(sql,inserts)
+	return this.query(sql, inserts)
 		.then(function (result) {
 
 			return result;
@@ -270,10 +284,11 @@ MysqlModelAdapter.prototype.fetchAll = function fetchAll(where,limit,offset) {
 
 };
 
-MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
+MysqlModelAdapter.prototype.fetchOne = function (where, offset) {
+	"use strict";
 
 	var inserts = [this.table],
-		sql = 'SELECT * FROM ??',
+		sql = "SELECT * FROM ??",
 		whereKeys;
 
 	if (where) {
@@ -282,13 +297,13 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 
 		if (whereKeys.length) {
 
-			sql += ' WHERE';
+			sql += " WHERE";
 
 			whereKeys.forEach(function (key) {
 
-				if (typeof where[key] === 'object') {
+				if (typeof where[key] === "object") {
 
-					sql += ' ?? '+where[key].comparator+' ? AND';
+					sql += " ?? " + where[key].comparator + " ? AND";
 
 					inserts.push(key);
 
@@ -296,7 +311,7 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 
 				} else {
 
-					sql += ' ?? = ? AND';
+					sql += " ?? = ? AND";
 
 					inserts.push(key);
 
@@ -306,23 +321,23 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 
 			});
 
-			sql = sql.replace(spaceAndRegex,'');
+			sql = sql.replace(spaceAndRegex, "");
 
 		}
 
 	}
 
-	sql += ' LIMIT 1';
+	sql += " LIMIT 1";
 
 	if (offset) {
 
-		sql += ' OFFSET ?';
+		sql += " OFFSET ?";
 
 		inserts.push(offset);
 
 	}
 
-	return this.query(sql,inserts)
+	return this.query(sql, inserts)
 		.then(function (result) {
 
 			if (result.length) {
@@ -338,12 +353,13 @@ MysqlModelAdapter.prototype.fetchOne = function (where,offset) {
 };
 
 MysqlModelAdapter.prototype.getConnection = function getConnection() {
+	"use strict";
 
 	var pool = this.pool;
 
-	return new Promise(function (resolve,reject) {
+	return new Promise(function (resolve, reject) {
 
-		return pool.getConnection(function (error,connection) {
+		return pool.getConnection(function (error, connection) {
 
 			if (error) {
 
@@ -359,21 +375,22 @@ MysqlModelAdapter.prototype.getConnection = function getConnection() {
 
 };
 
-MysqlModelAdapter.prototype.query = function query(sql,inserts) {
+MysqlModelAdapter.prototype.query = function query(sql, inserts) {
+	"use strict";
 
 	var pool = this.pool;
 
-	return new Promise(function (resolve,reject) {
+	return new Promise(function (resolve, reject) {
 
-		return pool.getConnection(function (error,connection) {
+		return pool.getConnection(function (error, connection) {
 
-			if  (error) {
+			if (error) {
 
 				return reject(error);
 
 			}
 
-			var query = connection.query(sql,inserts,function (error,result) {
+			var query = connection.query(sql, inserts, function (error, result) {
 
 				connection.release();
 
@@ -388,9 +405,9 @@ MysqlModelAdapter.prototype.query = function query(sql,inserts) {
 			});
 
 			/* istanbul ignore else */
-			if (env !== 'production') {
+			if (env !== "production") {
 
-				console.log('MysqlAdapter.query',query.sql);
+				console.log("MysqlAdapter.query", query.sql);
 
 			}
 

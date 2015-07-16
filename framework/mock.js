@@ -1,13 +1,17 @@
-var Expect = require('./expect');
-var Promise = require('./promise');
+var util = require("util");
+
+var Expect = require("./expect");
+var Promise = require("./promise");
 
 function Mock() {
+	"use strict";
 
 	this.mocks = {};
 
 }
 
 Mock.prototype.done = function done(done) {
+	"use strict";
 
 	var mock = this,
 		keys = Object.keys(this.mocks);
@@ -22,11 +26,11 @@ Mock.prototype.done = function done(done) {
 
 			if (mocked.calls.length !== mocked.called) {
 
-				console.error('expected',mocked.calls.length);
+				console.error("expected", mocked.calls.length);
 
-				console.error('actual',mocked.called);
+				console.error("actual", mocked.called);
 
-				throw new Error(mocked.name+'#'+mocked.fn+' called count does not match');
+				throw new Error(mocked.name + "#" + mocked.fn + " called count does not match");
 
 			}
 
@@ -38,7 +42,8 @@ Mock.prototype.done = function done(done) {
 
 };
 
-Mock.prototype.mock = function mock(name,obj,fn) {
+Mock.prototype.mock = function mock(name, obj, fn) {
+	"use strict";
 
 	var mocked;
 
@@ -61,7 +66,7 @@ Mock.prototype.mock = function mock(name,obj,fn) {
 
 	obj[fn] = function () {
 
-		return mocked.mocked.apply(mocked,arguments);
+		return mocked.mocked.apply(mocked, arguments);
 
 	};
 
@@ -70,6 +75,7 @@ Mock.prototype.mock = function mock(name,obj,fn) {
 };
 
 function Mocked(config) {
+	"use strict";
 
 	this.called = 0;
 	this.calls = [];
@@ -79,12 +85,14 @@ function Mocked(config) {
 }
 
 Mocked.prototype.call = function call(index) {
+	"use strict";
 
 	return this.calls[index];
 
 };
 
 Mocked.prototype.mocked = function mocked() {
+	"use strict";
 
 	var index;
 
@@ -94,15 +102,16 @@ Mocked.prototype.mocked = function mocked() {
 
 	if (undefined === this.calls[index]) {
 
-		throw new Error(this.name+'.'+this.fn+' not expected to be called '+this.called+' times');
+		throw new Error(this.name+ "." + this.fn + " not expected to be called " + this.called + " times");
 
 	}
 
-	return this.calls[index].call.apply(this.calls[index],arguments);
+	return this.calls[index].call.apply(this.calls[index], arguments);
 
 };
 
 Mocked.prototype.next = function next() {
+	"use strict";
 
 	var call = new MockedCall({
 		name: this.name,
@@ -116,6 +125,7 @@ Mocked.prototype.next = function next() {
 };
 
 function MockedCall(config) {
+	"use strict";
 
 	this.name = config.name;
 	this.fn = config.fn;
@@ -129,6 +139,7 @@ function MockedCall(config) {
 }
 
 MockedCall.prototype.call = function _call() {
+	"use strict";
 
 	var args = arguments, mocked = this;
 
@@ -138,20 +149,21 @@ MockedCall.prototype.call = function _call() {
 
 			try {
 
-				if (typeof mocked._with[index] === 'object') {
+				if (typeof mocked._with[index] === "object") {
 
-					Expect(mocked._with[index]).to.be.eql(args[index]);
+					Expect(args[index]).to.be.eql(mocked._with[index]);
 
 				} else {
 
-					Expect(mocked._with[index]).to.be.equal(args[index]);
+					Expect(args[index]).to.be.equal(mocked._with[index]);
 
 				}
 
 			} catch (error) {
 
-				throw new Error('Expected '+mocked.name+'.'+mocked.fn
-					+' With: '+mocked._with[index]+' Actual: '+args[index]);
+				throw error;
+
+				//throw new Error(mocked.name + "." + mocked.fn + " " + error.message);
 
 			}
 

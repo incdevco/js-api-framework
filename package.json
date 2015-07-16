@@ -28,6 +28,7 @@
     "bluebird": "^2.3.6",
     "body-parser": "^1.12.2",
     "chai": "^1.9.2",
+    "dot": "^1.0.3",
     "express": "^4.12.3",
     "helmet": "^0.7.1",
     "memory-cache": "^0.1.1",
@@ -38,6 +39,7 @@
     "numeral": "^1.5.3",
     "object-merge": "^2.5.1",
     "pg": "^4.3.0",
+    "stripe": "^3.3.4",
     "twilio": "^1.7.0"
   },
   "devDependencies": {
@@ -48,6 +50,9 @@
     "env": {
       "mocha": true,
       "node": true
+    },
+    "rules": {
+      "new-cap": 0
     }
   }
 }

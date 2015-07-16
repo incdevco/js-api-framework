@@ -1,40 +1,43 @@
 var base = process.env.PWD;
 
-var Framework = require(base+'/framework');
+var Framework = require(base + "/framework");
 
-describe('Framework.Services.Email',function () {
+describe("Framework.Services.Email", function () {
+  "use strict";
 
-  it('constructor',function () {
+  it("constructor", function () {
 
     var service = new Framework.Services.Email({
       config: {},
       defaults: {}
     });
 
+    Framework.Expect(service.defaults).to.be.eql({});
+
   });
 
-  it('send with defaults resolves with result from transport.sendEmail',function (done) {
+  it("send with defaults resolves with result from transport.sendEmail", function (done) {
 
     var service = new Framework.Services.Email({
         defaults: {
-          from: 'from',
-          subject: 'subject'
+          from: "from",
+          subject: "subject"
         },
         transport: {}
       }),
       email = {
-        to: 'to'
+        to: "to"
       },
-      expected = 'expected',
+      expected = "expected",
       mock = new Framework.Mock();
 
-    mock.mock('transport',service.transport,'sendEmail')
+    mock.mock("transport", service.transport, "sendEmail")
       .with({
-        from: 'from',
-        to: 'to',
-        subject: 'subject'
+        from: "from",
+        to: "to",
+        subject: "subject"
       })
-      .callback(null,expected);
+      .callback(null, expected);
 
     service.send(email)
       .then(function (actual) {
@@ -48,33 +51,33 @@ describe('Framework.Services.Email',function () {
 
   });
 
-  it('send rejects with error from transport.sendEmail',function (done) {
+  it("send rejects with error from transport.sendEmail", function (done) {
 
     var service = new Framework.Services.Email({
         defaults: {
-          from: 'from',
-          subject: 'subject'
+          from: "from",
+          subject: "subject"
         },
         transport: {}
       }),
       email = {
-        to: 'to'
+        to: "to"
       },
-      error = 'error',
+      error = "error",
       mock = new Framework.Mock();
 
-    mock.mock('transport',service.transport,'sendEmail')
+    mock.mock("transport", service.transport, "sendEmail")
       .with({
-        from: 'from',
-        to: 'to',
-        subject: 'subject'
+        from: "from",
+        to: "to",
+        subject: "subject"
       })
       .callback(error);
 
     service.send(email)
-      .then(function (actual) {
+      .then(function () {
 
-        return done(new Error('resolved'));
+        return done(new Error("resolved"));
 
       })
       .catch(function (actual) {

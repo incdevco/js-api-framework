@@ -1,22 +1,23 @@
-var Expect = require('../expect');
-var NotValid = require('../errors').NotValid;
-var Promise = require('../promise');
+var Expect = require("../expect");
+var NotValid = require("../errors").NotValid;
 
 function ExistsValidator(config) {
+	"use strict";
 
 	config = config || {};
 
-	Expect(config.key).to.be.a('string');
-	Expect(config.service).to.be.an('object');
-	Expect(config.service.fetchOne).to.be.a('function');
+	Expect(config.key).to.be.a("string");
+	Expect(config.service).to.be.an("object");
+	Expect(config.service.fetchOne).to.be.a("function");
 
 	this.key = config.key;
-	this.message = config.message || 'Does Not Exist';
+	this.message = config.message || "Does Not Exist";
 	this.service = config.service;
 
 }
 
-ExistsValidator.prototype.validate = function (value,context) {
+ExistsValidator.prototype.validate = function validate(value) {
+	"use strict";
 
 	var message = this.message, where = {};
 
@@ -27,7 +28,7 @@ ExistsValidator.prototype.validate = function (value,context) {
 
 			return true;
 
-		},function (error) {
+		}, function () {
 
 			throw new NotValid(message);
 

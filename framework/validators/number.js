@@ -1,28 +1,45 @@
-var NotValid = require('../errors').NotValid;
-var Promise = require('../promise');
+var NotValid = require("../errors").NotValid;
+var Promise = require("../promise");
 
 function NumberValidator(config) {
+  "use strict";
 
   config = config || {};
 
+  this.required = config.required;
   this.validators = config.validators || [];
 
 }
 
-NumberValidator.prototype.validate = function validate(value,context) {
+NumberValidator.prototype.validate = function validate(value, context) {
+  "use strict";
 
   var errors = [], promises = new Array(this.validators.length);
 
-  if (typeof value !== 'number') {
+  if (value === undefined || value === null) {
 
-    return Promise.reject(new NotValid('Must Be A Number'));
+    if (this.required) {
+
+      return Promise.reject(new NotValid("Required"));
+
+    } else {
+
+      return Promise.resolve(true);
+
+    }
 
   }
 
-  this.validators.forEach(function (validator,index) {
+  if (typeof value !== "number") {
 
-    promises[index] = validator.validate(value,context)
-      .catch(NotValid,function (error) {
+    return Promise.reject(new NotValid("Must Be A Number"));
+
+  }
+
+  this.validators.forEach(function (validator, index) {
+
+    promises[index] = validator.validate(value, context)
+      .catch(NotValid, function (error) {
 
         errors.push(error.errors);
 
@@ -38,7 +55,7 @@ NumberValidator.prototype.validate = function validate(value,context) {
       return value;
 
     })
-    .catch(NotValid,function (error) {
+    .catch(NotValid, function () {
 
       throw new NotValid(errors);
 

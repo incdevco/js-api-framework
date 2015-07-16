@@ -1,9 +1,10 @@
-var env = process.env.NODE_ENV || 'production';
-var Errors = require('../errors');
+var env = process.env.NODE_ENV || "development";
+var Errors = require("../errors");
 
 module.exports = function errorHandler() {
+  "use strict";
 
-  return function middleware(error,request,response,next) {
+  return function middleware(error, request, response, next) {
 
     var json = {
       message: error.message
@@ -11,30 +12,30 @@ module.exports = function errorHandler() {
 
     if (error instanceof Errors.NotAllowed) {
 
-  		response.status(403);
+      response.status(403);
 
       json.resource = error.resource;
       json.privilege = error.privilege;
 
-  	} else if (error instanceof Errors.NotValid) {
+    } else if (error instanceof Errors.NotValid) {
 
-  		response.status(400);
+      response.status(400);
 
       json.errors = error.errors;
 
-  	} else if (error instanceof Errors.NotFound) {
+    } else if (error instanceof Errors.NotFound) {
 
       response.status(404);
 
     } else {
 
-  		response.status(500);
+      response.status(500);
 
-  	}
+    }
 
-    if (env !== 'production') {
+    if (env !== "production") {
 
-      console.error(error,error.stack);
+      console.error(error, error.stack);
 
     }
 

@@ -1,13 +1,16 @@
-var util = require('util');
+var util = require("util");
 
-function NotFound() {
+function NotFound(result) {
+  "use strict";
 
-  Error.call(this);
+  Error.call(this, "Not Found");
 
-  this.message = 'Not Found';
+  this.message = "Not Found";
+
+  this.result = result;
 
 }
 
-util.inherits(NotFound,Error);
+util.inherits(NotFound, Error);
 
 module.exports = NotFound;

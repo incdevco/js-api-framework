@@ -1,23 +1,25 @@
-var Expect = require('../expect');
-var NotValid = require('../errors').NotValid;
-var Promise = require('../promise');
+var Expect = require("../expect");
+var NotValid = require("../errors").NotValid;
+var Promise = require("../promise");
 
 function InArrayValidator(config) {
+	"use strict";
 
 	config = config || {};
 
 	Expect(config.values).to.be.instanceof(Array);
 
-	this.message = config.message || 'Value Not Allowed';
+	this.message = config.message || "Value Not Allowed";
 	this.values = config.values;
 
 }
 
-InArrayValidator.prototype.validate = function validate(value,context) {
+InArrayValidator.prototype.validate = function validate(value) {
+	"use strict";
 
 	var self = this;
 
-	return new Promise(function (resolve,reject) {
+	return new Promise(function (resolve, reject) {
 
 		if (self.values.indexOf(value) >= 0) {
 

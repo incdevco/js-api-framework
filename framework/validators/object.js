@@ -1,7 +1,8 @@
-var NotValid = require('../errors').NotValid;
-var Promise = require('../promise');
+var NotValid = require("../errors").NotValid;
+var Promise = require("../promise");
 
 function ObjectValidator(config) {
+  "use strict";
 
   config = config || {};
 
@@ -10,26 +11,31 @@ function ObjectValidator(config) {
 
 }
 
-ObjectValidator.prototype.validate = function validate(value,context) {
+ObjectValidator.prototype.validate = function validate(value, context) {
+  "use strict";
 
   var errors = {
       object: {},
       validators: []
     },
     keys = Object.keys(this.object),
-    promises = new Array(),
-    validator = this;
+    promises = [],
+    self = this;
 
-  if (typeof value !== 'object' || Array.isArray(value)) {
+  context = context || value;
 
-    return Promise.reject(new NotValid('Must Be An Object'));
+  if (typeof value !== "object" || Array.isArray(value)) {
+
+    return Promise.reject(new NotValid("Must Be An Object"));
 
   }
 
-  keys.forEach(function (key,index) {
+  keys.forEach(function (key) {
 
-    promises.push(validator.object[key].validate(value[key],context)
-      .catch(NotValid,function (error) {
+    console.log("key", key);
+
+    promises.push(self.object[key].validate(value[key], value)
+      .catch(NotValid, function (error) {
 
         errors.object[key] = error.errors;
 
@@ -41,8 +47,8 @@ ObjectValidator.prototype.validate = function validate(value,context) {
 
   this.validators.forEach(function (validator) {
 
-    promises.push(validator.validate(value,context)
-      .catch(NotValid,function (error) {
+    promises.push(validator.validate(value, context)
+      .catch(NotValid, function (error) {
 
         errors.validators.push(error.errors);
 
@@ -58,7 +64,7 @@ ObjectValidator.prototype.validate = function validate(value,context) {
       return value;
 
     })
-    .catch(NotValid,function (error) {
+    .catch(NotValid, function () {
 
       throw new NotValid(errors);
 

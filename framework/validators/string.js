@@ -1,7 +1,8 @@
-var NotValid = require('../errors').NotValid;
-var Promise = require('../promise');
+var NotValid = require("../errors").NotValid;
+var Promise = require("../promise");
 
-function StringValidator(config) {
+function Validator(config) {
+  "use strict";
 
   config = config || {};
 
@@ -13,7 +14,8 @@ function StringValidator(config) {
 
 }
 
-StringValidator.prototype.validate = function validate(value,context) {
+Validator.prototype.validate = function validate(value, context) {
+  "use strict";
 
   var errors = [], promises = new Array(this.validators.length);
 
@@ -21,7 +23,17 @@ StringValidator.prototype.validate = function validate(value,context) {
 
     if (this.required) {
 
-      return Promise.reject(new NotValid('Required'));
+      if (typeof this.required === "function") {
+
+        if (this.required(value, context)) {
+
+          return Promise.resolve(true);
+
+        }
+
+      }
+
+      return Promise.reject(new NotValid("Required"));
 
     } else {
 
@@ -29,11 +41,21 @@ StringValidator.prototype.validate = function validate(value,context) {
 
     }
 
-  } else if (null === value) {
+  } else if (value === null) {
 
     if (this.required && !this.allowNull) {
 
-      return Promise.reject(new NotValid('Required'));
+      if (typeof this.required === "function") {
+
+        if (this.required(value, context)) {
+
+          return Promise.resolve(true);
+
+        }
+
+      }
+
+      return Promise.reject(new NotValid("Required"));
 
     } else {
 
@@ -43,16 +65,16 @@ StringValidator.prototype.validate = function validate(value,context) {
 
   } else {
 
-    if (typeof value !== 'string') {
+    if (typeof value !== "string") {
 
-      return Promise.reject(new NotValid('Must Be A String'));
+      return Promise.reject(new NotValid("Must Be A String"));
 
     }
 
-    this.validators.forEach(function (validator,index) {
+    this.validators.forEach(function (validator, index) {
 
-      promises[index] = validator.validate(value,context)
-        .catch(NotValid,function (error) {
+      promises[index] = validator.validate(value, context)
+        .catch(NotValid, function (error) {
 
           errors.push(error.errors);
 
@@ -63,7 +85,7 @@ StringValidator.prototype.validate = function validate(value,context) {
     });
 
     return Promise.all(promises)
-      .catch(NotValid,function (error) {
+      .catch(NotValid, function () {
 
         throw new NotValid(errors);
 
@@ -73,4 +95,4 @@ StringValidator.prototype.validate = function validate(value,context) {
 
 };
 
-module.exports = StringValidator;
+module.exports = Validator;

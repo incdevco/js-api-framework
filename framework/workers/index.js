@@ -1,1 +1,1 @@
-module.exports.SQS = require("./sqs");
+module.exports.Queue = require("./queue");
