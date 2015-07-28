@@ -9,7 +9,7 @@ function Postgresql(config) {
   "use strict";
 
   Expect(config).to.be.an("object", "config");
-  Expect(config.data).to.be.a("string", "config.data");
+  Expect(config.databasebase).to.be.a("string", "config.databasebase");
 
   if (config.host) {
 
@@ -33,7 +33,7 @@ function Postgresql(config) {
 
   Expect(config.user).to.be.a("string", "config.user");
 
-  this.data = config.data;
+  this.database = config.database;
   this.host = config.host || "localhost";
   this.password = config.password;
   this.pg = config.pg || Pg;
@@ -50,7 +50,7 @@ Postgresql.prototype.connect = function connect(config) {
 
   config = config || {};
 
-  config.data = config.data || self.data;
+  config.database = config.database || self.database;
   config.host = config.host || self.host;
   config.password = config.password || self.password;
   config.port = config.port || self.port;
