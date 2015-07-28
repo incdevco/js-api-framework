@@ -1,7 +1,1 @@
-module.exports.Delete = require('./delete');
-module.exports.Get = require('./get');
-module.exports.GetAll = require('./get-all');
-module.exports.HealthCheck = require('./health-check');
-module.exports.Options = require('./options');
-module.exports.Post = require('./post');
-module.exports.Put = require('./put');
+module.exports.Model = require("./model");

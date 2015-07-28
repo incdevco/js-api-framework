@@ -1,18 +1,20 @@
+var util = require('util');
 
 var RegexValidator = require('./regex');
 
-function PhoneNumber(config) {
-	
+var regex = /^[+0-9]+$/;
+
+function PhoneNumberValidator(config) {
+
 	config = config || {};
-	
+
 	config.message = config.message || 'Only + and 0-9 Allowed';
-	config.regex = /^[+0-9]+$/;
-	
+	config.regex = config.regex || regex;
+
 	RegexValidator.call(this,config);
-	
+
 }
 
-PhoneNumber.prototype = Object.create(RegexValidator.prototype);
-PhoneNumber.prototype.constructor = PhoneNumber;
+util.inherits(PhoneNumberValidator,RegexValidator);
 
-module.exports = PhoneNumber;
+module.exports = PhoneNumberValidator;

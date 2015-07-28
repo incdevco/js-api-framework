@@ -10,4 +10,5 @@ module.exports.config = {
 	password: 'incdevco_fw',
 	database: 'incdevco_fw'
 };
+
 module.exports.pool = Framework.Mysql.createPool(module.exports.config);

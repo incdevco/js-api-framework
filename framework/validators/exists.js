@@ -1,39 +1,39 @@
-var Promise = require('../promise');
+var Expect = require("../expect");
+var NotValid = require("../errors").NotValid;
 
 function ExistsValidator(config) {
-	
+	"use strict";
+
+	config = config || {};
+
+	Expect(config.key).to.be.a("string");
+	Expect(config.service).to.be.an("object");
+	Expect(config.service.fetchOne).to.be.a("function");
+
 	this.key = config.key;
-	this.message = config.message || 'Does Not Exist';
+	this.message = config.message || "Does Not Exist";
 	this.service = config.service;
-	
+
 }
 
-ExistsValidator.prototype.validate = function (scope,value,context) {
-	
-	var data = {}, 
-		message = this.message, 
-		service = scope.service(this.service);
-	
-	data[this.key] = value;
-	
-	if (service) {
-		
-		return service.fetchOne(scope,data,true).then(function () {
-			
+ExistsValidator.prototype.validate = function validate(value) {
+	"use strict";
+
+	var message = this.message, where = {};
+
+	where[this.key] = value;
+
+	return this.service.fetchOne(where)
+		.then(function () {
+
 			return true;
-			
-		},function () {
-			
-			throw message;
-			
+
+		}, function () {
+
+			throw new NotValid(message);
+
 		});
-		
-	}
-	
-	//console.error('Exists Validator','Service Not Found',this.service,service);
-	
-	return Promise.reject(message);
-	
+
 };
 
 module.exports = ExistsValidator;

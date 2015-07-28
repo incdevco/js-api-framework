@@ -3,69 +3,65 @@ var base = process.env.PWD;
 var Framework = require(base+'/framework');
 
 describe('Framework.Validators.InArray',function () {
-	
+
 	it('construct with array',function () {
-		
-		var validator = new Framework.Validators.InArray(['test','dog']);
-		
-		Framework.Expect(validator.array).to.be.eql(['test','dog']);
-		
+
+		var validator = new Framework.Validators.InArray({
+			values: ['test','dog']
+		});
+
+		Framework.Expect(validator.values).to.be.eql(['test','dog']);
+
 	});
-	
+
 	it('allows',function (done) {
-		
+
 		var validator = new Framework.Validators.InArray({
-			array: [
+			values: [
 				'test',
 				'dog',
 				'fred'
 			]
 		});
-		
-		validator.validate({},'dog',{}).then(function () {
-			
-			done();
-			
-		}).catch(function (exception) {
-			
-			console.error(exception);
-			
-			done(new Error('rejected'));
-			
-		});
-		
+
+		validator.validate('dog')
+			.then(function () {
+
+				return done();
+
+			})
+			.catch(done);
+
 	});
-	
+
 	it('rejects',function (done) {
-		
+
 		var validator = new Framework.Validators.InArray({
-			array: [
+			values: [
 				'test',
 				'dog',
 				'fred'
 			]
 		});
-		
-		validator.validate({},'abc',{}).then(function () {
-			
-			done(new Error('rejected'));
-			
-		}).catch(function (exception) {
-			
-			try {
-				
-				Framework.Expect(exception).to.be.equal('Value Not Allowed');
-				
-				done();
-			
-			} catch (error) {
-				
-				done(error);
-				
-			}
-			
-		});
-		
+
+		validator.validate('abc')
+			.then(function () {
+
+				return done(new Error('resolved'));
+
+			})
+			.catch(Framework.Errors.NotValid,function (exception) {
+
+				Framework.Expect(exception).to.be.eql({
+					errors: 'Value Not Allowed',
+					name: 'NotValid'
+				});
+
+				return done();
+
+			})
+			.catch(done);
+
 	});
-	
+
 });

@@ -1,24 +1,36 @@
+var Expect = require('../expect');
+var NotValid = require('../errors').NotValid;
 var Promise = require('../promise');
 
 function RegexValidator(config) {
-	
+
 	config = config || {};
-	
+
+	Expect(config.regex).to.be.instanceof(RegExp);
+
 	this.message = config.message || 'Does Not Match';
 	this.regex = config.regex;
-	
+
 }
 
-RegexValidator.prototype.validate = function (scope,value,context) {
+RegexValidator.prototype.validate = function validate(value,context) {
+
 	var self = this;
+
 	return new Promise(function (resolve,reject) {
+
 		if (self.regex.test(value)) {
-			resolve(true);
+
+			return resolve(true);
+
 		} else {
-			//console.error(value);
-			reject(self.message+' ('+value+')');
+
+			return reject(new NotValid(self.message));
+
 		}
+
 	});
+
 };
 
 module.exports = RegexValidator;

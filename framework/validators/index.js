@@ -1,12 +1,17 @@
 module.exports.Alpha = require('./alpha');
 module.exports.Alphanumeric = require('./alphanumeric');
+module.exports.Array = require('./array');
+module.exports.Boolean = require('./boolean');
 module.exports.Email = require('./email');
 module.exports.Exists = require('./exists');
 module.exports.Float = require('./float');
 module.exports.InArray = require('./in-array');
 module.exports.Length = require('./length');
 module.exports.NotExists = require('./not-exists');
+module.exports.Number = require('./number');
 module.exports.Numeric = require('./numeric');
+module.exports.Object = require('./object');
 module.exports.PhoneNumber = require('./phone-number');
 module.exports.Regex = require('./regex');
+module.exports.String = require('./string');
 module.exports.Url = require('./url');

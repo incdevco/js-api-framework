@@ -1,1 +1,1 @@
-module.exports = require('aws-sdk');
+module.exports = require("aws-sdk");

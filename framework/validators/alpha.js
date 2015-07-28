@@ -1,17 +1,21 @@
-var RegexValidator = require('./regex');
+var util = require("util");
+
+var RegexValidator = require("./regex");
+
+var regex = /^[a-zA-Z]+$/;
 
 function AlphaValidator(config) {
-	
+	"use strict";
+
 	config = config || {};
-	
-	config.message = config.message || 'Only Alpha Characters Allowed';
-	config.regex = /^[a-zA-Z]+$/;
-	
-	RegexValidator.call(this,config);
-	
+
+	config.message = config.message || "Only Alpha Characters Allowed";
+	config.regex = config.regex || regex;
+
+	RegexValidator.call(this, config);
+
 }
 
-AlphaValidator.prototype = Object.create(RegexValidator.prototype);
-AlphaValidator.prototype.constructor = AlphaValidator;
+util.inherits(AlphaValidator, RegexValidator);
 
 module.exports = AlphaValidator;
