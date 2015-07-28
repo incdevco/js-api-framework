@@ -1,6 +1,6 @@
 var base = process.env.PWD;
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
 var Id = require('../../attributes/blog/id');
 var Name = require('../../attributes/blog/name');

@@ -1,7 +1,7 @@
 var base = process.env.PWD;
 var util = require('util');
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
 var content = require('./content');
 var name = require('./name');

@@ -1,6 +1,7 @@
 var Errors = require("../errors");
 var Expect = require("../expect");
 var Pg = require("../pg");
+var Promise = require("../promise");
 var Sql = require("../sql");
 var Transaction = require("../postgresql/transaction");
 
@@ -8,7 +9,7 @@ function Postgresql(config) {
   "use strict";
 
   Expect(config).to.be.an("object", "config");
-  Expect(config.database).to.be.a("string", "config.database");
+  Expect(config.data).to.be.a("string", "config.data");
 
   if (config.host) {
 
@@ -32,7 +33,7 @@ function Postgresql(config) {
 
   Expect(config.user).to.be.a("string", "config.user");
 
-  this.database = config.database;
+  this.data = config.data;
   this.host = config.host || "localhost";
   this.password = config.password;
   this.pg = config.pg || Pg;
@@ -49,7 +50,7 @@ Postgresql.prototype.connect = function connect(config) {
 
   config = config || {};
 
-  config.database = config.database || self.database;
+  config.data = config.data || self.data;
   config.host = config.host || self.host;
   config.password = config.password || self.password;
   config.port = config.port || self.port;

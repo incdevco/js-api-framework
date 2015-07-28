@@ -1,8 +1,8 @@
 var base = process.env.PWD;
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
-var Pool = require(base+'/application/mysql').pool;
+var Pool = require(+'/application/mysql').pool;
 
 module.exports = function (config) {
 	
