@@ -9,7 +9,7 @@ function Postgresql(config) {
   "use strict";
 
   Expect(config).to.be.an("object", "config");
-  Expect(config.databasebase).to.be.a("string", "config.databasebase");
+  Expect(config.database).to.be.a("string", "config.database");
 
   if (config.host) {
 
