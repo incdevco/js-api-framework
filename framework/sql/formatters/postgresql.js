@@ -192,6 +192,8 @@ module.exports.where = function (where, sql, inserts) {
 
       var comparator = "=", value;
 
+      console.log("where", key, where[key]);
+
       if (typeof where[key] === "object") {
 
         comparator = where[key].comparator;
