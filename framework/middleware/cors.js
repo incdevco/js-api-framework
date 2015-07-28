@@ -8,7 +8,7 @@ module.exports = function cors(config) {
 
     var origin = request.header("Origin");
 
-    if (config.origins.indexOf(origin)) {
+    if (config.origins.indexOf(origin) >= 0) {
 
       response.header("Access-Control-Allow-Origin", origin);
 
