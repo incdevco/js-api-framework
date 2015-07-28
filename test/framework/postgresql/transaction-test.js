@@ -1,5 +1,5 @@
 var base = process.env.PWD;
-var Framework = require(base + "/framework");
+var Framework = require( + "/framework");
 
 describe("Framework.Postgresql.Transaction", function () {
   "use strict";

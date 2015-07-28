@@ -1,7 +1,7 @@
 var base = process.env.PWD;
 var util = require('util');
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
 var adapter = require('../adapters/blog/mysql');
 var validators = require('../validators/blog');

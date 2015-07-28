@@ -1,7 +1,7 @@
 var base = process.env.PWD;
 var util = require('util');
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
 var acl = require('../../../acl');
 var service = require('../services/post');

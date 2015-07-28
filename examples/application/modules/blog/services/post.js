@@ -1,6 +1,6 @@
 var base = process.env.PWD;
 
-var Framework = require(base+'/framework');
+var Framework = require(+'/framework');
 
 var Forms = require('../forms/post');
 var MysqlAdapter = require('../adapters/post/mysql');

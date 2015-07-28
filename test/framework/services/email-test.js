@@ -1,6 +1,6 @@
 var base = process.env.PWD;
 
-var Framework = require(base + "/framework");
+var Framework = require( + "/framework");
 
 describe("Framework.Services.Email", function () {
   "use strict";

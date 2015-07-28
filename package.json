@@ -1,7 +1,7 @@
 {
   "name": "incdevco-fw",
   "version": "0.5.0",
-  "description": "promise based node.js framework",
+  "description": "promise d node.js framework",
   "main": "framework/index.js",
   "scripts": {
     "coverage": "NODE_ENV=testing istanbul cover _mocha --",
