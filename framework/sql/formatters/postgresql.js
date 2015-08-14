@@ -174,6 +174,12 @@ module.exports.update = function update(query) {
 
   }
 
+  if (query.returning) {
+
+    sql += " RETURNING " + query.returning;
+
+  }
+
   return {
     inserts: inserts,
     sql: sql
@@ -192,7 +198,7 @@ module.exports.where = function (where, sql, inserts) {
 
       var comparator = "=", value;
 
-      console.log("where", key, where[key]);
+      //console.log("where", key, where[key]);
 
       if (typeof where[key] === "object") {
 

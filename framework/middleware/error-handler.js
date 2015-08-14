@@ -35,7 +35,7 @@ module.exports = function errorHandler() {
 
     if (env !== "production") {
 
-      console.error(error, error.stack);
+      console.error(error, error.message, error.stack);
 
     }
 

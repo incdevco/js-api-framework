@@ -4,7 +4,7 @@ var twilio = require("twilio");
 var Expect = require("../expect");
 var Promise = require("../promise");
 
-function TwilioService(config) {
+function Service(config) {
   "use strict";
 
   Expect(config).to.be.an("object", "config");
@@ -25,30 +25,53 @@ function TwilioService(config) {
 
 }
 
-TwilioService.prototype.makeCall = function makeCall(call) {
+Service.prototype.getMessage = function (messageSid) {
   "use strict";
 
-  var twilio = this.twilio;
+  var self = this;
+
+  return new Promise(function (resolve, reject) {
+
+    return self.twilio.messages(messageSid).get(function (exception, result) {
+
+      if (exception) {
+
+        return reject(exception);
+
+      } else {
+
+        return resolve(result);
+
+      }
+
+    });
+
+  });
+
+};
+
+Service.prototype.makeCall = function (call) {
+  "use strict";
+
+  var self = this;
 
   return new Promise(function (resolve, reject) {
 
     if (env === "production") {
 
-      return twilio.makeCall(call, function (error, response) {
+      return self.twilio.makeCall(call, function (exception, result) {
 
-        if (error) {
+        if (exception) {
 
-          return reject(error);
+          return reject(exception);
 
         }
 
-        return resolve(response);
+        return resolve(result);
 
       });
 
     } else {
-
-      console.log("TwilioService.makeCall", call);
 
       return resolve({
         sid: "12345678990",
@@ -64,30 +87,28 @@ TwilioService.prototype.makeCall = function makeCall(call) {
 
 };
 
-TwilioService.prototype.sendMessage = function sendMessage(message) {
+Service.prototype.sendMessage = function (message) {
   "use strict";
 
-  var twilio = this.twilio;
+  var self = this;
 
   return new Promise(function (resolve, reject) {
 
     if (env === "production") {
 
-      return twilio.sendMessage(message, function (error, response) {
+      return self.twilio.sendMessage(message, function (exception, result) {
 
-        if (error) {
+        if (exception) {
 
-          return reject(error);
+          return reject(exception);
 
         }
 
-        return resolve(response);
+        return resolve(result);
 
       });
 
     } else {
-
-      console.log("TwilioService.sendMessage", message);
 
       return resolve({
         sid: "12345678990",
@@ -104,4 +125,4 @@ TwilioService.prototype.sendMessage = function sendMessage(message) {
 
 };
 
-module.exports = TwilioService;
+module.exports = Service;
