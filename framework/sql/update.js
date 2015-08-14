@@ -9,6 +9,8 @@ function Update() {
 
   this.limit = null;
 
+  this.returning = null;
+
   this.set = {};
 
   this.sql = null;

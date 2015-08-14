@@ -234,7 +234,7 @@ Postgresql.prototype.transaction = function transaction() {
 
 };
 
-Postgresql.prototype.update = function update(table, set, where) {
+Postgresql.prototype.update = function update(table, set, where, returning) {
   "use strict";
 
   var query = new Sql.Update();
@@ -244,6 +244,8 @@ Postgresql.prototype.update = function update(table, set, where) {
   query.set = set;
 
   query.where = where;
+
+  query.returning = returning;
 
   query.build("postgresql");
 
