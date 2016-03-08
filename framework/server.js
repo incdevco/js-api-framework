@@ -132,7 +132,7 @@ Server.prototype.handle = function (request,response) {
 	
 };
 
-Server.prototype.listen = function (port) {
+Server.prototype.listen = function (port, readyFn) {
 	
 	var server = this;
 	
@@ -142,7 +142,7 @@ Server.prototype.listen = function (port) {
 		
 	});
 	
-	this._server.listen(port);
+	this._server.listen(port, readyFn);
 	
 };
 
